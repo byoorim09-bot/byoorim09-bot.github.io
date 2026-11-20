@@ -178,7 +178,7 @@ async function api(method, path, body) {
   const opt = { method, cache: 'no-store' };
   if (body !== undefined) { opt.headers = { 'Content-Type': 'application/json' }; opt.body = JSON.stringify(body); }
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 15000);
+  const t = setTimeout(() => ctrl.abort(), 12000);
   opt.signal = ctrl.signal;
   let res;
   try { res = await fetch(shopUrl(path), opt); }
@@ -1751,18 +1751,26 @@ async function enterShop(code, opts = {}) {
   const cachedRaw = localStorage.getItem(LS_CACHE + code);
   let cached = null;
   if (cachedRaw) { try { cached = JSON.parse(cachedRaw); } catch (e) { } }
-  S.data = cached ? normalize(cached) : blankData();
-  S.ready = false;
-  renderLoading();
-  let remote = undefined, err = null;
+  S.queue = (() => { try { return JSON.parse(localStorage.getItem(LS_QUEUE + code) || '[]'); } catch (e) { return []; } })();
+  if (cached) {
+    // 저장본이 있으면 먼저 바로 보여 주고, 서버에서 최신본을 받아 갱신한다.
+    S.data = normalize(cached);
+    S.ready = true;
+    rememberShop(code, shopName());
+    routeFromHash();
+  } else {
+    S.data = blankData();
+    S.ready = false;
+    renderLoading();
+  }
+  let remote, err = null;
   try { remote = await api('GET', ''); } catch (e) { err = e; }
   if (err) {
     if (cached) {
-      S.ready = true; S.online = false; rememberShop(code, (S.data.meta || {}).name || code);
+      S.online = false;
       localStorage.setItem(LS_SHOP, code);
-      S.queue = (() => { try { return JSON.parse(localStorage.getItem(LS_QUEUE + code) || '[]'); } catch (e) { return []; } })();
-      startStream();
-      routeFromHash(); toast('연결이 없어 기기 저장본으로 열었어요');
+      startStream(); flushQueue(); markSync();
+      toast('연결이 약해 기기 저장본으로 열었어요');
       return;
     }
     renderWelcome('샵 데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
@@ -1789,7 +1797,6 @@ async function enterShop(code, opts = {}) {
   }
   S.ready = true;
   S.sync = 'idle'; S.lastSync = Date.now();
-  S.queue = (() => { try { return JSON.parse(localStorage.getItem(LS_QUEUE + code) || '[]'); } catch (e) { return []; } })();
   rememberShop(code, shopName());
   localStorage.setItem(LS_SHOP, code);
   cacheNow();
