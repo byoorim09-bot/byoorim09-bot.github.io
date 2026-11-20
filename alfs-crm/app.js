@@ -113,6 +113,11 @@ function ic(name, cls = '') {
   return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 }
 
+/* 오류 수집 (검증용) */
+window.__alfsErrors = [];
+window.addEventListener('error', (e) => { try { window.__alfsErrors.push(String(e.message || e.error)); } catch (_) { } });
+window.addEventListener('unhandledrejection', (e) => { try { window.__alfsErrors.push('promise: ' + String(e.reason && e.reason.message || e.reason)); } catch (_) { } });
+
 /* 토스트 */
 let toastTimer = null;
 function toast(msg, ms = 2400) {
@@ -571,7 +576,7 @@ function viewHome() {
   const hero = `
   <section class="hero">
     <div class="hero-date">${new Date().getFullYear()}년 ${fmtDate(t)}</div>
-    <div class="hero-title">${esc(ownerName() || '원장님')} 원장님, 오늘도 반갑습니다</div>
+    <div class="hero-title">${ownerName() ? esc(ownerName()) + ' 원장님' : '원장님'}, 오늘도 반갑습니다</div>
     <div class="hero-sub">${esc(shopName())} · 오늘 예약 ${todayAppts.length}건 · 남은 예약 ${remain.length}건</div>
     <div class="hero-stats">
       <div class="hero-stat"><b>${todayAppts.length}<small style="font-size:13px">건</small></b><span>오늘 예약</span></div>
@@ -1760,7 +1765,8 @@ async function enterShop(code, opts = {}) {
     return;
   }
   S.online = true;
-  if (remote === null || remote === undefined) {
+  const seeded = !!(remote && remote.meta && remote.meta.code);
+  if (!seeded) {
     if (code === DEMO_CODE) {
       S.data = seedDemo();
       try { await api('PUT', '', S.data); } catch (e) { }
