@@ -679,7 +679,7 @@ function viewHome() {
                 <div class="li-title">${esc(p.customerName || customer(p.customerId)?.name || '')} <span class="chip gold">${esc(p.type)}</span></div>
                 <div class="li-sub">${esc(p.name)} · 잔여 ${passLeft(p)}</div>
               </div>
-              <button class="btn sm" data-act="copy-pass" data-id="${p.id}">${ic('copy')}</button>
+              <button class="btn sm" data-act="copy-pass" data-id="${p.id}" aria-label="재등록 안내 문구 복사">${ic('copy')}</button>
             </div>
           </div>`).join('') : `<div class="empty"><b>잔여가 넉넉해요</b>잔여 2회 이하일 때 알려드려요.</div>`}
       </section>
@@ -756,7 +756,8 @@ function reserveDay(date) {
       <div class="tiny muted">${date === todayISO() ? '오늘' : diffDays(date, todayISO()) > 0 ? `${diffDays(date, todayISO())}일 뒤` : `${-diffDays(date, todayISO())}일 전`} · ${list.length}건</div>
     </div>
     <button class="btn sm" data-act="day-shift" data-d="1">다음${ic('arrowR')}</button>
-  </div>`;
+  </div>
+  ${list.length ? `<button class="btn block gold sm" data-act="copy-day-remind" data-date="${date}" style="margin-bottom:10px">${ic('copy')}이 날 예약 ${list.length}건 안내문 한 번에 복사</button>` : ''}`;
   const body = list.length ? list.map(a => apptCard(a)).join('')
     : `<div class="empty"><b>이 날은 예약이 없습니다</b>예약 등록으로 새 예약을 잡아 보세요.</div>`;
   return head + body;
@@ -854,7 +855,7 @@ function viewCustomers() {
       <div class="li-main">
         <div class="li-title">${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></div>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}</div>
-        <div class="li-sub tiny">${last ? `최근 방문 ${daysSince(last)}일 전` : '방문 기록 없음'}${p ? ` · 회원권 ${passLeft(p)}` : ''}</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전`) : '방문 기록 없음'}${p ? ` · 회원권 ${passLeft(p)}` : ''}</div>
       </div>
       <div class="li-right"><span class="chip">${ic('arrowR')}</span></div>
     </div>`;
@@ -902,7 +903,7 @@ function viewCustomer(id) {
       <div style="min-width:0">
         <h2>${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></h2>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}${c.birth ? ` · ${esc(c.birth)}` : ''}</div>
-        <div class="li-sub tiny">${last ? `최근 방문 ${daysSince(last)}일 전 (${fmtDate(last)})` : '방문 기록 없음'} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전 (${fmtDate(last)})`) : '방문 기록 없음'} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
       </div>
     </div>
     ${c.memo ? `<div class="badge-note mt12">${esc(c.memo)}</div>` : ''}
@@ -1163,6 +1164,8 @@ function mountSigPad(canvas) {
   const pos = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
   canvas.addEventListener('pointerdown', (e) => {
     e.preventDefault(); drawing = true; last = pos(e);
+    ctx.beginPath(); ctx.arc(last.x, last.y, 1.3, 0, Math.PI * 2); ctx.fillStyle = '#12233B'; ctx.fill();
+    dirty = true;
     try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
   });
   canvas.addEventListener('pointermove', (e) => {
@@ -1414,7 +1417,7 @@ function modalCustomer(id) {
       <div class="field"><label for="f_phone">연락처 *</label><input id="f_phone" class="input" type="tel" inputmode="tel" value="${esc(c ? c.phone : '')}" placeholder="010-0000-0000"></div>
     </div>
     <div class="grid2">
-      <div class="field"><label for="f_grade">등급</label><select id="f_grade" class="select">${GRADES.map(([v, l]) => `<option value="${v}" ${c && c.grade === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label for="f_grade">등급</label><select id="f_grade" class="select">${GRADES.map(([v, l]) => `<option value="${v}" ${(c ? c.grade === v : v === 'new') ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
       <div class="field"><label for="f_birth">생년월일</label><input id="f_birth" class="input" type="date" value="${esc(c && c.birth ? c.birth : '')}"></div>
     </div>
     <div class="field"><label for="f_inflow">알게 된 경로</label><select id="f_inflow" class="select"><option value="">선택 안 함</option>${INFLOW.map(x => `<option ${c && c.inflow === x ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
@@ -1881,6 +1884,14 @@ document.addEventListener('click', async (e) => {
     case 'copy-refill': copyByKind('refill', id); break;
     case 'copy-miss': copyByKind('miss', id); break;
     case 'copy-pass': copyByKind('pass', id); break;
+    case 'copy-day-remind': {
+      const date = el.dataset.date;
+      const list = apptsOn(date).filter(a => a.status === '예약' || a.status === '확정');
+      if (!list.length) { toast('안내문을 보낼 예약이 없어요'); break; }
+      const text = list.map(a => msgRemind(a, date === todayISO() ? 'today' : 'tomorrow')).join('\n\n──────────\n\n');
+      copyText(text, `예약 ${list.length}건 안내문을 복사했어요. 카톡에 붙여넣으세요.`);
+      break;
+    }
     case 'new-cust': modalCustomer(null); break;
     case 'cust-open': {
       closeModal();
