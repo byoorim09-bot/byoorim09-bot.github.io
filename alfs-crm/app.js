@@ -387,18 +387,18 @@ function seedDemo() {
     sales: {
       s1: { id: 's1', date: t, at: at(t, '09:30'), amount: 120000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 미네랄 케어', passId: 'p1', appointmentId: 'a1', memo: '' },
       s2: { id: 's2', date: t, at: at(t, '08:50'), amount: 80000, method: '현금', customerId: 'c3', customerName: '이영자', items: '부분 관리', passId: '', appointmentId: '', memo: '' },
-      s3: { id: 's3', date: t, at: at(t, '10:40'), amount: 150000, method: '카드', customerId: 'c6', customerName: '한지영', items: '유디아 미네랄 케어 + 홈케어', passId: '', appointmentId: '', memo: '' },
+      s3: { id: 's3', date: t, at: at(t, '10:40'), amount: 150000, method: '카드', customerId: 'c5', customerName: '정명숙', items: '홈케어 제품', passId: '', appointmentId: '', memo: '체험 전 상담 중 구매' },
       s4: { id: 's4', date: d(-1), at: at(d(-1), '11:00'), amount: 120000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 미네랄 케어', passId: 'p1', appointmentId: '', memo: '' },
-      s5: { id: 's5', date: d(-1), at: at(d(-1), '15:30'), amount: 90000, method: '현금', customerId: 'c2', customerName: '박정희', items: '오륜 미네랄 케어', passId: 'p2', appointmentId: '', memo: '' },
-      s6: { id: 's6', date: d(-2), at: at(d(-2), '10:20'), amount: 210000, method: '카드', customerId: 'c6', customerName: '한지영', items: '유디아 미네랄 + 데톡스', passId: '', appointmentId: '', memo: '' },
-      s7: { id: 's7', date: d(-2), at: at(d(-2), '16:10'), amount: 80000, method: '카드', customerId: 'c4', customerName: '최순자', items: '데톡스 바디 케어', passId: 'p3', appointmentId: '', memo: '' },
-      s8: { id: 's8', date: d(-4), at: at(d(-4), '11:10'), amount: 120000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 미네랄 케어', passId: 'p1', appointmentId: '', memo: '' },
-      s9: { id: 's9', date: d(-5), at: at(d(-5), '14:40'), amount: 90000, method: '계좌이체', customerId: 'c2', customerName: '박정희', items: '오륜 미네랄 케어', passId: 'p2', appointmentId: '', memo: '' },
-      s10: { id: 's10', date: d(-7), at: at(d(-7), '10:00'), amount: 150000, method: '카드', customerId: 'c3', customerName: '이영자', items: '체험 + 홈케어', passId: '', appointmentId: '', memo: '' },
-      s11: { id: 's11', date: d(-9), at: at(d(-9), '13:30'), amount: 210000, method: '카드', customerId: 'c5', customerName: '정명숙', items: '데톡스 + 미네랄', passId: '', appointmentId: '', memo: '' },
-      s12: { id: 's12', date: d(-11), at: at(d(-11), '11:20'), amount: 120000, method: '현금', customerId: 'c4', customerName: '최순자', items: '데톡스 바디 케어', passId: 'p3', appointmentId: '', memo: '' },
-      s13: { id: 's13', date: d(-14), at: at(d(-14), '10:40'), amount: 240000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 2회분', passId: 'p1', appointmentId: '', memo: '' },
-      s14: { id: 's14', date: d(-18), at: at(d(-18), '15:10'), amount: 90000, method: '카드', customerId: 'c6', customerName: '한지영', items: '유디아 미네랄 케어', passId: '', appointmentId: '', memo: '' }
+      s5: { id: 's5', date: d(-2), at: at(d(-2), '10:20'), amount: 210000, method: '카드', customerId: 'c3', customerName: '이영자', items: '유디아 미네랄 + 데톡스', passId: '', appointmentId: '', memo: '' },
+      s6: { id: 's6', date: d(-4), at: at(d(-4), '11:10'), amount: 120000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 미네랄 케어', passId: 'p1', appointmentId: '', memo: '' },
+      s7: { id: 's7', date: d(-5), at: at(d(-5), '16:10'), amount: 90000, method: '계좌이체', customerId: 'c5', customerName: '정명숙', items: '오륜 미네랄 케어', passId: '', appointmentId: '', memo: '' },
+      s8: { id: 's8', date: d(-7), at: at(d(-7), '10:00'), amount: 150000, method: '카드', customerId: 'c3', customerName: '이영자', items: '체험 + 홈케어', passId: '', appointmentId: '', memo: '' },
+      s9: { id: 's9', date: d(-9), at: at(d(-9), '13:30'), amount: 240000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 2회분', passId: 'p1', appointmentId: '', memo: '' },
+      s10: { id: 's10', date: d(-11), at: at(d(-11), '11:20'), amount: 120000, method: '현금', customerId: 'c5', customerName: '정명숙', items: '데톡스 바디 케어', passId: '', appointmentId: '', memo: '' },
+      s11: { id: 's11', date: d(-14), at: at(d(-14), '10:40'), amount: 120000, method: '카드', customerId: 'c1', customerName: '김미숙', items: '유디아 미네랄 케어', passId: 'p1', appointmentId: '', memo: '' },
+      s12: { id: 's12', date: d(-16), at: at(d(-16), '15:10'), amount: 80000, method: '카드', customerId: '', customerName: '현장 방문 고객', items: '부분 관리', passId: '', appointmentId: '', memo: '' },
+      s13: { id: 's13', date: d(-18), at: at(d(-18), '11:50'), amount: 90000, method: '카드', customerId: 'c3', customerName: '이영자', items: '오륜 미네랄 케어', passId: '', appointmentId: '', memo: '' },
+      s14: { id: 's14', date: d(-20), at: at(d(-20), '14:30'), amount: 150000, method: '카드', customerId: 'c5', customerName: '정명숙', items: '데톡스 + 케어', passId: '', appointmentId: '', memo: '' }
     },
     minerals: {
       m1: { id: 'm1', customerId: 'c2', customerName: '박정희', product: '오륜 미네랄', type: '구매', date: d(-33), dueDate: d(-3), status: '대기', memo: '20회권 잔여 3회 · 재구매 상담', createdAt: at(d(-33), '11:40') },
@@ -459,7 +459,7 @@ function churnRisk() {
     .sort((a, b) => (a.last || '').localeCompare(b.last || ''));
 }
 function activePassesSoon() {
-  return passesArr().filter(p => p.active !== false && ((p.type === '횟수권' ? p.remaining <= 2 : p.remaining <= 50000)))
+  return passesArr().filter(p => p.active !== false && (p.type === '횟수권' ? p.remaining <= 3 : p.remaining <= (Number(p.total || 1) * 0.15)))
     .sort((a, b) => (a.type === '횟수권' ? a.remaining - b.remaining : a.remaining - b.remaining));
 }
 function shopName() { return (S.data.meta && S.data.meta.name) || S.meta.name || '알프스 샵'; }
