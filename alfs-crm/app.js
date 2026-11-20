@@ -266,19 +266,18 @@ async function put(path, value, opt = {}) {
   cacheNow();
 }
 async function patchRoot(obj, opt = {}) {
+  // RTDB REST PATCH는 요청 경로의 바로 아래 키만 병합하므로, 컬렉션별로 나눠 보낸다.
   deepMerge(S.data, JSON.parse(JSON.stringify(obj)));
   if (!opt.silent) { cacheNow(); render(); }
-  try {
-    S.sync = 'busy'; markSync();
-    await api('PATCH', '', obj);
-    S.sync = 'idle'; S.online = true; S.lastSync = Date.now();
-  } catch (e) {
-    queueSave({ m: 'PATCH', path: '', body: obj });
-    S.sync = 'off'; S.online = false;
-    toast('기기에 먼저 저장했어요 · 연결되면 자동 반영됩니다');
+  S.sync = 'busy'; markSync();
+  let ok = true;
+  for (const col of Object.keys(obj)) {
+    try { await api('PATCH', col, obj[col]); }
+    catch (e) { ok = false; queueSave({ m: 'PATCH', path: col, body: obj[col] }); }
   }
-  markSync();
-  cacheNow();
+  if (ok) { S.sync = 'idle'; S.online = true; S.lastSync = Date.now(); }
+  else { S.sync = 'off'; S.online = false; toast('기기에 먼저 저장했어요 · 연결되면 자동 반영됩니다'); }
+  markSync(); cacheNow();
 }
 async function del(path) {
   setPath(S.data, path, null);
@@ -436,9 +435,11 @@ function lastVisit(c) {
   treatmentsArr().filter(t => t.customerId === c.id).forEach(t => dates.push(t.date));
   apptsArr().filter(a => a.customerId === c.id && a.status === '방문완료').forEach(a => dates.push(a.date));
   salesArr().filter(s => s.customerId === c.id).forEach(s => dates.push(s.date));
-  if (!dates.length) return c.createdAt ? iso(new Date(c.createdAt)) : null;
+  if (!dates.length) return null;
   return dates.sort().pop();
 }
+function regDate(c) { return c && c.createdAt ? iso(new Date(c.createdAt)) : null; }
+function lastTouch(c) { return lastVisit(c) || regDate(c); }
 function daysSince(dateStr) { return dateStr ? diffDays(todayISO(), dateStr) : null; }
 function monthKey(dateStr) { return String(dateStr || '').slice(0, 7); }
 function salesOn(date) { return salesArr().filter(s => s.date === date); }
@@ -454,7 +455,7 @@ function refillDue() {
 }
 function churnRisk() {
   return customersArr()
-    .map(c => ({ c, last: lastVisit(c) }))
+    .map(c => ({ c, last: lastTouch(c) }))
     .filter(x => x.last && daysSince(x.last) >= 30)
     .sort((a, b) => (a.last || '').localeCompare(b.last || ''));
 }
@@ -855,7 +856,7 @@ function viewCustomers() {
       <div class="li-main">
         <div class="li-title">${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></div>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}</div>
-        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전`) : '방문 기록 없음'}${p ? ` · 회원권 ${passLeft(p)}` : ''}</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')}${p ? ` · 회원권 ${passLeft(p)}` : ''}</div>
       </div>
       <div class="li-right"><span class="chip">${ic('arrowR')}</span></div>
     </div>`;
@@ -903,7 +904,7 @@ function viewCustomer(id) {
       <div style="min-width:0">
         <h2>${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></h2>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}${c.birth ? ` · ${esc(c.birth)}` : ''}</div>
-        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전 (${fmtDate(last)})`) : '방문 기록 없음'} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전 (${fmtDate(last)})`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
       </div>
     </div>
     ${c.memo ? `<div class="badge-note mt12">${esc(c.memo)}</div>` : ''}
@@ -926,7 +927,7 @@ function viewCustomer(id) {
       <div class="section-title" style="font-size:17px">${ic('pen')} 전자 서명</div>
       <button class="btn sm" data-act="cust-consent" data-id="${c.id}">${ic('pen')}서명 받기</button>
     </div>
-    ${c.sig ? `<div class="mt8"><img class="sig-photo" src="${c.sig}" alt="${esc(c.name)} 고객 서명"><div class="tiny muted">${c.consentAt ? fmtDate(c.consentAt.slice(0, 10)) + ' 서명' : '서명 저장됨'} · ${esc(c.consentText || '개인정보 수집·이용 및 관리 동의')}</div></div>`
+    ${c.sig ? `<div class="mt8"><img class="sig-photo" src="${c.sig}" alt="${esc(c.name)} 고객 서명"><div class="tiny muted">${c.consentAt ? fmtDate(iso(new Date(c.consentAt))) + ' 서명' : '서명 저장됨'} · ${esc(c.consentText || '개인정보 수집·이용 및 관리 동의')}</div></div>`
       : `<div class="tiny muted mt8">서명이 없습니다. 처음 방문 시 서명을 받아 차트에 보관하세요.</div>`}
   </div>
   <div class="tabs" role="tablist">
