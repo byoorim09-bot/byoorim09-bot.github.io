@@ -862,9 +862,9 @@ function viewCustomers() {
       <div class="li-main">
         <div class="li-title">${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></div>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}</div>
-        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')}${p ? ` · 회원권 ${passLeft(p)}` : ''}</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')}${p ? ` · 회원권 ${p.type === '정액권' ? '잔액 ' + won(p.remaining) : passLeft(p)}` : ''}</div>
       </div>
-      <div class="li-right"><span class="chip">${ic('arrowR')}</span></div>
+      <div class="li-right">${ic('arrowR')}</div>
     </div>`;
   }).join('') : `<div class="empty"><b>찾는 고객이 없어요</b>검색어를 바꾸거나 새 고객을 등록해 보세요.</div>`}`;
 }
