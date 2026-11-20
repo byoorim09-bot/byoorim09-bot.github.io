@@ -31,7 +31,7 @@ html,body{margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
   font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,-apple-system,sans-serif;
-  background:var(--bg); color:var(--text); font-size:17px; line-height:1.55;
+  background:var(--bg); color:var(--text); font-size:17px; line-height:1.55; word-break:keep-all;
   overflow-x:hidden; -webkit-font-smoothing:antialiased;
 }
 button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
@@ -107,6 +107,7 @@ main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:18px 16px calc(var
 
 /* ---------- typography & common ---------- */
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:4px 0 14px}
+.page-head > .btn{flex:0 0 auto}
 .page-title{font-size:24px;font-weight:800}
 .page-sub{color:var(--muted);font-size:14.5px;margin-top:2px}
 .section{margin-top:20px}
@@ -139,7 +140,7 @@ main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:18px 16px calc(var
 .btn{
   min-height:var(--tap);border-radius:14px;border:1px solid var(--line);background:#fff;
   font-weight:700;font-size:16px;padding:10px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  text-decoration:none;color:var(--text);
+  text-decoration:none;color:var(--text);white-space:nowrap;
 }
 .btn:active{filter:brightness(.97)}
 .btn svg{width:20px;height:20px;flex:0 0 20px}
@@ -149,7 +150,7 @@ main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:18px 16px calc(var
 .btn.ghost{background:transparent}
 .btn.danger{color:var(--red);border-color:#F0CFCA;background:#fff}
 .btn.sm{min-height:42px;font-size:15px;border-radius:12px;padding:8px 13px}
-.btn.block{display:flex;width:100%}
+.btn.block{display:flex;width:100%;white-space:normal}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
 .btn-row .btn{flex:1 1 0;min-width:120px}
 
@@ -189,6 +190,7 @@ main{flex:1;width:100%;max-width:1180px;margin:0 auto;padding:18px 16px calc(var
 .select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B6B7F' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:40px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:420px){.grid2{grid-template-columns:1fr}}
+@media(max-width:440px){.btn.sm{padding:8px 10px;font-size:14.5px;gap:6px}.appt-actions .btn{min-width:0}}
 .two-col{display:grid;gap:14px}
 @media(min-width:980px){.two-col{grid-template-columns:1.15fr .85fr;align-items:start}}
 
