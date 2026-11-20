@@ -51,6 +51,12 @@ function fmtDateShort(dateStr) {
   const d = parseISO(dateStr);
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
+function fmtRange(a, b) {
+  const f = (str) => { const d = parseISO(str); return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}`; };
+  if (!a && !b) return '기간 없음';
+  if (!b) return `${f(a)} ~ 기간 없음`;
+  return `${f(a)} ~ ${f(b)}`;
+}
 function won(n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; }
 function wonShort(n) {
   n = Number(n || 0);
@@ -953,13 +959,13 @@ function passCard(p, compact) {
           ${empty ? '<span class="chip warn">소진</span>' : low ? '<span class="chip warn">잔여 적음</span>' : ''}
           ${expSoon ? `<span class="chip gold">만료 ${diffDays(p.expireDate, todayISO())}일 전</span>` : ''}</div>
         <div class="li-sub">${esc(p.customerName || (customer(p.customerId) || {}).name || '')} · 잔여 <b>${passLeft(p)}</b> / 결제 ${won(p.amount)}</div>
-        <div class="li-sub tiny">${p.startDate ? fmtDateShort(p.startDate) : ''} ~ ${p.expireDate ? fmtDateShort(p.expireDate) : '기간 없음'}${p.memo ? ' · ' + esc(p.memo) : ''}</div>
+        <div class="li-sub tiny">${fmtRange(p.startDate, p.expireDate)}${p.memo ? ' · ' + esc(p.memo) : ''}</div>
       </div>
       ${compact ? '' : `<div class="li-right"><span class="chip ${empty ? 'warn' : low ? 'gold' : 'regular'}">${pct}%</span></div>`}
     </div>
     <div class="progress ${empty ? 'empty' : low ? 'low' : ''}"><i style="width:${Math.max(2, Math.min(100, pct))}%"></i></div>
     ${compact ? '' : `<div class="appt-actions">
-      ${!empty ? `<button class="btn sm primary" data-act="pass-use" data-id="${p.id}">${ic('check')}1회 차감</button>` : ''}
+      ${!empty ? `<button class="btn sm primary" data-act="pass-use" data-id="${p.id}">${ic('check')}${isCount ? '1회 차감' : '금액 차감'}</button>` : ''}
       <button class="btn sm" data-act="copy-pass" data-id="${p.id}">${ic('copy')}재등록 안내</button>
       <button class="btn sm danger" data-act="pass-del" data-id="${p.id}">삭제</button>
     </div>`}
