@@ -1683,6 +1683,7 @@ function modalShopCreate() {
     if (!name) { toast('샵 이름을 입력해 주세요'); $('#f_sname', m).focus(); return; }
     const code = newShopCode();
     closeModal();
+    toast('새 샵 코드 ' + code + ' 를 만들었어요');
     enterShop(code, { create: true, meta: { name, ownerName: $('#f_owner', m).value.trim(), phone: $('#f_tel', m).value.trim(), address: $('#f_addr', m).value.trim() } });
   };
 }
@@ -1776,7 +1777,6 @@ async function enterShop(code, opts = {}) {
       S.online = false;
       localStorage.setItem(LS_SHOP, code);
       startStream(); flushQueue(); markSync();
-      toast('연결이 약해 기기 저장본으로 열었어요');
       return;
     }
     renderWelcome('샵 데이터를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.');
@@ -1803,6 +1803,7 @@ async function enterShop(code, opts = {}) {
   }
   S.ready = true;
   S.sync = 'idle'; S.lastSync = Date.now();
+  S.online = true;
   rememberShop(code, shopName());
   localStorage.setItem(LS_SHOP, code);
   cacheNow();
