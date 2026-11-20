@@ -16,20 +16,27 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="col"><div class="cap">모바일 390px</div><iframe id="m" src="./"></iframe></div>
-  <div class="col"><div class="cap">데스크톱 1440px</div><iframe id="d" src="./"></iframe></div>
+  <div class="col"><div class="cap">모바일 390px</div><iframe id="m" scrolling="no" src="./"></iframe></div>
+  <div class="col"><div class="cap">데스크톱 1440px</div><iframe id="d" scrolling="no" src="./"></iframe></div>
 </div>
 <script>
+(function(){
+  var page = new URLSearchParams(location.search).get('page') || '';
+  if (page) {
+    document.getElementById('m').src = './' + page;
+    document.getElementById('d').src = './' + page;
+  }
+})();
 window.__frameReport = function(frame){
   const f = document.getElementById(frame);
-  const doc = f.contentDocument, win = f.contentWindow;
+  const doc = f.contentDocument;
   const w = doc.documentElement.clientWidth;
   let max = 0, worst = '';
   doc.querySelectorAll('body *').forEach(el => {
     const r = el.getBoundingClientRect();
     if (r.width > 0 && r.right > max) { max = r.right; worst = el.tagName + '.' + (el.className || ''); }
   });
-  return { frame, viewport: w, contentRight: Math.round(max), overflow: Math.round(max - w), worst, scrollWidth: doc.documentElement.scrollWidth };
+  return { frame: frame, viewport: w, docW: doc.documentElement.scrollWidth, contentRight: Math.round(max), overflow: Math.round(max - w), worst: worst };
 };
 </script>
 </body>
