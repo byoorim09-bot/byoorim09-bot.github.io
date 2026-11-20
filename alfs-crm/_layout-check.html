@@ -22,10 +22,9 @@
 <script>
 (function(){
   var page = new URLSearchParams(location.search).get('page') || '';
-  if (page) {
-    document.getElementById('m').src = './' + page;
-    document.getElementById('d').src = './' + page;
-  }
+  var bust = './?cb=' + Date.now() + page;
+  document.getElementById('m').src = bust;
+  document.getElementById('d').src = bust;
 })();
 window.__frameReport = function(frame){
   const f = document.getElementById(frame);
