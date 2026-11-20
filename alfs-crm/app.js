@@ -910,7 +910,7 @@ function viewCustomer(id) {
       <div style="min-width:0">
         <h2>${esc(c.name)} <span class="chip ${gradeClass(c.grade)}">${gradeLabel(c.grade)}</span></h2>
         <div class="li-sub">${esc(c.phone || '연락처 없음')}${c.birth ? ` · ${esc(c.birth)}` : ''}</div>
-        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전 (${fmtDate(last)})`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
+        <div class="li-sub tiny">${last ? (daysSince(last) === 0 ? '오늘 방문' : `최근 방문 ${daysSince(last)}일 전 · ${fmtDate(last)}`) : (regDate(c) ? `등록 ${daysSince(regDate(c))}일 전` : '방문 기록 없음')} · 방문 ${apps.filter(a => a.status === '방문완료').length}회</div>
       </div>
     </div>
     ${c.memo ? `<div class="badge-note mt12">${esc(c.memo)}</div>` : ''}
