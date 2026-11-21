@@ -1608,7 +1608,11 @@ if (isUnlocked()) showApp();
   function goBack() {
     if (closeModal(false)) return;          // 안내 창이 열려 있으면 먼저 닫기
     try {
-      if (history.length > 1 && document.referrer && document.referrer.indexOf(location.host) !== -1) {
+      // 앱(홈 화면)으로 열려 있으면 관리자 앱은 그대로 두고, 본체는 새 탭에서 연다
+      if (isStandalone()) {
+        if (window.open(MAIN_URL, '_blank')) return;
+      } else if (history.length > 1 && document.referrer &&
+                 document.referrer.indexOf(location.host) !== -1) {
         history.back(); return;
       }
     } catch (e) {}
