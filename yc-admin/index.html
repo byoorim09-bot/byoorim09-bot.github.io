@@ -1,0 +1,1646 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="theme-color" content="#0F1E36">
+<meta name="color-scheme" content="light">
+<title>YC Manager · 영앤클래식 관리자</title>
+<meta name="description" content="영앤클래식 방문자·조회수·제휴 클릭 통계 관리자 대시보드">
+<link rel="manifest" href="/yc-admin/manifest.webmanifest">
+<link rel="icon" href="/yc-admin/yc-admin-favicon.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="/yc-admin/yc-admin-apple-touch-icon.png" sizes="180x180">
+<meta name="application-name" content="YC Manager">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YC Manager">
+<meta name="format-detection" content="telephone=no">
+<style>
+  :root{
+    --bg:#F4F1EA; --card:#FFFFFF; --ink:#16202E; --ink2:#586274; --navy:#0F1E36; --navy2:#1C2C4A;
+    --gold:#C6A15B; --naver:#03A94F; --coupang:#D9342B; --line:#E2DCD1; --ok:#1F7A4D; --warn:#B4451F;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+    font-size:17px; line-height:1.5; -webkit-text-size-adjust:100%;
+    padding-bottom:40px;
+  }
+  h1,h2,h3,p{margin:0}
+  button{font-family:inherit; cursor:pointer}
+
+  /* ---------- 잠금 화면 ---------- */
+  #lock[hidden],#app[hidden]{display:none !important}
+  #lock{position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:18px; padding:26px 20px 34px;
+    background:linear-gradient(180deg,#152744 0%,#0F1E36 55%,#081120 100%); color:#fff;}
+  #lock .brand{text-align:center}
+  #lock .brand b{display:block; font-size:27px; letter-spacing:-.4px}
+  #lock .brand span{display:block; font-size:15px; color:#D9BE8C; margin-top:4px; letter-spacing:.02em}
+  #lock .ask{font-size:18px; font-weight:700; margin-top:10px}
+  #lock .dots{display:flex; gap:14px; margin:2px 0 4px}
+  #lock .dots i{width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.55); display:block}
+  #lock .dots i.on{background:#E9C48D; border-color:#E9C48D}
+  #lock .pad{display:grid; grid-template-columns:repeat(3,86px); gap:12px; justify-content:center}
+  #lock .pad button{
+    height:64px; border:0; border-radius:18px; font-size:26px; font-weight:700; color:#1E2A4A;
+    background:rgba(255,255,255,.94); box-shadow:0 2px 8px rgba(0,0,0,.18);
+  }
+  #lock .pad button:active{transform:scale(.97); background:#EFE7DA}
+  #lock .pad button.fn{font-size:17px; background:rgba(255,255,255,.16); color:#fff; box-shadow:none}
+  #lock .msg{min-height:24px; font-size:16px; font-weight:700; color:#FFC9B0}
+  #lock .remember{display:flex; align-items:center; gap:10px; font-size:15px; color:#D8DEEA; margin-top:2px}
+  #lock .remember input{width:22px; height:22px}
+  #lock .hint{font-size:13.5px; color:#9DA9C0; text-align:center; max-width:330px}
+  #lock.shake .pad{animation:sh .35s}
+  @keyframes sh{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+  /* ---------- 공통 ---------- */
+  .wrap{max-width:720px; margin:0 auto; padding:0 14px}
+  header.top{background:var(--navy); color:#fff; padding:16px 0 14px; margin-bottom:14px;
+    border-bottom:3px solid var(--gold); position:sticky; top:0; z-index:10}
+  header.top .wrap{display:flex; align-items:center; justify-content:space-between; gap:12px}
+  header.top b{font-size:19px; letter-spacing:-.3px; display:block}
+  header.top .sub{font-size:13px; color:#B9C3D6; margin-top:2px}
+  header.top button{background:rgba(255,255,255,.14); color:#fff; border:0; border-radius:12px;
+    padding:11px 15px; font-size:15px; font-weight:700}
+  header.top button:active{background:rgba(255,255,255,.26)}
+
+  .stamp{font-size:14px; color:var(--ink2); margin:0 2px 12px}
+  .stamp b{color:var(--navy)}
+  section{margin:0 0 16px}
+  .sec-title{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin:0 2px 8px}
+  .sec-title h2{font-size:18px; letter-spacing:-.3px}
+  .sec-title span{font-size:13.5px; color:var(--ink2)}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 16px 14px;
+    box-shadow:0 1px 3px rgba(22,32,46,.05)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px 14px 13px;
+    box-shadow:0 1px 3px rgba(22,32,46,.05)}
+  .kpi .lab{font-size:14.5px; font-weight:700; color:var(--ink2); display:flex; align-items:center; gap:6px}
+  .kpi .num{font-size:38px; font-weight:800; letter-spacing:-1.4px; line-height:1.15; margin-top:4px; color:var(--navy)}
+  .kpi .num small{font-size:17px; font-weight:700; letter-spacing:0; color:var(--ink2); margin-left:3px}
+  .kpi .cap{font-size:13px; color:var(--ink2); margin-top:2px}
+  .dot{width:9px; height:9px; border-radius:50%; display:inline-block}
+
+  /* 방문자 · 클릭 */
+  .visit .num{color:var(--navy)}
+  .nv .num{color:var(--naver)}
+  .cp .num{color:var(--coupang)}
+
+  /* 전환율 */
+  .ctr{background:linear-gradient(135deg,#0F1E36,#273C63); color:#fff; border:0; padding:18px 18px 16px}
+  .ctr .lab{color:#C9D3E6; font-size:15px}
+  .ctr .num{color:#fff; font-size:46px; font-weight:800; letter-spacing:-1.5px; line-height:1.1; margin:4px 0 2px}
+  .ctr .num small{font-size:22px; font-weight:700; margin-left:2px}
+  .ctr .cap{color:#C9D3E6; font-size:14px; line-height:1.45}
+  .ctr .cap b{color:#F1D6AC}
+
+  /* 누적 */
+  .tot{display:flex; align-items:baseline; justify-content:space-between; padding:11px 0; border-bottom:1px dashed var(--line)}
+  .tot:last-child{border-bottom:0}
+  .tot .lab{font-size:15.5px; font-weight:700; color:var(--ink2)}
+  .tot .val{font-size:24px; font-weight:800; color:var(--navy); letter-spacing:-.6px}
+  .tot .val small{font-size:14px; color:var(--ink2); font-weight:700; margin-left:3px}
+
+  /* 7일 그래프 */
+  .chart{display:flex; align-items:flex-end; gap:8px; height:170px; padding-top:8px}
+  .chart .col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; height:100%}
+  .chart .bar{width:100%; max-width:46px; border-radius:9px 9px 4px 4px; background:#C9D2E4; min-height:4px;
+    position:relative; transition:height .3s}
+  .chart .col.today .bar{background:linear-gradient(180deg,#3B5289,#1E2A4A)}
+  .chart .v{font-size:14px; font-weight:800; color:var(--navy)}
+  .chart .d{font-size:12.5px; color:var(--ink2); font-weight:700}
+  .chart .col.today .d{color:var(--navy)}
+  .chart-note{font-size:13px; color:var(--ink2); margin-top:8px}
+  .chart-wrap{display:flex; flex-direction:column; align-items:stretch}
+
+  /* 탭 */
+  .tabs{display:flex; gap:8px; margin-bottom:10px}
+  .tabs button{flex:1; padding:12px 10px; font-size:16px; font-weight:800; border-radius:14px;
+    border:1.5px solid var(--line); background:#fff; color:var(--ink2)}
+  .tabs button.on{background:var(--navy); color:#fff; border-color:var(--navy)}
+
+  /* 순위 목록 */
+  .rank{list-style:none; margin:0; padding:0}
+  .rank li{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #F0EBE2}
+  .rank li:last-child{border-bottom:0; padding-bottom:0}
+  .rank .no{width:28px; height:28px; border-radius:9px; background:#EEF0F5; color:var(--navy);
+    font-size:14px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+  .rank li:nth-child(1) .no{background:#1E2A4A; color:#fff}
+  .rank .nm{flex:1; font-size:16px; font-weight:700; line-height:1.3}
+  .rank .nm i{display:block; font-style:normal; font-size:12.5px; color:var(--ink2); font-weight:600}
+  .rank .ct{font-size:17px; font-weight:800; color:var(--navy)}
+  .rank .ct small{font-size:12.5px; color:var(--ink2); font-weight:700; margin-left:2px}
+  .block + .block{margin-top:14px; padding-top:14px; border-top:1px solid var(--line)}
+  .block h3{font-size:15px; color:var(--ink2); margin-bottom:6px; letter-spacing:-.2px}
+  .empty{font-size:15px; color:var(--ink2); padding:8px 0 2px}
+
+  /* 유입 경로 막대 */
+  .src{margin:0 0 11px}
+  .src:last-child{margin-bottom:0}
+  .src .row{display:flex; justify-content:space-between; font-size:15.5px; font-weight:700; margin-bottom:5px}
+  .src .row b{font-weight:800}
+  .src .row span{color:var(--ink2); font-weight:700; font-size:14px}
+  .src .track{height:12px; border-radius:8px; background:#EDE8DF; overflow:hidden}
+  .src .fill{height:100%; border-radius:8px; background:linear-gradient(90deg,#3B5289,#1E2A4A)}
+  .foot{font-size:13px; color:var(--ink2); line-height:1.6; margin:18px 2px 0; padding-bottom:20px}
+  .foot b{color:var(--navy)}
+  .foot button{margin-top:12px; background:#fff; border:1.5px solid var(--line); border-radius:12px;
+    padding:11px 16px; font-size:15px; font-weight:700; color:var(--ink2)}
+  .loading{padding:28px 0; text-align:center; font-size:16px; color:var(--ink2); font-weight:700}
+  .err{background:#FFF3EC; border:1px solid #F2C9B4; color:#8A3416; border-radius:14px; padding:14px; font-size:15px; font-weight:700}
+  @media (max-width:359px){ .grid3{grid-template-columns:1fr 1fr} }
+
+  /* ============================================================
+     YC Manager 전용 — 상단 뒤로 · 📲 홈 화면 추가 · 카톡 탈출 배너 · 안내 모달
+     ============================================================ */
+  header.top .hrow{display:flex; align-items:center; gap:9px}
+  header.top .hbrand{flex:1; min-width:0}
+  header.top .hbrand b{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  header.top .hbtn{background:rgba(255,255,255,.14); color:#fff; border:0; border-radius:11px;
+    padding:9px 11px; font-size:14px; font-weight:800; flex:0 0 auto; line-height:1.25}
+  header.top .hbtn:active{background:rgba(255,255,255,.28)}
+  header.top .hbtn.back{padding:9px 11px 9px 9px}
+  .hinstall{padding-top:10px}
+  header.top .install{width:100%; display:flex; align-items:center; justify-content:center; gap:8px;
+    min-height:46px; border:1.5px solid rgba(233,204,143,.78); border-radius:14px;
+    background:linear-gradient(135deg,#F1DEB1,#C9A961); color:#0F1E36; font-size:16px; font-weight:900;
+    letter-spacing:-.2px; box-shadow:0 2px 10px rgba(0,0,0,.16)}
+  header.top .install:active{transform:scale(.995); filter:brightness(.97)}
+  header.top .install.done{background:rgba(255,255,255,.16); color:#F6E7C4; border-color:rgba(255,255,255,.32); box-shadow:none}
+
+  /* 카톡 인앱 브라우저 탈출 배너 */
+  .promo-slot:empty{display:none}
+  .promo{display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:10px 14px;
+    background:linear-gradient(135deg,#FCF4DE,#F2E2BA); border-bottom:1px solid #E3CE9E}
+  .promo-txt{flex:1 1 100%; line-height:1.35}
+  .promo-txt b{display:block; font-size:14px; font-weight:900; color:#3A2C04}
+  .promo-txt span{display:block; font-size:12.5px; font-weight:700; color:#6B520C; margin-top:1px}
+  .promo-btn{flex:1 1 auto; display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:0 14px;
+    border-radius:11px; border:0; background:#0F1E36; color:#F3E2B3; font-size:14.5px; font-weight:900;
+    text-decoration:none}
+  .promo-btn:active{background:#25395F}
+  .promo-x{width:32px; height:32px; border-radius:9px; border:1px solid rgba(0,0,0,.08);
+    background:rgba(255,255,255,.62); color:#6B520C; font-size:14px; line-height:1}
+
+  /* 잠금 화면 위 설치 버튼 */
+  #lock{overflow-y:auto; justify-content:safe center}
+  .lock-install{width:min(320px,86vw); min-height:44px; border-radius:13px; flex:0 0 auto;
+    border:1.5px solid rgba(233,204,143,.55); background:rgba(255,255,255,.10); color:#F3E2B3;
+    font-size:15px; font-weight:800}
+  .lock-install:active{background:rgba(255,255,255,.2)}
+  #lock .hint b{color:#E7D3A8}
+  .lock-install.done{color:#BFE3CF; border-color:rgba(191,227,207,.42)}
+  #lock #promoLock{align-self:stretch; margin:-26px -20px 0; flex:0 0 auto}
+
+  /* 안내 모달 */
+  .modal-root{position:fixed; inset:0; z-index:200; display:flex; align-items:flex-end; justify-content:center;
+    background:rgba(8,17,32,.56)}
+  .modal-root[hidden]{display:none}
+  .modal{width:100%; max-width:520px; background:#FFFDF8; border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 40px rgba(0,0,0,.3); max-height:86vh; overflow-y:auto}
+  .modal-head{display:flex; align-items:center; gap:8px; padding:14px 14px 10px; border-bottom:1px solid var(--line)}
+  .modal-head h3{flex:1; font-size:17px; letter-spacing:-.3px}
+  .modal-head button{border:0; background:#F1ECE2; color:var(--ink2); border-radius:10px;
+    padding:9px 11px; font-size:14px; font-weight:800}
+  .modal-body{padding:14px}
+  .modal-body p{font-size:15px; color:var(--ink); margin:0 0 10px}
+  .steps{display:flex; flex-direction:column; gap:9px; margin-top:12px}
+  .step{display:flex; gap:10px; align-items:flex-start; font-size:15px; line-height:1.45}
+  .step .n{flex:0 0 24px; width:24px; height:24px; border-radius:8px; background:var(--navy); color:#F3E2B3;
+    font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px}
+  .step b{font-weight:800}
+  .note{background:#F6F1E6; border:1px solid var(--line); border-radius:12px; padding:11px 12px;
+    font-size:14px; line-height:1.5; color:var(--ink)}
+  .note.warn{background:#FBF7EA; border-color:#E4CE82}
+  .modal-foot{padding:12px 14px 18px}
+  .modal-foot .primary{width:100%; min-height:48px; border-radius:14px; border:0; background:var(--navy);
+    color:#fff; font-size:16px; font-weight:900}
+  .modal-foot .gold{width:100%; min-height:48px; border-radius:14px; border:0; display:flex; align-items:center;
+    justify-content:center; text-decoration:none; background:linear-gradient(135deg,#F1DEB1,#C9A961);
+    color:#0F1E36; font-size:16px; font-weight:900}
+  .toast{position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:300;
+    background:rgba(15,30,54,.95); color:#fff; font-size:14.5px; font-weight:700; padding:12px 18px;
+    border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:86vw; text-align:center}
+  .toast[hidden]{display:none}
+  @media (min-width:700px){ .modal-root{align-items:center; padding:20px}.modal{border-radius:20px} }
+  @media (max-width:359px){ .hbtn{font-size:13px; padding:8px 9px} header.top .install{font-size:15px} }
+</style>
+</head>
+<body>
+
+<!-- ============ 잠금 화면 ============ -->
+<div id="lock">
+  <div id="promoLock" class="promo-slot"></div>
+  <button type="button" id="installBtn2" class="lock-install">📲 홈 화면 추가</button>
+  <div class="brand">
+    <b>영앤클래식</b>
+    <span>관리자 전용 대시보드</span>
+  </div>
+  <p class="ask">비밀번호 4자리를 눌러 주세요</p>
+  <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+  <div class="pad" id="pad">
+    <button type="button" data-k="1">1</button>
+    <button type="button" data-k="2">2</button>
+    <button type="button" data-k="3">3</button>
+    <button type="button" data-k="4">4</button>
+    <button type="button" data-k="5">5</button>
+    <button type="button" data-k="6">6</button>
+    <button type="button" data-k="7">7</button>
+    <button type="button" data-k="8">8</button>
+    <button type="button" data-k="9">9</button>
+    <button type="button" class="fn" data-k="del">지우기</button>
+    <button type="button" data-k="0">0</button>
+    <button type="button" class="fn" data-k="clear">처음</button>
+  </div>
+  <p class="msg" id="lockMsg"></p>
+  <label class="remember"><input type="checkbox" id="remember" checked> 이 기기에서 30일 동안 기억하기</label>
+  <p class="hint">이 주소는 네이버·구글 검색에 나오지 않습니다. 주소를 아는 사람만 열 수 있으니 <b>홈 화면에 추가</b>해 두세요.</p>
+</div>
+
+<!-- ============ 대시보드 ============ -->
+<div id="app" hidden>
+  <div id="promoApp" class="promo-slot"></div>
+  <header class="top">
+    <div class="wrap hrow">
+      <button type="button" id="btnBack" class="hbtn back" title="영앤클래식 쇼핑 화면으로">← 뒤로</button>
+      <div class="hbrand">
+        <b>영앤클래식 관리자</b>
+        <div class="sub" id="stampSub">YC Manager · 실제 방문 집계</div>
+      </div>
+      <button type="button" id="btnRefresh" class="hbtn">새로고침</button>
+    </div>
+    <div class="wrap hinstall">
+      <button type="button" id="installBtn" class="install">📲 홈 화면 추가</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <p class="stamp">한국시간 <b>00:00 ~ 24:00</b> 기준 · 마지막 갱신 <b id="updated">—</b></p>
+    <div id="body"><p class="loading">집계를 불러오는 중…</p></div>
+    <p class="foot">
+      <b>숫자를 읽는 법</b><br>
+      · <b>방문자(UV)</b>는 같은 사람이 하루에 여러 번 와도 1명으로 셉니다.<br>
+      · <b>조회수(PV)</b>는 화면을 열 때마다 1씩 늘어납니다.<br>
+      · <b>제휴 클릭</b>은 네이버쇼핑·쿠팡 버튼을 누른 횟수이고, <b>CTR</b>은 방문자 1명이 남긴 제휴 클릭 수입니다(100명 중 몇 명이 눌렀는지).<br>
+      · 검색 로봇·링크 미리보기 봇은 빼고 셉니다. 개인정보(이름·전화번호·IP)는 저장하지 않습니다.<br>
+      <button type="button" id="btnLock">잠그기</button>
+    </p>
+  </div>
+</div>
+
+<script>/* ============================================================
+   선택지 · 옷장 데이터
+   ============================================================ */
+var OPTIONS = {
+  gender: [
+    { id: 'm', label: '남성', icon: '👔', sub: '중년 남성 코디' },
+    { id: 'f', label: '여성', icon: '👗', sub: '중년 여성 코디' }
+  ],
+  weather: [
+    { id: 'warm', label: '맑고 포근', icon: '☀️', sub: '23도 이상 · 반소매도 좋아요', needOuter: false, top: 0.6, outer: 0.4,
+      note: '한낮에는 더워요. 얇은 셔츠나 린넨 소재로 가볍게, 실내 냉방을 위해 얇은 겉옷을 하나 챙기면 좋아요.' },
+    { id: 'mild', label: '선선·일교차', icon: '🌤', sub: '15~22도 · 겉옷 필수', needOuter: true, top: 1.3, outer: 1.4,
+      note: '아침저녁으로 쌀쌀해요. 가디건이나 재킷을 걸치면 낮에 벗어도 단정해 보입니다.' },
+    { id: 'rain', label: '비·바람', icon: '🌧', sub: '비 소식 · 방수 신발', needOuter: true, top: 1.6, outer: 2.0,
+      note: '비 오는 날은 밝은 색 상의가 답답함을 덜어 줘요. 젖어도 티가 덜 나는 소재와 방수 신발을 권합니다.' },
+    { id: 'cold', label: '쌀쌀·추움', icon: '🥶', sub: '10도 이하 · 보온이 먼저', needOuter: true, top: 2.5, outer: 3.0,
+      note: '보온이 먼저예요. 안에는 얇은 니트, 겉에는 코트로 겹겹이. 목도리를 더하면 체감 온도가 확 달라집니다.' }
+  ],
+  mood: [
+    { id: 'calm', label: '차분·단정', icon: '🌿', sub: '과하지 않게 깔끔하게',
+      tone: '눈에 튀지 않으면서 단정한 인상' },
+    { id: 'lively', label: '활기·산뜻', icon: '✨', sub: '밝은 색, 가벼운 소재',
+      tone: '얼굴빛이 밝아 보이는 산뜻한 인상' },
+    { id: 'comfy', label: '편안·여유', icon: '🍵', sub: '몸이 편한 핏',
+      tone: '힘을 뺀 듯 부드럽고 편안한 인상' },
+    { id: 'formal', label: '격식·품격', icon: '🎩', sub: '단정한 클래식',
+      tone: '격식 있는 자리에서 믿음이 가는 인상' }
+  ],
+  occasion: [
+    { id: 'gather', label: '모임·식사', icon: '🍽', sub: '동창회·저녁 약속', formal: 1.9 },
+    { id: 'work', label: '출근·미팅', icon: '💼', sub: '회사·고객 미팅', formal: 2.7 },
+    { id: 'trip', label: '여행·나들이', icon: '🧳', sub: '오래 걷는 날', formal: 1.0 },
+    { id: 'walk', label: '가벼운 산책', icon: '🚶', sub: '동네·공원', formal: 0.5 },
+    { id: 'event', label: '경조사', icon: '🎊', sub: '결혼식·장례식', formal: 3.0 }
+  ]
+};
+
+/* cat: top / bottom / outer / shoes / acc
+   formal: 0(편안) ~ 3(격식)   warmth: 0(한여름) ~ 3(한겨울)
+   connectUrl: (선택) 네이버 브랜드·쇼핑 커넥트 상품 링크.
+               넣어 두면 「네이버쇼핑에서 최저가 보기」가 이 링크로 열리고,
+               없으면 아이템 이름으로 네이버쇼핑을 검색합니다.
+   예) { id: 'm_t1', ..., connectUrl: 'https://smartstore.naver.com/...' } */
+var WARDROBE = [
+  /* ================= 남성 ================= */
+  { id: 'm_t1', g: 'm', cat: 'top', kind: 'shirt', name: '네이비 옥스퍼드 셔츠', color: '#2B3A5B', colorName: '네이비', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+  { id: 'm_t2', g: 'm', cat: 'top', kind: 'shirt', name: '화이트 코튼 셔츠', color: '#FAF7F0', colorName: '화이트', price: 34900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'm_t3', g: 'm', cat: 'top', kind: 'shirt', name: '블루 스트라이프 셔츠', color: '#6E8CAE', colorName: '스카이블루', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'lively'] },
+  { id: 'm_t4', g: 'm', cat: 'top', kind: 'knit', name: '오트밀 라운드 니트', color: '#D8C7AE', colorName: '오트밀', price: 49000, formal: 1, warmth: 2, moods: ['comfy', 'calm'] },
+  { id: 'm_t5', g: 'm', cat: 'top', kind: 'knit', name: '차콜 케이블 니트', color: '#3E4250', colorName: '차콜', price: 49900, formal: 2, warmth: 2, moods: ['calm', 'formal'] },
+  { id: 'm_t6', g: 'm', cat: 'top', kind: 'turtleneck', name: '블랙 터틀넥 니트', color: '#23262E', colorName: '블랙', price: 44900, formal: 2, warmth: 3, moods: ['calm', 'formal'] },
+  { id: 'm_t7', g: 'm', cat: 'top', kind: 'polo', name: '베이지 피케 폴로', color: '#CBB79B', colorName: '베이지', price: 34900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_t8', g: 'm', cat: 'top', kind: 'tee', name: '올리브 헨리넥 티셔츠', color: '#6B6A4B', colorName: '올리브', price: 34900, formal: 0, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_t9', g: 'm', cat: 'top', kind: 'tee', name: '화이트 수피마 티셔츠', color: '#FAF7F0', colorName: '화이트', price: 32900, formal: 0, warmth: 0, moods: ['comfy'] },
+  { id: 'm_t10', g: 'm', cat: 'top', kind: 'knit', name: '그레이 와플 니트', color: '#8E8F92', colorName: '라이트그레이', price: 45900, formal: 1, warmth: 2, moods: ['comfy', 'calm'] },
+  { id: 'm_t11', g: 'm', cat: 'top', kind: 'shirt', name: '린넨 블렌드 셔츠', color: '#E7DDCB', colorName: '아이보리', price: 39900, formal: 1, warmth: 0, moods: ['comfy', 'lively'] },
+  { id: 'm_t12', g: 'm', cat: 'top', kind: 'shirt', name: '블랙 옥스퍼드 셔츠', color: '#22262F', colorName: '블랙', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+
+  { id: 'm_b1', g: 'm', cat: 'bottom', kind: 'slacks', name: '네이비 울 슬랙스', color: '#2A3450', colorName: '네이비', price: 49900, formal: 3, warmth: 2, moods: ['formal', 'calm'] },
+  { id: 'm_b2', g: 'm', cat: 'bottom', kind: 'slacks', name: '차콜 슬랙스', color: '#3A3D45', colorName: '차콜', price: 44900, formal: 3, warmth: 2, moods: ['formal'] },
+  { id: 'm_b3', g: 'm', cat: 'bottom', kind: 'slacks', name: '베이지 치노 팬츠', color: '#C9B393', colorName: '베이지', price: 39900, formal: 1, warmth: 1, moods: ['comfy', 'calm'] },
+  { id: 'm_b4', g: 'm', cat: 'bottom', kind: 'slacks', name: '올리브 치노 팬츠', color: '#6E6A4E', colorName: '올리브', price: 39900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_b5', g: 'm', cat: 'bottom', kind: 'jeans', name: '미드 인디고 데님', color: '#3B5578', colorName: '인디고', price: 39900, formal: 0, warmth: 1, moods: ['lively', 'comfy'] },
+  { id: 'm_b6', g: 'm', cat: 'bottom', kind: 'jeans', name: '다크 인디고 데님', color: '#2C3E57', colorName: '다크인디고', price: 44900, formal: 1, warmth: 1, moods: ['calm', 'comfy'] },
+  { id: 'm_b7', g: 'm', cat: 'bottom', kind: 'slacks', name: '라이트 그레이 슬랙스', color: '#9A9C9E', colorName: '라이트그레이', price: 44900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+  { id: 'm_b8', g: 'm', cat: 'bottom', kind: 'slacks', name: '블랙 스트레치 팬츠', color: '#2A2C31', colorName: '블랙', price: 34900, formal: 0, warmth: 1, moods: ['comfy'] },
+
+  { id: 'm_o1', g: 'm', cat: 'outer', kind: 'cardigan', name: '카멜 가디건', color: '#B8864B', colorName: '카멜', price: 59000, formal: 1, warmth: 1, moods: ['comfy', 'calm'] },
+  { id: 'm_o2', g: 'm', cat: 'outer', kind: 'cardigan', name: '네이비 니트 가디건', color: '#2C3A57', colorName: '네이비', price: 54900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+  { id: 'm_o3', g: 'm', cat: 'outer', kind: 'jacket', name: '인디고 트러커 재킷', color: '#3D5573', colorName: '인디고', price: 59900, formal: 0, warmth: 1, moods: ['lively', 'comfy'] },
+  { id: 'm_o4', g: 'm', cat: 'outer', kind: 'blazer', name: '차콜 싱글 블레이저', color: '#3B3E46', colorName: '차콜', price: 89900, formal: 3, warmth: 2, moods: ['formal', 'calm'] },
+  { id: 'm_o5', g: 'm', cat: 'outer', kind: 'blazer', name: '네이비 블레이저', color: '#26324C', colorName: '네이비', price: 84900, formal: 3, warmth: 2, moods: ['formal'] },
+  { id: 'm_o6', g: 'm', cat: 'outer', kind: 'coat', name: '카멜 울 코트', color: '#B98A56', colorName: '카멜', price: 54900, formal: 3, warmth: 3, moods: ['formal', 'calm'] },
+  { id: 'm_o7', g: 'm', cat: 'outer', kind: 'coat', name: '차콜 울 코트', color: '#383C44', colorName: '차콜', price: 69900, formal: 3, warmth: 3, moods: ['formal'] },
+  { id: 'm_o8', g: 'm', cat: 'outer', kind: 'trench', name: '베이지 트렌치 재킷', color: '#CDB995', colorName: '베이지', price: 79900, formal: 2, warmth: 2, moods: ['calm', 'comfy'] },
+  { id: 'm_o9', g: 'm', cat: 'outer', kind: 'padding', name: '블랙 경량 패딩', color: '#26282E', colorName: '블랙', price: 59900, formal: 0, warmth: 3, moods: ['comfy'] },
+  { id: 'm_o10', g: 'm', cat: 'outer', kind: 'jacket', name: '올리브 필드 재킷', color: '#5F6247', colorName: '올리브', price: 64900, formal: 1, warmth: 2, moods: ['comfy', 'lively'] },
+
+  { id: 'm_s1', g: 'm', cat: 'shoes', kind: 'loafer', name: '브라운 페니 로퍼', color: '#7A4F33', colorName: '브라운', price: 59900, formal: 3, warmth: 1, moods: ['formal', 'calm'], suede: true },
+  { id: 'm_s2', g: 'm', cat: 'shoes', kind: 'loafer', name: '블랙 로퍼', color: '#22242A', colorName: '블랙', price: 54900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'm_s3', g: 'm', cat: 'shoes', kind: 'derby', name: '블랙 더비 슈즈', color: '#232326', colorName: '블랙', price: 69900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'm_s4', g: 'm', cat: 'shoes', kind: 'sneaker', name: '화이트 레더 스니커즈', color: '#F5F1E9', colorName: '화이트', price: 49900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_s5', g: 'm', cat: 'shoes', kind: 'sneaker', name: '네이비 스니커즈', color: '#2E3D5A', colorName: '네이비', price: 45900, formal: 1, warmth: 1, moods: ['comfy'] },
+  { id: 'm_s6', g: 'm', cat: 'shoes', kind: 'boot', name: '브라운 첼시 부츠', color: '#6B4A34', colorName: '브라운', price: 69900, formal: 2, warmth: 2, moods: ['calm', 'comfy'], suede: true },
+
+  { id: 'm_a1', g: 'm', cat: 'acc', kind: 'belt', name: '브라운 가죽 벨트', color: '#6B4A34', colorName: '브라운', price: 24900, formal: 2, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'm_a2', g: 'm', cat: 'acc', kind: 'watch', name: '실버 클래식 워치', color: '#B8BCC2', colorName: '실버', price: 29900, formal: 2, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'm_a3', g: 'm', cat: 'acc', kind: 'scarf', name: '카멜 캐시미어 머플러', color: '#B8864B', colorName: '카멜', price: 29900, formal: 2, warmth: 3, moods: ['calm', 'formal'] },
+  { id: 'm_a4', g: 'm', cat: 'acc', kind: 'bag', name: '브라운 레더 브리프백', color: '#6B4A34', colorName: '브라운', price: 69900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'm_a5', g: 'm', cat: 'acc', kind: 'bag', name: '네이비 나일론 크로스백', color: '#2C3A57', colorName: '네이비', price: 44900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_a6', g: 'm', cat: 'acc', kind: 'gloves', name: '가죽 장갑', color: '#2C2E33', colorName: '블랙', price: 24900, formal: 2, warmth: 3, moods: ['formal', 'calm'] },
+  { id: 'm_a7', g: 'm', cat: 'acc', kind: 'umbrella', name: '우드핸들 장우산', color: '#2B3A5B', colorName: '네이비', price: 24900, formal: 1, warmth: 1, moods: ['calm'] },
+  { id: 'm_a8', g: 'm', cat: 'acc', kind: 'belt', name: '블랙 가죽 벨트', color: '#26282E', colorName: '블랙', price: 22900, formal: 2, warmth: 1, moods: ['formal'] },
+
+  /* ================= 여성 ================= */
+  { id: 'f_t1', g: 'f', cat: 'top', kind: 'blouse', name: '아이보리 실크 블라우스', color: '#F3EADA', colorName: '아이보리', price: 49900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_t2', g: 'f', cat: 'top', kind: 'blouse', name: '네이비 셔링 블라우스', color: '#2B3A5B', colorName: '네이비', price: 44900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'f_t3', g: 'f', cat: 'top', kind: 'shirt', name: '블루 스트라이프 셔츠', color: '#7B96B6', colorName: '스카이블루', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'lively'] },
+  { id: 'f_t4', g: 'f', cat: 'top', kind: 'knit', name: '오트밀 라운드 니트', color: '#D9C9B2', colorName: '오트밀', price: 44900, formal: 1, warmth: 2, moods: ['comfy', 'calm'] },
+  { id: 'f_t5', g: 'f', cat: 'top', kind: 'knit', name: '더스티 로즈 니트', color: '#C08A82', colorName: '로즈', price: 45900, formal: 1, warmth: 2, moods: ['lively', 'calm'] },
+  { id: 'f_t6', g: 'f', cat: 'top', kind: 'turtleneck', name: '블랙 터틀넥 니트', color: '#23262E', colorName: '블랙', price: 39900, formal: 2, warmth: 3, moods: ['calm', 'formal'] },
+  { id: 'f_t7', g: 'f', cat: 'top', kind: 'tee', name: '화이트 코튼 티셔츠', color: '#FAF7F0', colorName: '화이트', price: 32900, formal: 0, warmth: 0, moods: ['comfy'] },
+  { id: 'f_t8', g: 'f', cat: 'top', kind: 'blouse', name: '샴페인 시폰 블라우스', color: '#E4D3BC', colorName: '샴페인', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+  { id: 'f_t9', g: 'f', cat: 'top', kind: 'knit', name: '카멜 케이블 니트', color: '#B8864B', colorName: '카멜', price: 49900, formal: 1, warmth: 2, moods: ['comfy', 'calm'] },
+  { id: 'f_t10', g: 'f', cat: 'top', kind: 'shirt', name: '화이트 셔츠', color: '#FBF8F2', colorName: '화이트', price: 34900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'f_t11', g: 'f', cat: 'top', kind: 'blouse', name: '올리브 새틴 블라우스', color: '#6E6A45', colorName: '올리브', price: 44900, formal: 2, warmth: 1, moods: ['calm', 'lively'] },
+  { id: 'f_t12', g: 'f', cat: 'top', kind: 'blouse', name: '라벤더 시어 블라우스', color: '#A99BBE', colorName: '라벤더', price: 37900, formal: 1, warmth: 0, moods: ['lively', 'calm'] },
+
+  { id: 'f_b1', g: 'f', cat: 'bottom', kind: 'slacks', name: '네이비 와이드 슬랙스', color: '#2A3450', colorName: '네이비', price: 44900, formal: 3, warmth: 2, moods: ['formal', 'calm'] },
+  { id: 'f_b2', g: 'f', cat: 'bottom', kind: 'slacks', name: '크림 슬랙스', color: '#E3D7C3', colorName: '크림', price: 39900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+  { id: 'f_b3', g: 'f', cat: 'bottom', kind: 'skirt', name: '블랙 미디 스커트', color: '#26282E', colorName: '블랙', price: 34900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_b4', g: 'f', cat: 'bottom', kind: 'skirt', name: '카멜 A라인 스커트', color: '#B8864B', colorName: '카멜', price: 39900, formal: 2, warmth: 2, moods: ['calm', 'comfy'] },
+  { id: 'f_b5', g: 'f', cat: 'bottom', kind: 'jeans', name: '스트레이트 데님', color: '#3B5578', colorName: '인디고', price: 39900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'f_b6', g: 'f', cat: 'bottom', kind: 'slacks', name: '그레이 슬랙스', color: '#9A9C9E', colorName: '그레이', price: 39900, formal: 2, warmth: 1, moods: ['calm'] },
+  { id: 'f_b7', g: 'f', cat: 'bottom', kind: 'skirt', name: '네이비 플리츠 스커트', color: '#2C3A57', colorName: '네이비', price: 44900, formal: 2, warmth: 1, moods: ['calm', 'lively'] },
+  { id: 'f_b8', g: 'f', cat: 'bottom', kind: 'slacks', name: '올리브 와이드 팬츠', color: '#6E6A4E', colorName: '올리브', price: 44900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'f_b9', g: 'f', cat: 'bottom', kind: 'skirt', name: '아이보리 롱 스커트', color: '#F0E6D5', colorName: '아이보리', price: 49900, formal: 2, warmth: 1, moods: ['calm', 'formal'] },
+
+  { id: 'f_o1', g: 'f', cat: 'outer', kind: 'cardigan', name: '카멜 가디건', color: '#B8864B', colorName: '카멜', price: 59000, formal: 1, warmth: 1, moods: ['comfy', 'calm'] },
+  { id: 'f_o2', g: 'f', cat: 'outer', kind: 'blazer', name: '트위드 재킷', color: '#BFAE9A', colorName: '오트밀', price: 79900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'f_o3', g: 'f', cat: 'outer', kind: 'blazer', name: '네이비 테일러드 자켓', color: '#26324C', colorName: '네이비', price: 84900, formal: 3, warmth: 2, moods: ['formal'] },
+  { id: 'f_o4', g: 'f', cat: 'outer', kind: 'coat', name: '카멜 핸드메이드 코트', color: '#B98A56', colorName: '카멜', price: 99900, formal: 3, warmth: 3, moods: ['formal', 'calm'] },
+  { id: 'f_o5', g: 'f', cat: 'outer', kind: 'coat', name: '그레이 롱 코트', color: '#6E7278', colorName: '그레이', price: 89900, formal: 3, warmth: 3, moods: ['formal'] },
+  { id: 'f_o6', g: 'f', cat: 'outer', kind: 'trench', name: '베이지 트렌치', color: '#CDB995', colorName: '베이지', price: 74900, formal: 2, warmth: 2, moods: ['calm', 'comfy'] },
+  { id: 'f_o7', g: 'f', cat: 'outer', kind: 'padding', name: '아이보리 경량 패딩', color: '#F0E9DB', colorName: '아이보리', price: 59900, formal: 0, warmth: 3, moods: ['comfy'] },
+  { id: 'f_o8', g: 'f', cat: 'outer', kind: 'jacket', name: '데님 재킷', color: '#3D5573', colorName: '인디고', price: 54900, formal: 0, warmth: 1, moods: ['lively', 'comfy'] },
+  { id: 'f_o9', g: 'f', cat: 'outer', kind: 'cardigan', name: '오트밀 니트 자켓', color: '#D5C4AC', colorName: '오트밀', price: 59900, formal: 1, warmth: 2, moods: ['comfy', 'calm'] },
+
+  { id: 'f_s1', g: 'f', cat: 'shoes', kind: 'pump', name: '누드 스터드 펌프스', color: '#D8B79C', colorName: '누드', price: 49900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_s2', g: 'f', cat: 'shoes', kind: 'pump', name: '블랙 펌프스', color: '#23262E', colorName: '블랙', price: 44900, formal: 3, warmth: 1, moods: ['formal'] },
+  { id: 'f_s3', g: 'f', cat: 'shoes', kind: 'loafer', name: '브라운 로퍼', color: '#7A4F33', colorName: '브라운', price: 54900, formal: 2, warmth: 1, moods: ['calm', 'comfy'], suede: true },
+  { id: 'f_s4', g: 'f', cat: 'shoes', kind: 'sneaker', name: '화이트 스니커즈', color: '#F5F1E9', colorName: '화이트', price: 44900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'f_s5', g: 'f', cat: 'shoes', kind: 'boot', name: '블랙 앵클 부츠', color: '#2A2C31', colorName: '블랙', price: 64900, formal: 2, warmth: 2, moods: ['calm', 'formal'] },
+  { id: 'f_s6', g: 'f', cat: 'shoes', kind: 'flat', name: '블랙 발레 플랫', color: '#23262E', colorName: '블랙', price: 44900, formal: 2, warmth: 1, moods: ['calm', 'comfy'] },
+  { id: 'f_s7', g: 'f', cat: 'shoes', kind: 'boot', name: '브라운 첼시 부츠', color: '#6B4A34', colorName: '브라운', price: 69900, formal: 2, warmth: 2, moods: ['calm', 'comfy'], suede: true },
+
+  { id: 'f_a1', g: 'f', cat: 'acc', kind: 'tote', name: '베이지 레더 토트백', color: '#D8C3A5', colorName: '베이지', price: 69900, formal: 2, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_a2', g: 'f', cat: 'acc', kind: 'bag', name: '블랙 숄더백', color: '#26282E', colorName: '블랙', price: 59900, formal: 2, warmth: 1, moods: ['formal'] },
+  { id: 'f_a3', g: 'f', cat: 'acc', kind: 'scarf', name: '실크 스카프', color: '#C9A6A0', colorName: '로즈', price: 24900, formal: 2, warmth: 1, moods: ['lively', 'calm'] },
+  { id: 'f_a4', g: 'f', cat: 'acc', kind: 'scarf', name: '카멜 캐시미어 머플러', color: '#B8864B', colorName: '카멜', price: 29900, formal: 2, warmth: 3, moods: ['calm', 'formal'] },
+  { id: 'f_a5', g: 'f', cat: 'acc', kind: 'belt', name: '브라운 가죽 벨트', color: '#6B4A34', colorName: '브라운', price: 22900, formal: 2, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_a6', g: 'f', cat: 'acc', kind: 'watch', name: '로즈골드 워치', color: '#C9A27E', colorName: '로즈골드', price: 29900, formal: 2, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_a7', g: 'f', cat: 'acc', kind: 'earring', name: '진주 이어링', color: '#EDE7DC', colorName: '진주', price: 24900, formal: 3, warmth: 1, moods: ['formal', 'calm'] },
+  { id: 'f_a8', g: 'f', cat: 'acc', kind: 'gloves', name: '가죽 장갑', color: '#26282E', colorName: '블랙', price: 24900, formal: 2, warmth: 3, moods: ['formal', 'calm'] },
+  { id: 'f_a9', g: 'f', cat: 'acc', kind: 'umbrella', name: '우드핸들 장우산', color: '#2B3A5B', colorName: '네이비', price: 24900, formal: 1, warmth: 1, moods: ['calm'] },
+
+  /* ================= 트레이닝 · 애슬레저 (2026-11-19 추가) ================= */
+  { id: 'm_tr1', g: 'm', cat: 'outer', kind: 'trackjacket', name: '차콜 트랙 재킷', color: '#3E4250', colorName: '차콜', price: 34900, formal: 0, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'm_tr2', g: 'm', cat: 'top', kind: 'sweatshirt', name: '그레이 멜란지 스웨트셔츠', color: '#9A9C9E', colorName: '라이트그레이', price: 36900, formal: 0, warmth: 2, moods: ['comfy'] },
+  { id: 'm_tr3', g: 'm', cat: 'bottom', kind: 'jogger', name: '차콜 조거 팬츠', color: '#3A3D45', colorName: '차콜', price: 29900, formal: 0, warmth: 2, moods: ['comfy', 'lively'] },
+  { id: 'f_tr1', g: 'f', cat: 'outer', kind: 'trackjacket', name: '크림 트랙 재킷', color: '#F0E6D5', colorName: '크림', price: 39900, formal: 1, warmth: 1, moods: ['comfy', 'lively'] },
+  { id: 'f_tr2', g: 'f', cat: 'top', kind: 'hoodie', name: '오트밀 집업 후드', color: '#D5C4AC', colorName: '오트밀', price: 32900, formal: 0, warmth: 2, moods: ['comfy'] },
+  { id: 'f_tr3', g: 'f', cat: 'bottom', kind: 'trackpants', name: '네이비 와이드 트레이닝 팬츠', color: '#2C3A57', colorName: '네이비', price: 34900, formal: 0, warmth: 2, moods: ['comfy', 'lively'] }
+];
+
+var SIZE_TABLE = {
+  m: { top: ['95', '100', '105', '110'], bottom: ['29', '30', '32', '34'], outer: ['95', '100', '105', '110'], shoes: ['255', '265', '275', '285'], acc: ['FREE'] },
+  f: { top: ['S', 'M', 'L', 'XL'], bottom: ['S', 'M', 'L', 'XL'], outer: ['S', 'M', 'L', 'XL'], shoes: ['235', '240', '245', '250'], acc: ['FREE'] }
+};
+var SIZE_UNIT = { m: { top: '호', bottom: '인치', outer: '호', shoes: 'mm', acc: '' }, f: { top: '', bottom: '', outer: '', shoes: 'mm', acc: '' } };
+
+var CAT_LABEL = { top: '상의', bottom: '하의', outer: '아우터', shoes: '신발', acc: '소품' };
+
+/* 아이템 실사 이미지 (assets/items → 배포 폴더 items/)
+   파일 이름은 kind-색상영문슬러그.jpg — 같은 종류·색상은 한 장을 함께 씁니다. */
+var COLOR_SLUG = {
+  '네이비': 'navy', '브라운': 'brown', '블랙': 'black', '차콜': 'charcoal',
+  '화이트': 'white', '아이보리': 'ivory', '베이지': 'beige', '오트밀': 'oatmeal',
+  '올리브': 'olive', '인디고': 'indigo', '다크인디고': 'dark-indigo', '스카이블루': 'sky-blue',
+  '그레이': 'grey', '라이트그레이': 'light-grey', '크림': 'cream', '카멜': 'camel',
+  '라벤더': 'lavender', '샴페인': 'champagne', '로즈': 'rose', '누드': 'nude',
+  '진주': 'pearl', '로즈골드': 'rose-gold', '실버': 'silver'
+};
+function imgFor(it) {
+  return 'items/' + it.kind + '-' + (COLOR_SLUG[it.colorName] || 'basic') + '.jpg';
+}
+
+var CONCEPTS = [
+  { key: 'classic', no: '01', name: '정석 세미정장',
+    line: '가장 안정적인 기본 조합',
+    fit: {
+      m: '상의는 어깨선이 딱 맞는 사이즈로, 하의 밑단은 신발 위에 살짝 걸치게. 허리선을 올려 주면 키가 커 보여요.',
+      f: '재킷 어깨선과 스커트·슬랙스 길이를 맞추면 단정해 보여요. 무릎 아래 5cm가 가장 안정적입니다.'
+    } },
+  { key: 'soft', no: '02', name: '부드러운 여유',
+    line: '편안한데 흐트러지지 않는 조합',
+    fit: {
+      m: '니트는 몸에 달라붙지 않는 여유 핏으로. 상의 밑단을 하의 안에 넣어 허리선만 살짝 드러내 주세요.',
+      f: '니트는 살짝 여유 있는 핏으로, 허리선은 벨트나 하프 턱으로 표시하면 비율이 좋아 보여요.'
+    } },
+  { key: 'accent', no: '03', name: '포인트 한 스푼',
+    line: '평소보다 한 톤 밝은 조합',
+    fit: {
+      m: '포인트 색은 상체에 두고 하의는 어두운 톤으로 통일하면 배 부분이 슬림해 보여요.',
+      f: '포인트 색은 얼굴 가까이(블라우스·스카프)에 두면 얼굴빛이 화사해 보여요.'
+    } }
+];
+
+/* ============================================================
+   네이버 쇼핑 커넥트 제휴 링크 (2026-11-19 발급 · brandconnect.naver.com)
+   - 영앤클래식 대표 아이템과 실제 상품을 1:1로 이어 둔 링크입니다.
+   - 넣은 아이템만 「네이버쇼핑에서 최저가 보기」가 이 링크로 열리고,
+     나머지 아이템은 이름으로 네이버쇼핑을 검색합니다.
+   - 수수료율은 발급 시점 기준이고 매월 1일 판매자 설정에 따라 바뀔 수 있습니다.
+   - 쿠팡 파트너스 상품 링크를 따로 발급하면 it.coupangUrl 에 넣으면 그 링크로 열립니다.
+     (없으면 쿠팡 검색으로 연결됩니다)
+   ============================================================ */
+var CONNECT_LINKS = {
+  m_t10: 'https://naver.me/5hovk6aO',   /* 그레이 와플 니트 → 남자니트 오버핏 겨울 두꺼운 워셔블니트 (맨즈그라운드, 32,900원·5%) */
+  m_b3: 'https://naver.me/xG0ET7E3',    /* 베이지 치노 팬츠 → 남자 치노 면바지 일자 (이구이오, 34,000원·5%) */
+  m_o6: 'https://naver.me/xm06h3DU',    /* 카멜 울 코트 → 남자 코트 빅사이즈 오버핏 울 코트 (션타운, 84,000원·5%) */
+  m_o8: 'https://naver.me/xwodN1Xt',    /* 베이지 트렌치 재킷 → 남자 트렌치코트 롱 바바리 (에이치베이직, 59,900원·5%) */
+  m_t2: 'https://naver.me/5YoTQ7yt',    /* 화이트 코튼 셔츠 → 어반트 세미카라 화이트 남자 긴팔 셔츠 (52,000원·18%) */
+  m_s4: 'https://naver.me/xnObA7Xw',    /* 화이트 레더 스니커즈 → 캄슈 화이트스니커즈 키높이 (58,900원·5%) */
+  f_o1: 'https://naver.me/G9UGTnwr',    /* 카멜 가디건(여성) → 루즈핏 캐시미어 브이넥 가디건 (코이블리, 22,900원·5%) */
+  f_b1: 'https://naver.me/xWISh4Hx',    /* 네이비 와이드 슬랙스 → 하이웨스트 핀턱 와이드 슬랙스 (코이블리, 37,900원·5%) */
+  /* ↓ 2026-11-19 추가 발급 (겨울·핵심 아이템) */
+  m_t4: 'https://naver.me/5vJjin0m',    /* 오트밀 라운드 니트 → 캐시미어 무지 라운드 루즈핏 워셔블 니트 (마이클로드, 31,900원·5%) */
+  m_t5: 'https://naver.me/FnsyxIIB',    /* 차콜 케이블 니트 → 오버핏 꽈배기 니트 (디포르마, 27,900원·5%) */
+  m_t6: 'https://naver.me/FORHzTpE',    /* 블랙 터틀넥 니트 → 캐시미어 반폴라 니트 (션타운, 28,000원·5%) */
+  m_b1: 'https://naver.me/xLNVM7ZH',    /* 네이비 울 슬랙스 → 링클프리 울 모직 기모 슬랙스 (32,000원·5%) */
+  m_b2: 'https://naver.me/5l2W4QCb',    /* 차콜 슬랙스 → 구김없는 정장 일자 슬랙스 (36,000원·5%) */
+  m_b7: 'https://naver.me/G6RmA1Bm',    /* 라이트 그레이 슬랙스 → 링클프리 세미 와이드 슬랙스 (션타운, 28,000원·5%) */
+  m_o7: 'https://naver.me/FEgXv4HI',    /* 차콜 울 코트 → 남자 겨울 모직 울 코트 (션타운, 74,000원·5%) */
+  m_s1: 'https://naver.me/x6J2Sokc',    /* 브라운 페니 로퍼 → TXG 수제 페니로퍼 (49,800원·7%) */
+  m_s2: 'https://naver.me/FRo5HTlz',    /* 블랙 로퍼 → 보닌 천연소가죽 로퍼 (59,800원·5%) */
+  m_s3: 'https://naver.me/IGsIDPSF',    /* 블랙 더비 슈즈 → 남자구두 더비슈즈 (로프신스, 45,900원·5%) */
+  f_o4: 'https://naver.me/xSBiAtnJ',    /* 카멜 핸드메이드 코트 → 캐시미어20 울80 핸드메이드 롱 코트 (노벨 스튜디오, 237,000원·5%) */
+  f_o5: 'https://naver.me/5YoTsOGA',    /* 그레이 롱 코트 → 하이넥 캐시미어 롱 코트 (노벨 스튜디오, 219,000원·5%) */
+  /* ↓ 2026-11-19 추가 발급 (전 품목 확대 1차 · 아래 항목은 실제 발급 링크) */
+  m_t1: 'https://naver.me/xIFK7zbe',         /* 네이비 옥스퍼드 셔츠 → 어반트 구김없는 남성 옥스포드 셔츠 링크프리 (52,000원·18%) */
+  m_t3: 'https://naver.me/GSQeqY7y',         /* 블루 스트라이프 셔츠 → 어반트 블루라벨 스트라이프 긴팔셔츠 (35,000원·18%) */
+  m_t7: 'https://naver.me/xvCoGzJV',         /* 베이지 피케 폴로 → 베이직하우스 세미 오버핏 피케 폴로티 (19,900원·5%) */
+  m_t8: 'https://naver.me/5WURtv0d',         /* 올리브 헨리넥 티셔츠 → 션타운 피케 헨리넥 긴팔·반팔 티셔츠 (19,800원·5%) */
+  m_t9: 'https://naver.me/F8lgvjDU',         /* 화이트 수피마 티셔츠 → 시크놈 수피마 반팔티 (18,900원·5%) */
+  m_t11: 'https://naver.me/GbyVqjUp',         /* 린넨 블렌드 셔츠 → 어반트 코튼린넨 링클프리 긴팔셔츠 (35,900원·18%) */
+  m_t12: 'https://naver.me/GlR8ED2l',         /* 블랙 옥스퍼드 셔츠 → 킵글랜 남자 블랙셔츠 (29,800원·5%) */
+  m_b4: 'https://naver.me/5t72TKrX',         /* 올리브 치노 팬츠 → 워크웨어 테이퍼드 치노팬츠 (34,000원·14%) */
+  m_b5: 'https://naver.me/FyAS3gC7',         /* 미드 인디고 데님 → 피팅남 런우 일자 스트레이트 데님팬츠 (29,800원·10%) */
+  m_b6: 'https://naver.me/FaeuKnUt',         /* 다크 인디고 데님 → 레직기 레귤러핏 데님 3종 흑청·진청·중청 (29,800원·10%) */
+  m_o1: 'https://naver.me/xaTqWwGF',         /* 카멜 가디건 → 시크놈 베이지 오버핏 가디건 (28,900원·5%) */
+  m_o2: 'https://naver.me/xJcCxeSB',         /* 네이비 니트 가디건 → 헤세드옷장 V넥 오버핏 니트가디건 (29,800원·5%) */
+  /* ↓ 2026-11-19 저녁 추가 발급 (전 품목 확대 2차 · 58건 · 실제 발급 링크) */
+  m_b8: 'https://naver.me/GfrNmsE4',/* 블랙 스트레치 팬츠 → 남자 롱 세미 와이드 스판 슬랙스 바지 블랙 베이지 (23,500원·10%) */
+  m_o3: 'https://naver.me/5T08sjAT',/* 인디고 트러커 재킷 → 남자흑청자켓 오버핏 데님 연청 트러커재킷 (45,800원·5%) */
+  m_o4: 'https://naver.me/IMZcHGsq',/* 차콜 싱글 블레이저 → 정장마이 울블레이저 겨울블레이저 오버핏블레이저 (89,000원·10%) */
+  m_o5: 'https://naver.me/xbK2Y5mL',/* 네이비 블레이저 → 트러수트 포시즌 다크네이비 남자 가을 자켓 마이 콤비 (69,000원·5%) */
+  m_o9: 'https://naver.me/I5wvuTlT',/* 블랙 경량 패딩 → 블랙야크 초경량패딩 얇은패딩 덕다운 겨울아우터 경량점퍼 남성 방한점퍼 (블랙야크 부천시청점) (159,000원·5%) */
+  m_o10: 'https://naver.me/xjYBQyaZ',/* 올리브 필드 재킷 → 밀리터리야상 남자야상자켓 밀리터리룩 (89,800원·5%) */
+  m_s5: 'https://naver.me/5IfZOzvU',/* 네이비 스니커즈 → 나이키 코트 비전 로우 스니커즈 네이비 브라운 화이트 블랙 운동화 FQ8075-133 (75,000원·5%) */
+  m_s6: 'https://naver.me/Gwf6Pjz6',/* 브라운 첼시 부츠 → TXG 남성 첼시부츠 7cm 키높이 남자 부츠 (56,800원·7%) */
+  m_a1: 'https://naver.me/FaeuKEn9',/* 브라운 가죽 벨트 → 몽블랑 호환 남성 정장 가죽 벨트 이태리가죽 교체 카멜앤블랙 30미리 (36,900원·18%) */
+  m_a8: 'https://naver.me/xtNfBJqC',/* 블랙 가죽 벨트 → 몽블랑 호환 남성 정장 가죽 벨트 이태리가죽 교체 블랙앤블랙 29미리 (35,900원·18%) */
+  m_a2: 'https://naver.me/Gwf6PcVL',/* 실버 클래식 워치 → 다니엘 웰링턴 CLASSIC PIANO LINK 남자 메탈시계 실버/블루 (254,400원·5%) */
+  m_a3: 'https://naver.me/GHLPCeCk',/* 카멜 캐시미어 머플러 → 몽골 캐시미어 100 머플러 여자 남자 목도리 고비 (79,000원·16%) */
+  f_a4: 'https://naver.me/G3vcMeE6',/* 카멜 캐시미어 머플러 → [백화점] 100% 캐시미어 머플러 브랜드 여성머플러 남성머플러 명품 캐시미어 숄 머플러 (99,000원·5%) */
+  m_a4: 'https://naver.me/5Jqmw9F6',/* 브라운 레더 브리프백 → 남자 가죽 서류가방 로터프 LO-0170 딥브라운 (264,000원·10%) */
+  m_a5: 'https://naver.me/I5wvuh5d',/* 네이비 나일론 크로스백 → [브랜든] 세이프 플러스 크로스백 여행용 나일론 크로스백 도난방지가방 (72,000원·5%) */
+  m_a6: 'https://naver.me/G0ptMLHL',/* 가죽 장갑 → 헤스트라 토니 코르크 23300 710 남자 사슴 가죽 장갑 (218,000원·5%) */
+  m_a7: 'https://naver.me/IFExVCix',/* 우드핸들 장우산 → 모던한 우드 핸들 장우산 자동 튼튼한 장우산 16k 남성 (17,410원·18%) */
+  f_a9: 'https://naver.me/5ulrRRXv',/* 우드핸들 장우산 → 가벼운 우드 핸들 장우산 고급 파스텔 장우산 튼튼한 선물용 양산 (20,160원·18%) */
+  f_t1: 'https://naver.me/FYrieeMC',/* 아이보리 실크 블라우스 → [자체제작] 에센셜 스프레드 카라 노치드 블라우스 (IVORY) (56,000원·5%) */
+  f_t2: 'https://naver.me/GkIWAAHc',/* 네이비 셔링 블라우스 → 에이치 어깨 매듭 스트랩 여름 셔링 여자 홀터넥 블라우스(네이비) (27,900원·5%) */
+  f_t3: 'https://naver.me/GO601wbC',/* 블루 스트라이프 셔츠 → 클래식 오버핏 배색 카라 스트라이프 셔츠 블라우스 코발트블루 화이트 오피스룩 (32,900원·5%) */
+  f_t4: 'https://naver.me/xaTqW4jc',/* 오트밀 라운드 니트 → 단톤 여성 램울 풀오버 크루넥 니트 DT-D0027 LMW 오트밀 38 (221,050원·5%) */
+  f_t5: 'https://naver.me/58qmJX7m',/* 더스티 로즈 니트 → 부드러운 루즈핏 보카시 울니트 꽈배기 케이블 니트 여성 니트티 라운드 브이넥 핑크 퍼플 (21,000원·5%) */
+  f_t6: 'https://naver.me/FgEl352S',/* 블랙 터틀넥 니트 → 홀가먼트 폴라 울 니트 목폴라 nt5290 (31,500원·8%) */
+  f_t7: 'https://naver.me/5Mv4FIBj',/* 화이트 코튼 티셔츠 → 빅사이즈 자체제작 화이트 아이보리 박시 반팔 롱 티셔츠 무지 면 슬라브 라운드넥 (7,900원·16%) */
+  f_t8: 'https://naver.me/5LQ6ew9Y',/* 샴페인 시폰 블라우스 → 홀터넥 셔링 쉬폰 타이 블라우스 bs8614 (19,500원·5%) */
+  f_t9: 'https://naver.me/GlR8E8m4',/* 카멜 케이블 니트 → 레이어드 배색 카라 케이블 니트 nt5204 (26,300원·8%) */
+  f_t10: 'https://naver.me/Fpw5Y53F',/* 화이트 셔츠 → 여성셔츠 면접 여자정장 화이트셔츠 흰색 흰 검정 와이셔츠 빅사이즈 (44,200원·14%) */
+  f_t11: 'https://naver.me/x6J2o22H',/* 올리브 새틴 블라우스 → [당일발송] 어토프 에디 블라우스 실키 새틴 루즈핏 오버핏 카라 셔츠블라우스 (3c) (83,000원·5%) */
+  f_t12: 'https://naver.me/GXFreBLh',/* 라벤더 시어 블라우스 → [블프세일 이제이노리] 라벤더 셔링 오프 숄더 블라우스 EJnolee (98,700원·5%) */
+  f_b2: 'https://naver.me/5397cFy1',/* 크림 슬랙스 → 모직울혼방 뒷부분밴딩 슬림핏와이드팬츠 도톰한 슬랙스 편한 겨울 캐주얼 정장 크림화이트 (41,800원·5%) */
+  f_b3: 'https://naver.me/5fd8bVcQ',/* 블랙 미디 스커트 → 겨울 모직 앞트임 맞주름 밴딩 H라인 미디 롱 스커트 치마 (44,800원·18%) */
+  f_b4: 'https://naver.me/5WURtMoV',/* 카멜 A라인 스커트 → [자체제작] 3083 말랑쫀쫀 밴딩 플레어 a라인 롱 스커트 가을 겨울 10컬러 (27,360원·8%) */
+  f_b5: 'https://naver.me/FiP0R5rP',/* 스트레이트 데님 → 로엠 스트레이트 데님 팬츠 RMTJG49R14 (41,930원·5%) */
+  f_b6: 'https://naver.me/xaTqWj69',/* 그레이 슬랙스 → 겨울 기모 여성정장바지 하이웨스트 세미와이드팬츠 스판 그레이슬랙스 (51,300원·5%) */
+  f_b7: 'https://naver.me/FAAUq0Nr',/* 네이비 플리츠 스커트 → 겨울 모직 울 밴딩 플리츠 롱 스커트 플레어 주름 치마 (20,520원·5%) */
+  f_b8: 'https://naver.me/xKy8PcuT',/* 올리브 와이드 팬츠 → 코듀로이 하이웨스트 A라인 와이드 팬츠 가을 겨울 신상 올리브그린 (22,100원·6%) */
+  f_b9: 'https://naver.me/xQJb1DZa',/* 아이보리 롱 스커트 → 뒷밴딩 플레어 롱스커트 햅번 핀턱 주름 스커트 훌 검정 베이지 아이보리 (35,800원·12%) */
+  f_o2: 'https://naver.me/5PW4FPeY',/* 트위드 재킷 → [N배송] 로엠 타이 트위드 자켓 RMJKG11S51 (64,500원·5%) */
+  f_o3: 'https://naver.me/FP8QlP9E',/* 네이비 테일러드 자켓 → 싱글 오버핏 테일러드 여자 자켓 블레이저 간절기 여성 가을 자켓 블랙 결혼식 하객룩 (54,900원·5%) */
+  f_o6: 'https://naver.me/FP8QlPY4',/* 베이지 트렌치 → 여성 트렌치코트 베이지 싱글 롱코트 클래식 데일리 아우터 카키 (60,700원·7%) */
+  f_o7: 'https://naver.me/5eD5s4FR',/* 아이보리 경량 패딩 → 여성 누빔 벨티드 경량 하프 점퍼 자켓 퀄팅 노카라 슬림핏 패딩 코트 다운 아이보리 (121,350원·5%) */
+  f_o8: 'https://naver.me/GNJMDVCW',/* 데님 재킷 → 오버핏 프리미엄 연청 데님 여성 청자켓 간절기 여자 봄 가을 자켓 (53,800원·5%) */
+  f_o9: 'https://naver.me/xvCoGfMB',/* 오트밀 니트 자켓 → 라즈니 트위드 헤어리 골드버튼 포켓 봄 니트 가디건 자켓 (24,210원·5%) */
+  f_s1: 'https://naver.me/GVVdjJrO',/* 누드 스터드 펌프스 → [찰스앤키스] 코랄리 스터드 포인티드 펌프스 2colors CK1-60280379-1 (84,700원·8%) */
+  f_s2: 'https://naver.me/Gwf6PvEH',/* 블랙 펌프스 → 엠프리스 여성 면접 승무원 구두 발편한 구두 유니화 4cm 블랙 빅사이즈 둥근코 A8BK (49,000원·5%) */
+  f_s3: 'https://naver.me/G9UGakoP',/* 브라운 로퍼 → 엠프리스 발편한 여성 로퍼 페니로퍼 여성 단화 구두 2cm 블랙 베이지 브라운 면접 승무원 (49,000원·5%) */
+  f_s4: 'https://naver.me/GM3uh9iv',/* 화이트 스니커즈 → 나이키 코르테즈 여성 스니커즈 화이트블랙, 240 (62,900원·5%) */
+  f_s5: 'https://naver.me/5nhKztVj',/* 블랙 앵클 부츠 → [기모안감] 데이워크 발편한 아치깔창 여성 앵클 스판 부츠 코이 블랙스웨이드 DW30051 (63,900원·5%) */
+  f_s6: 'https://naver.me/IDkRmsrT',/* 블랙 발레 플랫 → [스퍼] 엘리스 십자수 밴딩 스트랩 발레 플랫슈즈 3.5cm VA9001 4color (63,920원·5%) */
+  f_s7: 'https://naver.me/G0ptM3TS',/* 브라운 첼시 부츠 → [찰스앤키스] 사이드버클 리지드솔 첼시부츠 2Colors CK1-90380159 (108,700원·8%) */
+  f_a1: 'https://naver.me/Fhu7wW0A',/* 베이지 레더 토트백 → [백화점A/S] 닥스 토트백 여성가방 소가죽 숄더백 베이지 음각로고 엄마선물 (288,000원·5%) */
+  f_a2: 'https://naver.me/F4Wsl1Xm',/* 블랙 숄더백 → 엠제이드 마틸다 L 숄더백 쇼퍼백 보부상 데일리 디자이너 브랜드 가방 블랙 (159,000원·18%) */
+  f_a3: 'https://naver.me/xvCoGbgk',/* 실크 스카프 → [백화점] 실크스카프 브랜드 여성 명품스카프 사각 가을스카프 간절기 (41,400원·7%) */
+  f_a5: 'https://naver.me/GzdNY8of',/* 브라운 가죽 벨트 → 언바인 여성 소가죽 데일리 벨트 슬랙스 청바지 정장 허리띠 금장 은장 버클 (21,800원·10%) */
+  f_a6: 'https://naver.me/GT4NhVLm',/* 로즈골드 워치 → 다니엘 웰링턴 MARLON MELROSE LINEN 로즈골드 메시 손목시계 (139,000원·5%) */
+  f_a7: 'https://naver.me/FLEftLEO',/* 진주 이어링 → 스와로브스키 진주 귀걸이 실버925 미니 (16,900원·12%) */
+  f_a8: 'https://naver.me/59l7Yu0w',/* 가죽 장갑 → (백화점 납품) 천연 스웨이드 기모 여성 겨울장갑 털 가죽 장갑 스마트폰 터치 손가락 장갑 (32,900원·5%) */
+  /* ↓ 2026-11-19 추가 발급 (트레이닝 · 애슬레저 6건) */
+  m_tr1: 'https://naver.me/GNJMmB3G',/* 차콜 트랙 재킷 → 러닝라이프 러닝 트레이닝 바람막이 트랙 자켓 집업 (34,900원·10%) */
+  m_tr2: 'https://naver.me/xQJbhohd',/* 그레이 멜란지 스웨트셔츠 → 남자 맨투맨 스판 회색 무지 스웻셔츠 오버핏 (션타운, 15,800원·14%) */
+  m_tr3: 'https://naver.me/FXnbWLtO',/* 차콜 조거 팬츠 → 베이직하우스 면 코튼 트레이닝 밴딩 조거팬츠 LYPT0102 (24,900원·5%) */
+  f_tr1: 'https://naver.me/FsoYGKud',/* 크림 트랙 재킷 → 여성 트레이닝세트 반집업 츄리닝 기모 와이드 조거 오버핏 상하세트 (콩닥, 35,800원·12%) */
+  f_tr2: 'https://naver.me/Fx2HqXLi',/* 오트밀 집업 후드 → 여성 트레이닝 후드 츄리닝 트레이닝복 (파인굿즈, 14,900원·5%) */
+  f_tr3: 'https://naver.me/IgMEdN4h',/* 네이비 와이드 트레이닝 팬츠 → 미미캐츠 히든 백포켓 여성 하이웨스트 롱밴드 와이드 트레이닝 팬츠 MC7619 (19,900원·8%) */
+};
+WARDROBE.forEach(function (it) {
+  if (CONNECT_LINKS[it.id]) it.connectUrl = CONNECT_LINKS[it.id];
+});
+
+/* 쿠팡 파트너스 단축 링크 (2026-11-19 partners.coupang.com 에서 직접 발급 · 채널 '기본값')
+   - 대표 아이템 7개만 실제 상품과 연결했습니다. 나머지는 이름으로 쿠팡 검색.
+   - 링크가 있는 아이템은 「쿠팡에서 최저가 보기」가 이 단축 링크로 열립니다. */
+var COUPANG_LINKS = {
+  m_o6: 'https://link.coupang.com/a/iMTfKOffEq',   /* 이브컴퍼니 남성 캐시미어 울 싱글 코트 8컬러 · 98,800원 */
+  m_o8: 'https://link.coupang.com/a/iMTjJzlgjI',   /* 에이치베이직 오버핏 롱 트렌치 로브 바바리 · 66,800원 */
+  m_t10: 'https://link.coupang.com/a/iMTlZ84UVg',  /* 룩플레인 울 원단 라운드 니트 15color · 32,900원 */
+  m_b3: 'https://link.coupang.com/a/iMToB2OgaO',   /* 트래드클럽 트루 레귤러 치노 면바지 · 34,900원 */
+  m_s4: 'https://link.coupang.com/a/iMTqvLp77s',   /* 오오룩 소가죽 화이트 스니커즈 · 44,800원 */
+  m_t2: 'https://link.coupang.com/a/iMTsbvutzw',   /* 엘엑스티 구김없는 스판 반슬림 와이셔츠 · 22,800원 */
+  f_o1: 'https://link.coupang.com/a/iMTt6Kq6jQ',   /* 라파클럽 여성 라운드 니트 가디건 · 39,800원 */
+  /* ↓ 2026-11-19 추가 발급 */
+  m_t4: 'https://link.coupang.com/a/iNAowcANAi',   /* 룩플레인 도톰한 배색 오버핏 라운드 니트 · 34,800원 */
+  m_t6: 'https://link.coupang.com/a/iNAsJwaUx2',   /* [투뎃] 남녀공용 겨울 꽈배기 터틀넥 폴라 니트 · 23,800원 */
+  /* ↓ 2026-11-19 추가 발급 (쿠팡 파트너스 · 간편 링크 만들기) */
+  m_t1: 'https://link.coupang.com/a/iNEvBRPuM0',   /* 베이직하우스 프리미엄 옥스포드 레귤핏 긴팔 셔츠 LYWS0102 · 29,900원 */
+  m_t3: 'https://link.coupang.com/a/iNEA6PLuXQ',   /* 스타일리브 남성 스트라이프셔츠 · 29,800원 */
+  m_t5: 'https://link.coupang.com/a/iNEGCXXVvM',   /* 트래드클럽 베리 베이직 케이블 니트 5컬러 · 39,000원 */
+  m_t7: 'https://link.coupang.com/a/iNEKXVsRTU',   /* 비버리힐스폴로클럽 남성 썸머 피케 카라티 · 39,900원 */
+  m_t11: 'https://link.coupang.com/a/iNEQwOWHF6',   /* 엘엑스티 남성 캐주얼 면 린넨 긴팔 셔츠 · 22,900원 */
+  m_t12: 'https://link.coupang.com/a/iNECF6xqc8',   /* 레디핏 남자 옥스포드 긴팔 셔츠(검정·흰색·파랑) · 9,500원 */
+  f_t4: 'https://link.coupang.com/a/iNERDTCyBh',   /* Y.EDEN 멜로우 포근 라운드 니트 · 15,400원 */
+  f_t5: 'https://link.coupang.com/a/iNESPOFQK4',   /* 핑크셀럽 베이직 보들 라운드 니트 · 15,800원 */
+  f_t6: 'https://link.coupang.com/a/iNEUbeMZOu',   /* Y.EDEN 구름 포근 반목 니트 · 19,710원 */
+  f_o9: 'https://link.coupang.com/a/iNEVin6mqW',   /* 메리앤유 배색 브이넥 니트 가디건 · 28,520원 */
+  f_t1: 'https://link.coupang.com/a/iNFeWFBPWK',   /* 피어니스트 하객룩 스카프 블라우스 · 11,970원 */
+  f_t2: 'https://link.coupang.com/a/iNFcrmrcui',   /* 더웨이나인 셔링 쉬폰 블라우스 · 41,200원 */
+  f_t8: 'https://link.coupang.com/a/iNFbjXVwsu',   /* 자칠 심플 시폰 블라우스 · 19,960원 */
+  f_t11: 'https://link.coupang.com/a/iNFdK0FucS',   /* 여성 타이 브이넥 새틴 블라우스 · 24,600원 */
+  f_t12: 'https://link.coupang.com/a/iNFf1dUf6a',   /* 포플러앤씨 베르시 핀턱 블라우스 · 12,240원 */
+  /* ↓ 2026-11-19 추가 발급 (66건 · 쿠팡 파트너스 간편 링크 만들기) */
+  m_t8: 'https://link.coupang.com/a/iNFHX5uSB2',   /* 구스마켓 남성용 와플 헨리넥 긴팔 티셔츠 [5컬러] · 26,800원 */
+  m_t9: 'https://link.coupang.com/a/iNFK5nb31M',   /* kosarte 남성티셔츠 수피마 코튼 반팔 남자 흰 티셔츠 1+1 · 35,500원 */
+  m_b1: 'https://link.coupang.com/a/iNFNoNS6sS',   /* 머시따 남성용 울 모직 슬랙스 · 26,920원 */
+  m_b8: 'https://link.coupang.com/a/iNFPhKR0sm',   /* 놈시크 27-40 남성 슬랙스 옆밴딩 링클프리 스판 빅사이즈 9부 10부 · 29,900원 */
+  m_b2: 'https://link.coupang.com/a/iNFQ6iiauO',   /* 지오지아 남성용 테이퍼드 슬랙스 AEF4PP1101 · 35,940원 */
+  m_b4: 'https://link.coupang.com/a/iNFTF9TGns',   /* 지오다노 114525 LW 테이퍼드 치노 팬츠 · 29,300원 */
+  m_b5: 'https://link.coupang.com/a/iNFVU35oo8',   /* JEEP Spirit (지프스피릿) 남성 청바지 마이크로 탄성 미드 웨이스트 · 28,400원 */
+  m_b6: 'https://link.coupang.com/a/iNFXfR2gpM',   /* FB COUNTY 하드 데님 인디고블랙 청바지 · 72,500원 */
+  m_b7: 'https://link.coupang.com/a/iNFZilKHN6',   /* 바톨리니 남성 데일리 레귤러 사계절 수트 정장 바지 슬랙스 (6컬러) · 39,000원 */
+  m_o1: 'https://link.coupang.com/a/iNF0qHIzDw',   /* 스타일리브 남자 가디건 오버핏 루즈핏 니트 골지 브이넥 · 32,800원 */
+  m_o2: 'https://link.coupang.com/a/iNF12xlchU',   /* 페르소나 남자 레귤러핏 다크 네이비 라운드넥 니트 가디건 JKNV · 89,800원 */
+  m_o3: 'https://link.coupang.com/a/iNF3lnVXXM',   /* 머시따 남성용 논페이드 데님 스티치 트러커 자켓 · 20,900원 */
+  m_o4: 'https://link.coupang.com/a/iNF4XGH5dk',   /* 레브클래식 남자 콤비 자켓 블레이저 세미 캐주얼 정장 · 79,800원 */
+  m_o5: 'https://link.coupang.com/a/iNF6uu8pGK',   /* ZAJA 슬림 남성 정장자켓 블레이저 모직 오피스룩 아우터 · 44,880원 */
+  m_o7: 'https://link.coupang.com/a/iNF7XWwGDk',   /* 팀스핏 남성용 M~3XL 4컬러 울 오버핏 싱글코트 · 68,800원 */
+  m_o9: 'https://link.coupang.com/a/iNF9yJhVVQ',   /* 아소트 남자 경량 패딩점퍼 남성 웰론 패딩 자켓 겨울 아우터 · 28,900원 */
+  m_o10: 'https://link.coupang.com/a/iNGbRYo3VY',   /* M43 야상 필드자켓 아메카지 밀리터리 워크웨어 아우터 · 83,600원 */
+  m_s1: 'https://link.coupang.com/a/iNGduCvnEW',   /* 엘칸토 마쯔 남성 페니 로퍼 3.5cm LCMD82I111 · 36,750원 */
+  m_s2: 'https://link.coupang.com/a/iNGfB8Kbgi',   /* 신사야 250~290mm 베스트룩 편안한 세미 남성로퍼 SSY2221 · 39,800원 */
+  m_s3: 'https://link.coupang.com/a/iNGkfsBS2u',   /* 로프신스 남자구두 가벼운 더비슈즈 볼넓은구두 · 49,900원 */
+  m_s5: 'https://link.coupang.com/a/iNGmuRIklo',   /* 엘칸토 인텐스 남성 클래식 스니커즈 3cm LCMS56I126 · 39,900원 */
+  m_s6: 'https://link.coupang.com/a/iNGoQ0ikgK',   /* 남성 리얼 소가죽 스웨이드 빈티지 첼시 부츠 · 70,410원 */
+  m_a1: 'https://link.coupang.com/a/iNGrg6UafA',   /* 타미힐피거 남성용 정장 캐쥬얼 천연가죽 브라운 벨트 · 45,900원 */
+  m_a2: 'https://link.coupang.com/a/iNGtx6Bli8',   /* 카시오 남성용 심플 메탈 손목시계 MTP-V001D-1B · 27,200원 */
+  m_a3: 'https://link.coupang.com/a/iNGvMjFnJ6',   /* 마인드브릿지 남녀공용 캐시미어 롱 머플러 MZMF00A · 35,910원 */
+  m_a4: 'https://link.coupang.com/a/iNGx4zZrPw',   /* 크리스찬케리 남성 가죽 서류가방 CK-8090 노트북 · 75,000원 */
+  m_a5: 'https://link.coupang.com/a/iNGAMU5Fg4',   /* 마인드브릿지 나일론 멀티포켓 크로스백 · 39,630원 */
+  m_a6: 'https://link.coupang.com/a/iNGDap2Ux2',   /* 닥스 남성 가죽 장갑(GPS701X) · 53,000원 */
+  m_a7: 'https://link.coupang.com/a/iNGFosL6vk',   /* 크로커다일 60 클래식 우드 장우산 · 8,920원 */
+  m_a8: 'https://link.coupang.com/a/iNGHslQCe4',   /* 에스콰이아 남성용 사피아노 정장벨트 · 56,200원 */
+  f_t3: 'https://link.coupang.com/a/iNGJCARsrs',   /* 베이직하우스 여성용 포플린 세미 오버핏 긴팔셔츠 · 24,630원 */
+  f_t7: 'https://link.coupang.com/a/iNGL9wBhKe',   /* ELLE PARIS 여성용 통기성 베이직 라운드넥 반팔 티셔츠 · 6,900원 */
+  f_t9: 'https://link.coupang.com/a/iNGOq7SNLE',   /* 포근한 울 겨울 꽈베기 니트 루즈핏 카멜 라운드넥 케이블 니트 · 9,900원 */
+  f_t10: 'https://link.coupang.com/a/iNGQH2Ws7U',   /* ELLE PARIS 여성용 슬림핏 구김없는 링클프리 셔츠 · 16,900원 */
+  f_b1: 'https://link.coupang.com/a/iNGS1R8WmO',   /* 케이엘바이린 여성용 블림 와이드 슬랙스 · 33,960원 */
+  f_b2: 'https://link.coupang.com/a/iNGVxF4buu',   /* 클라비스 여성용 스판슬랙스 투턱 와이드 팬츠 · 39,830원 */
+  f_b3: 'https://link.coupang.com/a/iNGXGcbxrU',   /* 리올그 R BACK SLIT 미디스커트 · 48,900원 */
+  f_b4: 'https://link.coupang.com/a/iNGZPCCKXs',   /* 포플러앤씨 솔모나 A라인 벨트 스커트 · 30,050원 */
+  f_b5: 'https://link.coupang.com/a/iNG10sxr4e',   /* 스파오 여성용 스트레이트 진 · 38,180원 */
+  f_b6: 'https://link.coupang.com/a/iNG4iFJbUa',   /* 와이드 뒷밴딩 핀턱 여성 슬랙스 그레이 바지 · 29,500원 */
+  f_b7: 'https://link.coupang.com/a/iNG6DPhqRE',   /* [컴젠] 여성 벨트 디테일 플리츠 스커트 D NAVY · 80,110원 */
+  f_b8: 'https://link.coupang.com/a/iNG8NXrCdU',   /* 밀리언코르 여성용 커버밴드 컬러 와이드 팬츠 · 22,460원 */
+  f_b9: 'https://link.coupang.com/a/iNHa9vwEai',   /* 아피나르 여성용 소프트터치 H-line 니트 밴딩 골지 롱 스커트 · 16,660원 */
+  f_o2: 'https://link.coupang.com/a/iNHdzvQpcO',   /* 미쏘 여성용 라운드넥 울트위드 자켓 MIWJKGT3PB · 85,410원 */
+  f_o3: 'https://link.coupang.com/a/iNHfOIFIcu',   /* 미쏘 여성용 테일러드 오버핏 자켓 · 59,990원 */
+  f_o4: 'https://link.coupang.com/a/iNHhXXl5z2',   /* 케이엘바이린 여성용 카를로 핸드메이드 코트 · 256,000원 */
+  f_o5: 'https://link.coupang.com/a/iNHj7l951E',   /* 미쏘 여성용 울블렌디드 테일러드 롱코트 · 116,100원 */
+  f_o6: 'https://link.coupang.com/a/iNHme9XVG8',   /* 뉴욕멋쟁이 뮤지크 베이지 트렌치코트 · 55,300원 */
+  f_o7: 'https://link.coupang.com/a/iNHossa0jI',   /* 엘쏘 여성용 오리털 경량 44 99 덕다운 패딩 · 29,800원 */
+  f_o8: 'https://link.coupang.com/a/iNHqFZVO56',   /* ELLE PARIS 세미오버핏 베이직 데님 자켓 · 29,900원 */
+  f_s1: 'https://link.coupang.com/a/iNHsNVIwpg',   /* 코노시도진 웨이브 포인트 스터드 펌프스 CCPM56 · 43,850원 */
+  f_s2: 'https://link.coupang.com/a/iNHu5eed7Q',   /* 엘칸토 인텐스 여성 베이직 데일리 펌프스 5cm · 33,750원 */
+  f_s3: 'https://link.coupang.com/a/iNHxv0qgw0',   /* 엘칸토 마쯔 여성 캐주얼 스웨이드 페니로퍼 3cm · 39,200원 */
+  f_s4: 'https://link.coupang.com/a/iNHzTM9LhI',   /* 나이키 여성용 코트 비전 로우 넥스트 네이처 스니커즈 · 69,000원 */
+  f_s5: 'https://link.coupang.com/a/iNHCfYZnfU',   /* 엘칸토 인텐스 여성 버클 앵클 부츠 5cm LCWA69I54V · 55,200원 */
+  f_s6: 'https://link.coupang.com/a/iNHEAsoXlI',   /* 아피나르 라운드토 베이직 플랫 슈즈 · 12,990원 */
+  f_s7: 'https://link.coupang.com/a/iNHGXd9BdY',   /* 착한구두 피가로 첼시 부츠 BSLTR4c186 · 29,120원 */
+  f_a1: 'https://link.coupang.com/a/iNHJiIZKWi',   /* 맥끌라니 여성가방 미네 토트앤 숄더백 · 78,500원 */
+  f_a2: 'https://link.coupang.com/a/iNHLAQBf4u',   /* 프롬헤븐 두쇼르 데일리 토트 숄더백 S523 · 29,900원 */
+  f_a3: 'https://link.coupang.com/a/iNHNHwMa4G',   /* 엘르 마차라인 실크 정사각 스카프 SE831S301 · 30,800원 */
+  f_a4: 'https://link.coupang.com/a/iNHPIaW4rc',   /* 율샵 여성 캐시미어 머플러 롱 무지 · 13,900원 */
+  f_a5: 'https://link.coupang.com/a/iNHRYtutUa',   /* S.J.S 모던라인 여성용 소가죽 슬림 벨트 블랙·브라운 2종 · 23,700원 */
+  f_a6: 'https://link.coupang.com/a/iNHUhvCrDM',   /* 미니골드 여성용 아도라 데일리 메쉬 메탈 손목시계 · 69,150원 */
+  f_a7: 'https://link.coupang.com/a/iNHWYGKzE4',   /* 세이아 주얼리 S925 은침 진주 귀걸이 데일리 포인트 · 12,900원 */
+  f_a8: 'https://link.coupang.com/a/iNHZLXegY8',   /* 다알리아 여성 양가죽 리본 블랙 장갑 · 25,000원 */
+  f_a9: 'https://link.coupang.com/a/iNH1S6hTxs',   /* 미치코런던 60우드 장우산 046 · 12,920원 */
+  /* ↓ 2026-11-19 추가 발급 (트레이닝 · 애슬레저 6건) */
+  m_tr1: 'https://link.coupang.com/a/iNNBp7udFc',   /* 로아 남성 트레이닝 자켓 데일리 하이넥 무지 저지 트랙 집업 · 12,890원 */
+  m_tr2: 'https://link.coupang.com/a/iNNDOGd1oG',   /* 트래드클럽 나루 베이직 스웨트 오버 맨투맨 (2컬러 S~5XL) · 24,900원 */
+  m_tr3: 'https://link.coupang.com/a/iNNCzK0g5A',   /* 캐럿 남성용 베이직 조거 팬츠 · 10,690원 */
+  f_tr1: 'https://link.coupang.com/a/iNNE2HFNqS',   /* 지존보 중년 여성 봄 가을 운동복 세트 캐주얼 점퍼 집업 상하의 세트 · 19,940원 */
+  f_tr2: 'https://link.coupang.com/a/iNNGbE6IqO',   /* 잇진 여성 나그랑 맨투맨 + 핀턱 투웨이 와이드 팬츠 트레이닝 세트 · 28,900원 */
+  f_tr3: 'https://link.coupang.com/a/iNNHbEL3Ce',   /* 가비진 여성 밴딩 사이드폴딩 트레이닝 와이드팬츠 · 15,750원 */
+};
+WARDROBE.forEach(function (it) {
+  if (COUPANG_LINKS[it.id]) it.coupangUrl = COUPANG_LINKS[it.id];
+});
+
+/* ============================================================
+   큐레이션 코디 세트 (1:1 실착장)
+   세트 하나가 곧 완성된 코디입니다. items 순서 = 아우터·상의·하의·신발·소품,
+   img 는 그 세트의 items 를 그대로 입은 모델 착장 사진입니다.
+   (무작위 조합을 없애 카드의 옷과 사진이 항상 100% 일치합니다.)
+   ============================================================ */
+var CURATED_LOOKS = [
+  { id: 'm-warm-1', gender: 'm', weathers: ['warm'],
+    occasions: ['work', 'gather', 'event'], moods: ['calm', 'formal'], concept: 'classic',
+    title: '산뜻한 여름 세미캐주얼',
+    reason: '출근과 저녁 약속을 한 벌로 잇는 단정한 조합이에요.',
+    tip: '가디건 단추는 풀고 셔츠 소매를 한 번 접으면 더위에도 단정해 보여요.',
+    items: ['m_o2', 'm_t2', 'm_b7', 'm_s2', 'm_a2'],
+    img: 'looks/set_01.jpg' },
+  { id: 'm-warm-2', gender: 'm', weathers: ['warm'],
+    occasions: ['trip', 'walk'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '베이지 폴로 나들이 룩',
+    reason: '가볍게 걸어 다니기 좋은 여름 외출 조합이에요.',
+    tip: '피케 폴로는 어깨선이 맞아야 단정해 보여요. 가디건은 어깨에 걸쳐도 잘 어울립니다.',
+    items: ['m_o1', 'm_t7', 'm_b5', 'm_s4', 'm_a5'],
+    img: 'looks/set_02.jpg' },
+  { id: 'm-warm-3', gender: 'm', weathers: ['warm'],
+    occasions: ['trip', 'walk', 'gather'], moods: ['comfy', 'lively'], concept: 'accent',
+    title: '린넨 셔츠 데님 캐주얼',
+    reason: '소재만 바꿔도 훨씬 시원해 보이는 여름 캐주얼이에요.',
+    tip: '린넨 셔츠는 한 사이즈 여유 있게, 소매를 접어 팔목을 드러내면 시원해 보여요.',
+    items: ['m_o3', 'm_t11', 'm_b6', 'm_s5', 'm_a1'],
+    img: 'looks/set_03.jpg' },
+  { id: 'm-warm-4', gender: 'm', weathers: ['warm'],
+    occasions: ['walk', 'trip'], moods: ['comfy'], concept: 'soft',
+    title: '화이트 티 심플 데일리',
+    reason: '티셔츠 한 장으로도 정돈돼 보이는 가장 단순한 조합이에요.',
+    tip: '흰 티는 목선이 늘어나지 않은 것을 고르고, 팬츠 위로 살짝만 넣어 입으면 비율이 좋아 보여요.',
+    items: ['m_o1', 'm_t9', 'm_b8', 'm_s4', 'm_a5'],
+    img: 'looks/set_04.jpg' },
+  { id: 'm-warm-5', gender: 'm', weathers: ['warm'],
+    occasions: ['gather', 'work'], moods: ['lively', 'calm'], concept: 'accent',
+    title: '블루 셔츠 베이지 팬츠 모임 룩',
+    reason: '모임·식사 자리에 밝고 부담 없는 조합이에요.',
+    tip: '블루 셔츠와 베이지 팬츠 사이에 갈색 로퍼를 두면 색이 자연스럽게 이어져요.',
+    items: ['m_o2', 'm_t3', 'm_b3', 'm_s1', 'm_a1'],
+    img: 'looks/set_05.jpg' },
+  { id: 'm-mild-1', gender: 'm', weathers: ['mild'],
+    occasions: ['work', 'event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '단정한 가을 세미정장',
+    reason: '출근·경조사처럼 격식이 필요한 날의 기본 조합이에요.',
+    tip: '블레이저 단추는 위에서 두 번째까지만 채우면 편하면서도 단정해 보여요.',
+    items: ['m_o5', 'm_t2', 'm_b1', 'm_s3', 'm_a2'],
+    img: 'looks/set_06.jpg' },
+  { id: 'm-mild-2', gender: 'm', weathers: ['mild'],
+    occasions: ['gather', 'trip', 'work'], moods: ['calm', 'comfy'], concept: 'classic',
+    title: '트렌치 니트 데님 룩',
+    reason: '아침저녁 일교차를 겉옷 하나로 견디는 조합이에요.',
+    tip: '트렌치는 허리끈을 묶지 않고 두르면 더 여유 있어 보여요. 니트는 하의 안에 넣어 허리선을 살려 주세요.',
+    items: ['m_o8', 'm_t4', 'm_b6', 'm_s6', 'm_a1'],
+    img: 'looks/set_07.jpg' },
+  { id: 'm-mild-3', gender: 'm', weathers: ['mild'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '데님 트러커 캐주얼',
+    reason: '동네·공원 산책처럼 가볍게 나서는 날에 맞는 조합이에요.',
+    tip: '트러커 재킷은 안쪽 니트보다 밝게, 데님은 짙게 고르면 위아래가 구분돼 보여요.',
+    items: ['m_o3', 'm_t10', 'm_b5', 'm_s5', 'm_a5'],
+    img: 'looks/set_08.jpg' },
+  { id: 'm-mild-4', gender: 'm', weathers: ['mild'],
+    occasions: ['gather', 'work'], moods: ['calm', 'formal'], concept: 'classic',
+    title: '네이비 셔츠 베이지 팬츠 단정 룩',
+    reason: '가벼운 외출에도 셔츠 한 장이면 단정해 보이는 조합이에요.',
+    tip: '네이비 셔츠에는 갈색 벨트와 로퍼를 맞추면 색이 흩어지지 않아요.',
+    items: ['m_o1', 'm_t1', 'm_b3', 'm_s1', 'm_a1'],
+    img: 'looks/set_09.jpg' },
+  { id: 'm-mild-5', gender: 'm', weathers: ['mild'],
+    occasions: ['walk', 'trip', 'gather'], moods: ['lively', 'comfy'], concept: 'accent',
+    title: '블루와 올리브 포인트 룩',
+    reason: '얼굴 가까이 밝은 색을 두어 기분이 밝아 보이는 조합이에요.',
+    tip: '올리브 팬츠에는 흰 스니커즈를 맞추고, 가디건은 어깨에 걸쳐 색을 위로 올려 보세요.',
+    items: ['m_o1', 'm_t3', 'm_b4', 'm_s4', 'm_a2'],
+    img: 'looks/set_10.jpg' },
+  { id: 'm-rain-1', gender: 'm', weathers: ['rain'],
+    occasions: ['work', 'gather', 'event'], moods: ['calm', 'formal'], concept: 'classic',
+    title: '비 오는 날 단정한 출근 룩',
+    reason: '비가 와도 흐트러져 보이지 않는 출근 조합이에요.',
+    tip: '트렌치는 무릎 아래로 오는 길이가 발목이 젖는 걸 줄여 줘요. 신발은 가죽 더비가 안전해요.',
+    items: ['m_o8', 'm_t1', 'm_b2', 'm_s3', 'm_a7'],
+    img: 'looks/set_11.jpg' },
+  { id: 'm-rain-2', gender: 'm', weathers: ['rain'],
+    occasions: ['gather', 'work', 'trip'], moods: ['comfy', 'calm'], concept: 'soft',
+    title: '비 오는 날 니트 데님 룩',
+    reason: '비 오는 날의 쌀쌀함을 니트로 막는 조합이에요.',
+    tip: '필드 재킷은 지퍼를 끝까지 올리지 말고 목만 여유 있게 두면 답답하지 않아요.',
+    items: ['m_o10', 'm_t5', 'm_b6', 'm_s2', 'm_a7'],
+    img: 'looks/set_12.jpg' },
+  { id: 'm-rain-3', gender: 'm', weathers: ['rain'],
+    occasions: ['work', 'gather'], moods: ['calm', 'lively'], concept: 'classic',
+    title: '흐린 날 밝은 셔츠 룩',
+    reason: '흐린 날에도 얼굴이 밝아 보이는 조합이에요.',
+    tip: '흐린 날은 밝은 셔츠가 답답함을 덜어 줘요. 가디건은 단추를 채워 두면 바람을 막아 줍니다.',
+    items: ['m_o2', 'm_t3', 'm_b7', 'm_s5', 'm_a7'],
+    img: 'looks/set_13.jpg' },
+  { id: 'm-rain-4', gender: 'm', weathers: ['rain'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '비 오는 날 가벼운 데님 캐주얼',
+    reason: '짧게 나서는 날 부담 없는 비 오는 날 조합이에요.',
+    tip: '데님 재킷은 물에 젖으면 무거워져요. 우산을 꼭 챙기고, 스니커즈는 물이 스며들지 않는 소재가 좋아요.',
+    items: ['m_o3', 'm_t10', 'm_b5', 'm_s4', 'm_a7'],
+    img: 'looks/set_14.jpg' },
+  { id: 'm-rain-5', gender: 'm', weathers: ['rain'],
+    occasions: ['event', 'work'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '비 오는 날 터틀넥 세미정장',
+    reason: '비 오는 날 격식 있는 자리에도 맞는 조합이에요.',
+    tip: '터틀넥은 목을 너무 조이지 않는 것을 고르고, 블레이저 안에서 접히지 않게 여유를 두세요.',
+    items: ['m_o5', 'm_t6', 'm_b1', 'm_s2', 'm_a7'],
+    img: 'looks/set_15.jpg' },
+  { id: 'm-cold-1', gender: 'm', weathers: ['cold'],
+    occasions: ['work', 'event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '겨울 카멜 코트 정석',
+    reason: '겨울 출근과 모임을 한 번에 해결하는 가장 안정적인 조합이에요.',
+    tip: '카멜 코트 안에 검정 터틀넥을 받치면 색 대비로 얼굴이 맑아 보여요. 머플러는 한 번만 둘러 주세요.',
+    items: ['m_o6', 'm_t6', 'm_b2', 'm_s3', 'm_a3'],
+    img: 'looks/set_16.jpg' },
+  { id: 'm-cold-2', gender: 'm', weathers: ['cold'],
+    occasions: ['work', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '차콜 코트 니트 출근 룩',
+    reason: '추운 아침에도 격식이 흐트러지지 않는 조합이에요.',
+    tip: '차콜 코트와 차콜 니트는 밝기가 비슷해 어두워 보여요. 슬랙스를 네이비로 달리해 결을 나눠 보세요.',
+    items: ['m_o7', 'm_t5', 'm_b1', 'm_s1', 'm_a6'],
+    img: 'looks/set_17.jpg' },
+  { id: 'm-cold-3', gender: 'm', weathers: ['cold'],
+    occasions: ['walk', 'trip'], moods: ['comfy'], concept: 'soft',
+    title: '패딩 니트 데님 겨울 외출',
+    reason: '가볍게 나서는 겨울 외출에 가장 편한 조합이에요.',
+    tip: '경량 패딩은 안에 니트를 입어도 부해 보이지 않아요. 크로스백은 패딩 위에 걸치면 허리가 살아 보여요.',
+    items: ['m_o9', 'm_t4', 'm_b6', 'm_s6', 'm_a5'],
+    img: 'looks/set_18.jpg' },
+  { id: 'm-cold-4', gender: 'm', weathers: ['cold'],
+    occasions: ['trip', 'walk', 'gather'], moods: ['comfy', 'calm', 'lively'], concept: 'soft',
+    title: '트렌치 겹쳐 입은 겨울 캐주얼',
+    reason: '가볍게 겹쳐 입어도 따뜻한 겨울 외출 조합이에요.',
+    tip: '트렌치 안에 와플 니트를 받치고 가죽 장갑까지 챙기면 손끝까지 따뜻해요.',
+    items: ['m_o8', 'm_t10', 'm_b8', 'm_s5', 'm_a6'],
+    img: 'looks/set_19.jpg' },
+  { id: 'm-cold-5', gender: 'm', weathers: ['cold'],
+    occasions: ['event', 'work'], moods: ['formal'], concept: 'classic',
+    title: '겨울 격식 세미정장',
+    reason: '경조사·중요 미팅처럼 격식이 먼저인 날의 조합이에요.',
+    tip: '화이트 셔츠는 목둘레가 맞는 것으로 고르고, 블레이저는 실내에서 벗어도 셔츠만으로 단정하게 보이도록 챙기세요.',
+    items: ['m_o4', 'm_t2', 'm_b1', 'm_s2', 'm_a4'],
+    img: 'looks/set_20.jpg' },
+  { id: 'f-warm-1', gender: 'f', weathers: ['warm'],
+    occasions: ['work', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '산뜻한 여름 출근 룩',
+    reason: '더운 날에도 단정함을 잃지 않는 출근 조합이에요.',
+    tip: '흰 셔츠는 소매를 팔꿈치까지 올리고, 플리츠 스커트는 허리선을 높게 잡으면 시원해 보여요.',
+    items: ['f_o1', 'f_t10', 'f_b7', 'f_s2', 'f_a6'],
+    img: 'looks/set_21.jpg' },
+  { id: 'f-warm-2', gender: 'f', weathers: ['warm'],
+    occasions: ['event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '여름 하객룩 세미정장',
+    reason: '결혼식·모임처럼 격식이 필요한 여름 자리에 맞는 조합이에요.',
+    tip: '트위드 재킷은 실내에서 벗어도 실크 블라우스만으로 단정해 보여요. 진주 이어링으로 얼굴 가까이를 밝혀 주세요.',
+    items: ['f_o2', 'f_t1', 'f_b9', 'f_s1', 'f_a7'],
+    img: 'looks/set_22.jpg' },
+  { id: 'f-warm-3', gender: 'f', weathers: ['warm'],
+    occasions: ['trip', 'walk'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '데님 재킷 여름 나들이 룩',
+    reason: '가볍게 걷고 사진 찍기 좋은 여름 외출 조합이에요.',
+    tip: '데님 재킷은 소매를 접고, 흰 티는 밑단을 살짝 넣어 허리선을 보여 주세요.',
+    items: ['f_o8', 'f_t7', 'f_b5', 'f_s4', 'f_a1'],
+    img: 'looks/set_23.jpg' },
+  { id: 'f-warm-4', gender: 'f', weathers: ['warm'],
+    occasions: ['gather', 'work'], moods: ['calm', 'lively'], concept: 'accent',
+    title: '로즈 니트 크림 팬츠 룩',
+    reason: '얼굴빛을 밝히는 부드러운 여름 조합이에요.',
+    tip: '크림 슬랙스에는 같은 계열의 로즈 니트를 맞추고, 스카프는 목에 한 번만 둘러 색을 모아 주세요.',
+    items: ['f_o1', 'f_t5', 'f_b2', 'f_s6', 'f_a3'],
+    img: 'looks/set_24.jpg' },
+  { id: 'f-warm-5', gender: 'f', weathers: ['warm'],
+    occasions: ['gather', 'work'], moods: ['calm', 'comfy'], concept: 'soft',
+    title: '샴페인 블라우스 단정 캐주얼',
+    reason: '모임과 외출 사이에서 어느 쪽으로도 어색하지 않은 조합이에요.',
+    tip: '샴페인 블라우스는 반짝임이 적은 것을 고르고, 벨트로 허리선만 잡아 주면 단정해 보여요.',
+    items: ['f_o8', 'f_t8', 'f_b6', 'f_s3', 'f_a5'],
+    img: 'looks/set_25.jpg' },
+  { id: 'f-mild-1', gender: 'f', weathers: ['mild'],
+    occasions: ['work', 'event'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '단정한 가을 세미정장',
+    reason: '출근과 중요한 미팅에 가장 믿음이 가는 조합이에요.',
+    tip: '네이비 자켓 안에 흰 셔츠를 받치면 어떤 자리에서도 흐트러지지 않아요. 슬랙스는 발등을 덮는 길이가 안정적이에요.',
+    items: ['f_o3', 'f_t10', 'f_b1', 'f_s2', 'f_a6'],
+    img: 'looks/set_26.jpg' },
+  { id: 'f-mild-2', gender: 'f', weathers: ['mild'],
+    occasions: ['gather', 'trip', 'work'], moods: ['calm', 'comfy'], concept: 'classic',
+    title: '트렌치 니트 데일리 룩',
+    reason: '일교차가 큰 날 겉옷 하나로 해결되는 조합이에요.',
+    tip: '트렌치 허리끈은 앞에서 한 번 묶어 주면 허리선이 살아 보여요. 니트는 밑단을 넣어 비율을 잡아 주세요.',
+    items: ['f_o6', 'f_t4', 'f_b5', 'f_s7', 'f_a1'],
+    img: 'looks/set_27.jpg' },
+  { id: 'f-mild-3', gender: 'f', weathers: ['mild'],
+    occasions: ['event', 'gather'], moods: ['formal'], concept: 'classic',
+    title: '트위드 재킷 격식 룩',
+    reason: '결혼식·상견례처럼 격식이 먼저인 날의 조합이에요.',
+    tip: '트위드 재킷은 어깨선이 맞아야 고급스러워 보여요. 펌프스는 굽이 너무 높지 않은 것을 고르세요.',
+    items: ['f_o2', 'f_t1', 'f_b3', 'f_s1', 'f_a7'],
+    img: 'looks/set_28.jpg' },
+  { id: 'f-mild-4', gender: 'f', weathers: ['mild'],
+    occasions: ['gather', 'work'], moods: ['comfy', 'calm'], concept: 'soft',
+    title: '카멜 가디건 크림 팬츠 룩',
+    reason: '얼굴 가까이 따뜻한 색을 두는 부드러운 조합이에요.',
+    tip: '카멜과 크림은 밝기 차이로 결이 나요. 가디건 단추는 위쪽만 채워 아래를 열어 두세요.',
+    items: ['f_o1', 'f_t9', 'f_b2', 'f_s6', 'f_a4'],
+    img: 'looks/set_29.jpg' },
+  { id: 'f-mild-5', gender: 'f', weathers: ['mild'],
+    occasions: ['trip', 'walk', 'gather'], moods: ['lively', 'comfy'], concept: 'accent',
+    title: '블루 셔츠 올리브 팬츠 포인트 룩',
+    reason: '평소보다 한 톤 밝게 가는 포인트 조합이에요.',
+    tip: '올리브 팬츠에는 밝은 셔츠를 맞추고, 니트 자켓을 걸치면 허리가 길어 보이지 않아요.',
+    items: ['f_o9', 'f_t3', 'f_b8', 'f_s4', 'f_a5'],
+    img: 'looks/set_30.jpg' },
+  { id: 'f-rain-1', gender: 'f', weathers: ['rain'],
+    occasions: ['work', 'gather'], moods: ['calm', 'formal'], concept: 'classic',
+    title: '비 오는 날 트렌치 출근 룩',
+    reason: '비 오는 출근길에 가장 믿음 가는 조합이에요.',
+    tip: '트렌치는 허리끈을 묶어 두면 바람에 옷이 날리지 않아요. 플랫은 가죽이 젖어도 덜 미끄러워요.',
+    items: ['f_o6', 'f_t8', 'f_b1', 'f_s6', 'f_a9'],
+    img: 'looks/set_31.jpg' },
+  { id: 'f-rain-2', gender: 'f', weathers: ['rain'],
+    occasions: ['event', 'work'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '비 오는 날 단정한 격식 룩',
+    reason: '비 오는 날 격식 있는 자리에도 맞는 조합이에요.',
+    tip: '미디 스커트는 무릎 아래로 떨어지는 길이가 좋고, 부츠는 발목을 잡아 주는 것을 고르세요.',
+    items: ['f_o3', 'f_t1', 'f_b3', 'f_s5', 'f_a9'],
+    img: 'looks/set_32.jpg' },
+  { id: 'f-rain-3', gender: 'f', weathers: ['rain'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '비 오는 날 데님 캐주얼',
+    reason: '짧게 나서는 날 가장 편한 비 오는 날 조합이에요.',
+    tip: '데님은 젖으면 금방 무거워져요. 데님 재킷은 벗어 팔에 걸쳐 두고, 우산은 큰 것을 쓰세요.',
+    items: ['f_o8', 'f_t4', 'f_b5', 'f_s4', 'f_a9'],
+    img: 'looks/set_33.jpg' },
+  { id: 'f-rain-4', gender: 'f', weathers: ['rain'],
+    occasions: ['work', 'gather'], moods: ['calm', 'lively'], concept: 'classic',
+    title: '흐린 날 밝은 셔츠 룩',
+    reason: '흐린 날에도 얼굴이 밝아 보이는 조합이에요.',
+    tip: '파란 스트라이프 셔츠는 흐린 날 가장 잘 어울려요. 가디건은 단추를 채워 바람을 막아 주세요.',
+    items: ['f_o1', 'f_t3', 'f_b6', 'f_s6', 'f_a9'],
+    img: 'looks/set_34.jpg' },
+  { id: 'f-rain-5', gender: 'f', weathers: ['rain'],
+    occasions: ['event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '비 오는 날 하객 룩',
+    reason: '비가 와도 격식이 흐트러지지 않는 조합이에요.',
+    tip: '네이비 톤으로 위아래를 맞추면 비에 젖어도 티가 덜 나요. 우산은 네이비 장우산이 가장 단정해 보입니다.',
+    items: ['f_o2', 'f_t2', 'f_b7', 'f_s2', 'f_a9'],
+    img: 'looks/set_35.jpg' },
+  { id: 'f-cold-1', gender: 'f', weathers: ['cold'],
+    occasions: ['work', 'event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '겨울 카멜 코트 출근 룩',
+    reason: '겨울 출근과 모임에 가장 안정적인 조합이에요.',
+    tip: '카멜 코트 안에 검정 터틀넥을 받치면 얼굴선이 맑아 보여요. 머플러는 목에 한 번만 둘러 주세요.',
+    items: ['f_o4', 'f_t6', 'f_b1', 'f_s5', 'f_a4'],
+    img: 'looks/set_36.jpg' },
+  { id: 'f-cold-2', gender: 'f', weathers: ['cold'],
+    occasions: ['work', 'gather'], moods: ['calm', 'comfy'], concept: 'classic',
+    title: '그레이 코트 겨울 출근 룩',
+    reason: '차분한 겨울 출근 조합이에요.',
+    tip: '그레이 코트는 니트와 밝기를 달리해야 답답해 보이지 않아요. 미디 스커트에는 앵클 부츠가 안정적입니다.',
+    items: ['f_o5', 'f_t4', 'f_b3', 'f_s7', 'f_a8'],
+    img: 'looks/set_37.jpg' },
+  { id: 'f-cold-3', gender: 'f', weathers: ['cold'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '패딩 니트 데님 겨울 외출',
+    reason: '가볍게 나서는 겨울 외출에 가장 편한 조합이에요.',
+    tip: '아이보리 패딩은 안에 카멜 니트를 받치면 포근해 보여요. 스니커즈는 기모 안감이면 더 따뜻해요.',
+    items: ['f_o7', 'f_t9', 'f_b5', 'f_s4', 'f_a4'],
+    img: 'looks/set_38.jpg' },
+  { id: 'f-cold-4', gender: 'f', weathers: ['cold'],
+    occasions: ['work', 'gather'], moods: ['calm', 'formal'], concept: 'classic',
+    title: '겨울 트렌치 블라우스 출근 룩',
+    reason: '가볍게 겹쳐 입어도 단정한 겨울 출근 조합이에요.',
+    tip: '트렌치 안에 셔링 블라우스를 입으면 목선이 살아 보여요. 슬랙스는 발목이 보이지 않는 길이가 따뜻해요.',
+    items: ['f_o6', 'f_t2', 'f_b6', 'f_s3', 'f_a2'],
+    img: 'looks/set_39.jpg' },
+  { id: 'f-cold-5', gender: 'f', weathers: ['cold'],
+    occasions: ['event', 'gather'], moods: ['formal', 'calm'], concept: 'classic',
+    title: '겨울 격식 하객 룩',
+    reason: '겨울 결혼식·모임에 맞는 격식 조합이에요.',
+    tip: '네이비 자켓과 카멜 스커트는 색 대비가 좋아 사진이 잘 나와요. 진주 이어링으로 마무리해 보세요.',
+    items: ['f_o3', 'f_t1', 'f_b4', 'f_s2', 'f_a7'],
+    img: 'looks/set_40.jpg' },
+  { id: 'm-train-1', gender: 'm', weathers: ['warm', 'mild', 'rain', 'cold'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '편안한 트랙수트 산책 룩',
+    reason: '가볍게 걷거나 여행 갈 때 몸이 편한 조합이에요.',
+    tip: '트랙 재킷 지퍼는 가슴까지만 올리고, 조거 팬츠 밑단을 살짝 접으면 다리가 길어 보여요.',
+    items: ['m_tr1', 'm_tr2', 'm_tr3', 'm_s4', 'm_a5'],
+    img: 'looks/set_41.jpg' },
+  { id: 'f-train-1', gender: 'f', weathers: ['warm', 'mild', 'rain', 'cold'],
+    occasions: ['walk', 'trip'], moods: ['comfy', 'lively'], concept: 'soft',
+    title: '크림 트랙수트 나들이 룩',
+    reason: '동네 산책부터 주말 나들이까지 편하게 입는 조합이에요.',
+    tip: '크림 톤으로 위아래를 맞추고 안에는 오트밀 후드를 받치면 부드러운 분위기가 살아요.',
+    items: ['f_tr1', 'f_tr2', 'f_tr3', 'f_s4', 'f_a1'],
+    img: 'looks/set_42.jpg' },
+];
+</script>
+<script>
+/* ============================================================
+   영앤클래식 관리자 대시보드
+   ------------------------------------------------------------
+   · 00:00~24:00 한국시간(KST) 기준으로 오늘/누적/최근 7일을 계산합니다.
+   · 집계 원본: Firebase Realtime Database (방문·클릭 기록)
+   ============================================================ */
+var DB = 'https://youngclassic-stats-default-rtdb.asia-southeast1.firebasedatabase.app';
+var PIN_HASH = '8033bcfb';            /* 4자리 비밀번호의 확인용 값(기본 0725) */
+var LOCK_STORE = 'yc.admin.lock.v1';
+var MONTH_CACHE = 'yc.admin.months.v1';
+var KST = 9 * 60 * 60 * 1000;
+
+/* ---- 작은 도구들 ---- */
+function fnv(s) {
+  var h = 0x811c9dc5;
+  for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function dayKey(ts) {
+  var d = new Date(ts + KST);
+  return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+}
+function dayKeyBefore(n) { return dayKey(Date.now() - n * 86400000); }
+function monthKeyOf(day) { return day.slice(0, 7).replace('-', ''); }
+function num(n) { return (n || 0).toLocaleString('ko-KR'); }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function $id(id) { return document.getElementById(id); }
+
+var MOOD_LABEL = {};
+(OPTIONS.mood || []).forEach(function (m) { MOOD_LABEL[m.id] = m.label; });
+var GENDER_LABEL = { m: '남성', f: '여성' };
+var CAT_KO = { top: '상의', bottom: '하의', outer: '아우터', shoes: '신발', acc: '소품' };
+var ITEM_MAP = {};
+(WARDROBE || []).forEach(function (it) { ITEM_MAP[it.id] = it; });
+var SRC_LABEL = {
+  naver: '네이버 검색', google: '구글 검색', instagram: '인스타그램', blog: '블로그',
+  kakao: '카카오톡', daum: '다음', facebook: '페이스북', direct: '직접 방문', other: '기타'
+};
+var SRC_ORDER = ['naver', 'google', 'instagram', 'blog', 'kakao', 'daum', 'facebook', 'direct', 'other'];
+
+/* ---- 잠금 ---- */
+var entered = '';
+
+function paintDots() {
+  var dots = $id('dots').children;
+  for (var i = 0; i < dots.length; i++) dots[i].className = i < entered.length ? 'on' : '';
+}
+function showApp() {
+  $id('lock').hidden = true;
+  $id('app').hidden = false;
+  load();
+}
+function tryUnlock() {
+  if (fnv('ync:' + entered) === PIN_HASH) {
+    var remember = $id('remember').checked;
+    try {
+      sessionStorage.setItem(LOCK_STORE, 'ok');
+      if (remember) localStorage.setItem(LOCK_STORE, String(Date.now() + 30 * 86400000));
+      else localStorage.removeItem(LOCK_STORE);
+    } catch (e) {}
+    entered = '';
+    paintDots();
+    showApp();
+  } else {
+    $id('lockMsg').textContent = '비밀번호가 맞지 않습니다. 다시 눌러 주세요.';
+    entered = '';
+    paintDots();
+    $id('lock').classList.add('shake');
+    setTimeout(function () { $id('lock').classList.remove('shake'); }, 380);
+  }
+}
+$id('pad').addEventListener('click', function (e) {
+  var b = e.target.closest('button');
+  if (!b) return;
+  var k = b.getAttribute('data-k');
+  $id('lockMsg').textContent = '';
+  if (k === 'del') entered = entered.slice(0, -1);
+  else if (k === 'clear') entered = '';
+  else if (entered.length < 4) entered += k;
+  paintDots();
+  if (entered.length === 4) setTimeout(tryUnlock, 120);
+});
+document.addEventListener('keydown', function (e) {
+  if (!$id('lock').hidden && /^[0-9]$/.test(e.key) && entered.length < 4) {
+    entered += e.key; paintDots();
+    if (entered.length === 4) setTimeout(tryUnlock, 120);
+  }
+});
+$id('btnLock').addEventListener('click', lock);
+function lock() {
+  try { sessionStorage.removeItem(LOCK_STORE); localStorage.removeItem(LOCK_STORE); } catch (e) {}
+  $id('app').hidden = true;
+  $id('lock').hidden = false;
+  entered = ''; paintDots();
+}
+function isUnlocked() {
+  try {
+    if (sessionStorage.getItem(LOCK_STORE) === 'ok') return true;
+    var until = +(localStorage.getItem(LOCK_STORE) || 0);
+    return until > Date.now();
+  } catch (e) { return false; }
+}
+
+/* ---- 기록 읽기 ---- */
+function getJSON(url) {
+  return fetch(url, { cache: 'no-store' }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+function cacheRead() {
+  try { return JSON.parse(localStorage.getItem(MONTH_CACHE) || '{}') || {}; } catch (e) { return {}; }
+}
+function cacheWrite(obj) {
+  try { localStorage.setItem(MONTH_CACHE, JSON.stringify(obj)); } catch (e) {}
+}
+
+function loadMonths() {
+  return getJSON(DB + '/e.json?shallow=true').then(function (list) {
+    var keys = Object.keys(list || {}).filter(function (k) { return /^[0-9]{6}$/.test(k); }).sort();
+    var cur = monthKeyOf(dayKey(Date.now()));
+    var cache = cacheRead();
+    var jobs = keys.map(function (k) {
+      var c = cache[k];
+      /* 지난 달 기록은 바뀌지 않으므로 한 번 읽으면 계속 씁니다. 이번 달은 30초마다 새로 읽습니다. */
+      if (c && c.data && (k !== cur || (Date.now() - (c.ts || 0)) < 30000)) {
+        return Promise.resolve({ key: k, data: c.data });
+      }
+      return getJSON(DB + '/e/' + k + '.json').then(function (d) {
+        var data = d || {};
+        cache[k] = { data: data, ts: Date.now() };
+        return { key: k, data: data };
+      }).catch(function () { return { key: k, data: (c && c.data) || {} }; });
+    });
+    return Promise.all(jobs).then(function (list2) {
+      cacheWrite(cache);
+      return list2;
+    });
+  });
+}
+
+/* ---- 집계 ---- */
+function blankDay() {
+  return { v: {}, pv: 0, naver: 0, coupang: 0, af: 0, g: {}, st: {}, it: {}, ref: {} };
+}
+function addCount(map, key) { if (key) map[key] = (map[key] || 0) + 1; }
+
+function aggregate(months) {
+  var days = {};
+  months.forEach(function (m) {
+    var node = m.data || {};
+    Object.keys(node).forEach(function (id) {
+      var ev = node[id];
+      if (!ev || !ev.d || typeof ev.d !== 'string') return;
+      if (!days[ev.d]) days[ev.d] = blankDay();
+      var d = days[ev.d];
+      if (ev.v) d.v[ev.v] = 1;
+      if (ev.k === 'pv') {
+        d.pv++;
+        addCount(d.ref, ev.r || 'direct');
+      } else if (ev.k === 'click') {
+        if (ev.s === 'naver') d.naver++;
+        else if (ev.s === 'coupang') d.coupang++;
+        if (ev.af) d.af++;
+        addCount(d.g, ev.g);
+        addCount(d.st, ev.st);
+        addCount(d.it, ev.it);
+      }
+    });
+  });
+  return days;
+}
+function uvOf(d) { return d ? Object.keys(d.v).length : 0; }
+function clicksOf(d) { return d ? d.naver + d.coupang : 0; }
+
+function totals(days) {
+  var out = { uv: {}, pv: 0, naver: 0, coupang: 0, af: 0, g: {}, st: {}, it: {}, ref: {}, days: 0 };
+  Object.keys(days).forEach(function (k) {
+    var d = days[k];
+    Object.keys(d.v).forEach(function (v) { out.uv[v] = 1; });
+    out.pv += d.pv; out.naver += d.naver; out.coupang += d.coupang; out.af += d.af;
+    for (var i in d.g) out.g[i] = (out.g[i] || 0) + d.g[i];
+    for (var j in d.st) out.st[j] = (out.st[j] || 0) + d.st[j];
+    for (var l in d.it) out.it[l] = (out.it[l] || 0) + d.it[l];
+    for (var r in d.ref) out.ref[r] = (out.ref[r] || 0) + d.ref[r];
+    out.days++;
+  });
+  out.uv = Object.keys(out.uv).length;
+  return out;
+}
+function topList(map, n, labelFn) {
+  return Object.keys(map).map(function (k) { return { k: k, c: map[k] }; })
+    .sort(function (a, b) { return b.c - a.c; })
+    .slice(0, n);
+}
+
+/* ---- 그리기 ---- */
+function kpi(cls, label, value, cap) {
+  return '<div class="kpi ' + cls + '">' +
+    '<div class="lab">' + label + '</div>' +
+    '<div class="num">' + value + '</div>' +
+    (cap ? '<div class="cap">' + cap + '</div>' : '') +
+    '</div>';
+}
+function rankHTML(items, labelFn, unit) {
+  if (!items.length) return '<p class="empty">아직 기록이 없습니다.</p>';
+  return '<ol class="rank">' + items.map(function (x, i) {
+    var lab = labelFn(x.k);
+    return '<li><span class="no">' + (i + 1) + '</span>' +
+      '<span class="nm">' + esc(lab.t) + (lab.s ? '<i>' + esc(lab.s) + '</i>' : '') + '</span>' +
+      '<span class="ct">' + num(x.c) + '<small>' + (unit || '클릭') + '</small></span></li>';
+  }).join('') + '</ol>';
+}
+function srcHTML(refMap) {
+  var rows = SRC_ORDER.filter(function (s) { return refMap[s]; })
+    .map(function (s) { return { k: s, c: refMap[s] }; })
+    .sort(function (a, b) { return b.c - a.c; });
+  if (!rows.length) return '<p class="empty">아직 기록이 없습니다.</p>';
+  var max = rows[0].c || 1;
+  var sum = rows.reduce(function (a, b) { return a + b.c; }, 0) || 1;
+  return rows.map(function (r) {
+    var pct = Math.round(r.c / sum * 100);
+    return '<div class="src"><div class="row"><b>' + esc(SRC_LABEL[r.k] || r.k) + '</b>' +
+      '<span>' + num(r.c) + '회 · ' + pct + '%</span></div>' +
+      '<div class="track"><div class="fill" style="width:' + Math.max(4, Math.round(r.c / max * 100)) + '%"></div></div></div>';
+  }).join('');
+}
+
+var view = { contentTab: 'today', refTab: 'today' };
+var lastDays = null, lastTotals = null;
+
+function render() {
+  var days = lastDays, tot = lastTotals;
+  var todayKey = dayKey(Date.now());
+  var t = days[todayKey] || blankDay();
+  var uvToday = uvOf(t), pvToday = t.pv;
+  var clicksToday = clicksOf(t), afToday = t.af;
+  var ctr = uvToday ? (clicksToday / uvToday * 100) : 0;
+  var per100 = uvToday ? Math.round(clicksToday / uvToday * 100) : 0;
+
+  /* 최근 7일 */
+  var series = [];
+  for (var i = 6; i >= 0; i--) { var k = dayKeyBefore(i); series.push({ d: k, uv: uvOf(days[k]), pv: days[k] ? days[k].pv : 0 }); }
+  var maxUv = Math.max.apply(null, series.map(function (s) { return s.uv; }).concat([1]));
+  var wd = ['일', '월', '화', '수', '목', '금', '토'];
+
+  var contentSrc = (view.contentTab === 'today') ? t : null;
+  var gMap, stMap, itMap, cLabel;
+  if (contentSrc) {
+    gMap = contentSrc.g; stMap = contentSrc.st; itMap = contentSrc.it; cLabel = '오늘';
+  } else {
+    gMap = tot.g; stMap = tot.st; itMap = tot.it; cLabel = '누적';
+  }
+  var gItems = topList(gMap, 5);
+  var stItems = topList(stMap, 5);
+  var itItems = topList(itMap, 5);
+
+  var refMap, refLabel;
+  if (view.refTab === 'today') { refMap = t.ref; refLabel = '오늘'; }
+  else {
+    refMap = {};
+    for (var j = 0; j < 7; j++) {
+      var dd = days[dayKeyBefore(j)];
+      if (!dd) continue;
+      for (var s in dd.ref) refMap[s] = (refMap[s] || 0) + dd.ref[s];
+    }
+    refLabel = '최근 7일';
+  }
+
+  var totalClicks = tot.naver + tot.coupang;
+  var html = '';
+
+  /* 1. 오늘 */
+  html += '<section>' +
+    '<div class="sec-title"><h2>오늘 (' + todayKey.slice(5).replace('-', '/') + ')</h2><span>00시부터 지금까지</span></div>' +
+    '<div class="grid2">' +
+      kpi('visit', '👥 오늘 방문자', num(uvToday) + '<small>명</small>', '같은 사람은 1명으로') +
+      kpi('visit', '📄 오늘 조회수', num(pvToday) + '<small>회</small>', '화면을 연 횟수') +
+      kpi('nv', '🟢 네이버 클릭', num(t.naver) + '<small>회</small>', '네이버쇼핑 버튼') +
+      kpi('cp', '🧡 쿠팡 클릭', num(t.coupang) + '<small>회</small>', '쿠팡 버튼') +
+    '</div></section>';
+
+  /* 2. 전환율 */
+  html += '<section><div class="card ctr">' +
+    '<div class="lab">💰 제휴 클릭 전환율 (CTR)</div>' +
+    '<div class="num">' + (uvToday ? ctr.toFixed(1) : '0.0') + '<small>%</small></div>' +
+    '<div class="cap">' + (uvToday
+      ? '오늘 방문자 <b>' + num(uvToday) + '명</b> 중 <b>' + num(clicksToday) + '번</b> 제휴 버튼을 눌렀어요. (100명이 오면 약 <b>' + per100 + '번</b>)'
+        + (ctr > 100 ? '<br><span style="font-size:12.5px">방문자가 적을 때는 한 사람이 여러 번 눌러 100%를 넘을 수 있어요.</span>' : '')
+      : '오늘 아직 방문 기록이 없습니다. 손님이 들어오면 여기에 바로 쌓입니다.') + '</div>' +
+    '</div></section>';
+
+  /* 3. 누적 */
+  html += '<section><div class="card">' +
+    '<div class="tot"><span class="lab">누적 방문자</span><span class="val">' + num(tot.uv) + '<small>명</small></span></div>' +
+    '<div class="tot"><span class="lab">누적 조회수</span><span class="val">' + num(tot.pv) + '<small>회</small></span></div>' +
+    '<div class="tot"><span class="lab">누적 네이버 클릭</span><span class="val" style="color:var(--naver)">' + num(tot.naver) + '<small>회</small></span></div>' +
+    '<div class="tot"><span class="lab">누적 쿠팡 클릭</span><span class="val" style="color:var(--coupang)">' + num(tot.coupang) + '<small>회</small></span></div>' +
+    '<div class="tot"><span class="lab">누적 제휴 클릭 합계</span><span class="val">' + num(totalClicks) + '<small>회</small></span></div>' +
+    '<div class="chart-note">집계된 날짜 <b>' + num(tot.days) + '일</b>분</div>' +
+    '</div></section>';
+
+  /* 4. 최근 7일 */
+  html += '<section><div class="sec-title"><h2>최근 7일 방문자</h2><span>막대 = 방문자(UV)</span></div>' +
+    '<div class="card chart-wrap"><div class="chart">' +
+    series.map(function (s) {
+      var h = Math.round(s.uv / maxUv * 118);
+      var dObj = new Date(s.d + 'T00:00:00+09:00');
+      var isToday = s.d === todayKey;
+      return '<div class="col' + (isToday ? ' today' : '') + '">' +
+        '<span class="v">' + (s.uv ? s.uv : '·') + '</span>' +
+        '<div class="bar" style="height:' + Math.max(4, h) + 'px"></div>' +
+        '<span class="d">' + (isToday ? '오늘' : wd[dObj.getDay()]) + '</span>' +
+        '</div>';
+    }).join('') +
+    '</div><p class="chart-note">7일 합계 · 방문자 <b>' + num(series.reduce(function (a, s) { return a + s.uv; }, 0)) +
+      '명</b> · 조회수 <b>' + num(series.reduce(function (a, s) { return a + s.pv; }, 0)) + '회</b></p>' +
+    '</div></section>';
+
+  /* 5. 인기 콘텐츠 */
+  html += '<section><div class="sec-title"><h2>인기 콘텐츠</h2><span>클릭 기준 순위</span></div>' +
+    '<div class="tabs">' +
+      '<button type="button" data-tab="content" data-v="today" class="' + (view.contentTab === 'today' ? 'on' : '') + '">오늘</button>' +
+      '<button type="button" data-tab="content" data-v="total" class="' + (view.contentTab === 'total' ? 'on' : '') + '">누적</button>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="block"><h3>' + cLabel + ' 성별</h3>' + rankHTML(gItems, function (k) {
+        return { t: (GENDER_LABEL[k] || k) + ' 코디', s: '' };
+      }) + '</div>' +
+      '<div class="block"><h3>' + cLabel + ' 스타일(무드)</h3>' + rankHTML(stItems, function (k) {
+        return { t: MOOD_LABEL[k] || k, s: '' };
+      }) + '</div>' +
+      '<div class="block"><h3>' + cLabel + ' 아이템 TOP 5</h3>' + rankHTML(itItems, function (k) {
+        var it = ITEM_MAP[k];
+        return { t: it ? it.name : k, s: it ? (CAT_KO[it.cat] || it.cat) + ' · ' + (GENDER_LABEL[it.g] || '') : '' };
+      }) + '</div>' +
+    '</div></section>';
+
+  /* 6. 유입 경로 */
+  html += '<section><div class="sec-title"><h2>유입 경로</h2><span>어디서 들어왔는지</span></div>' +
+    '<div class="tabs">' +
+      '<button type="button" data-tab="ref" data-v="today" class="' + (view.refTab === 'today' ? 'on' : '') + '">오늘</button>' +
+      '<button type="button" data-tab="ref" data-v="week" class="' + (view.refTab === 'week' ? 'on' : '') + '">최근 7일</button>' +
+    '</div>' +
+    '<div class="card">' + srcHTML(refMap) + '</div></section>';
+
+  $id('body').innerHTML = html;
+  var now = new Date();
+  $id('updated').textContent = pad2(now.getHours()) + ':' + pad2(now.getMinutes()) + ':' + pad2(now.getSeconds());
+}
+
+$id('body').addEventListener('click', function (e) {
+  var b = e.target.closest('button[data-tab]');
+  if (!b) return;
+  if (b.getAttribute('data-tab') === 'content') view.contentTab = b.getAttribute('data-v');
+  else view.refTab = b.getAttribute('data-v');
+  render();
+});
+
+var loading = false;
+function load() {
+  if (loading) return;
+  loading = true;
+  if (!lastDays) $id('body').innerHTML = '<p class="loading">집계를 불러오는 중…</p>';
+  loadMonths().then(function (months) {
+    lastDays = aggregate(months);
+    lastTotals = totals(lastDays);
+    render();
+  }).catch(function (err) {
+    $id('body').innerHTML = '<div class="err">집계를 불러오지 못했습니다.<br>인터넷 연결을 확인하고 <b>새로고침</b>을 눌러 주세요.<br><span style="font-size:13px">(' + esc(err.message || err) + ')</span></div>';
+  }).then(function () { loading = false; });
+}
+
+$id('btnRefresh').addEventListener('click', function () {
+  var btn = $id('btnRefresh');
+  btn.textContent = '불러오는 중…';
+  var clear = cacheRead();
+  var cur = monthKeyOf(dayKey(Date.now()));
+  if (clear[cur]) { delete clear[cur]; cacheWrite(clear); }
+  var done = function () { btn.textContent = '새로고침'; };
+  loading = false;
+  load();
+  setTimeout(done, 1200);
+});
+
+/* 화면을 보고 있는 동안 1분마다 새로 집계합니다. */
+setInterval(function () {
+  if (!document.hidden && !$id('app').hidden) load();
+}, 60000);
+
+/* ---- 시작 ---- */
+paintDots();
+if (isUnlocked()) showApp();
+</script>
+
+<div id="modalRoot" class="modal-root" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<script>
+/* ============================================================
+   YC Manager — 📲 홈 화면 추가(PWA) · 카톡 인앱 탈출 · 뒤로가기
+   ============================================================ */
+(function () {
+  'use strict';
+  var MAIN_URL = 'https://byoorim09-bot.github.io/Mine-/';
+  var UA = navigator.userAgent || '';
+  var IS_KA = /KAKAOTALK/i.test(UA);
+  var IS_ANDROID = /Android/i.test(UA);
+  var IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (/Macintosh/i.test(UA) && 'ontouchend' in document);
+  var PWA = { deferred: null, installed: false };
+  var modalOpen = false, skipPop = false, lastBack = 0, toastTimer = null;
+
+  function q(id) { return document.getElementById(id); }
+  function isStandalone() {
+    try { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+    catch (e) { return false; }
+  }
+  function lockVisible() { return !!(q('app') && q('app').hidden); }
+
+  /* ---------- 토스트 ---------- */
+  function toast(msg, ms) {
+    var t = q('toast'); if (!t) return;
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, ms || 2200);
+  }
+
+  /* ---------- 안내 모달 ---------- */
+  function openModal(title, body, foot) {
+    var root = q('modalRoot'); if (!root) return;
+    root.innerHTML =
+      '<div class="modal" role="dialog" aria-modal="true" aria-label="' + title + '">' +
+        '<div class="modal-head">' +
+          '<button type="button" data-close="1" aria-label="뒤로">← 뒤로</button>' +
+          '<h3>' + title + '</h3>' +
+          '<button type="button" data-close="1" aria-label="닫기">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' + body + '</div>' +
+        '<div class="modal-foot">' + (foot || '<button type="button" class="primary" data-close="1">확인</button>') + '</div>' +
+      '</div>';
+    root.hidden = false;
+    document.body.style.overflow = 'hidden';
+    if (!modalOpen) {
+      modalOpen = true;
+      try { history.pushState({ modal: 1 }, ''); } catch (e) {}
+    }
+  }
+  function closeModal(fromPop) {
+    var root = q('modalRoot');
+    if (!root || root.hidden) return false;
+    root.hidden = true; root.innerHTML = '';
+    document.body.style.overflow = '';
+    var had = modalOpen; modalOpen = false;
+    if (had && !fromPop) { skipPop = true; try { history.back(); } catch (e) { skipPop = false; } }
+    return true;
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-close]')) closeModal(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeModal(false);
+  });
+
+  /* ---------- 안내 문구 ---------- */
+  function steps(items) {
+    return '<div class="steps">' + items.map(function (t, i) {
+      return '<div class="step"><span class="n">' + (i + 1) + '</span><span>' + t + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function chromeIntent() {
+    return 'intent://' + location.host + location.pathname + location.search +
+      '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' +
+      encodeURIComponent(location.href) + ';end';
+  }
+  function browserSteps() {
+    return IS_IOS
+      ? ['카톡 오른쪽 위 <b>⋯</b>를 누르고 <b>Safari로 열기</b>를 고릅니다.',
+         'Safari 아래쪽 <b>공유</b> 버튼을 누릅니다.',
+         '<b>홈 화면에 추가</b>를 고르고 <b>추가</b>를 누릅니다.']
+      : ['오른쪽 위 <b>⋮</b>를 누릅니다.',
+         '<b>다른 브라우저로 열기</b>에서 <b>Chrome</b>을 고릅니다.',
+         'Chrome에서 <b>⋮ → 앱 설치</b>(또는 <b>홈 화면에 추가</b>)를 누릅니다.'];
+  }
+  function installSteps() {
+    return IS_IOS
+      ? ['이 주소를 <b>Safari</b>에서 엽니다.',
+         '아래쪽 <b>공유</b> 버튼을 누릅니다.',
+         '<b>홈 화면에 추가</b>를 누르고 <b>추가</b>를 고릅니다.']
+      : ['Chrome에서 이 화면을 엽니다.',
+         '오른쪽 위 <b>⋮</b> 메뉴를 누릅니다.',
+         '<b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 고릅니다.',
+         '<b>설치</b>를 누르면 홈 화면에 <b>YC Manager</b> 아이콘이 생깁니다.'];
+  }
+
+  /* ---------- 카톡 인앱 탈출 배너 ---------- */
+  function paintPromo() {
+    [q('promoLock'), q('promoApp')].forEach(function (slot) {
+      if (!slot) return;
+      if (!IS_KA) { slot.innerHTML = ''; return; }
+      var btn = IS_ANDROID
+        ? '<a class="promo-btn" href="' + chromeIntent() + '">크롬으로 열기</a>'
+        : '<button type="button" class="promo-btn" data-help="1">' + (IS_IOS ? 'Safari로 열기' : '브라우저로 열기') + '</button>';
+      slot.innerHTML =
+        '<div class="promo"><div class="promo-txt">' +
+          '<b>카톡 안에서는 「홈 화면 추가」가 안 돼요</b>' +
+          '<span>크롬에서 열면 YC Manager를 앱처럼 설치할 수 있어요.</span>' +
+        '</div>' + btn +
+        '<button type="button" class="promo-x" data-off="1" aria-label="안내 닫기">✕</button></div>';
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-off]')) {
+      [q('promoLock'), q('promoApp')].forEach(function (s) { if (s) s.innerHTML = ''; });
+    }
+    if (e.target.closest('[data-help]')) modalBrowserHelp();
+  });
+
+  /* ---------- 홈 화면 추가 ---------- */
+  function paintInstall() {
+    var done = !!(PWA.installed || isStandalone());
+    [q('installBtn'), q('installBtn2')].forEach(function (b) {
+      if (!b) return;
+      b.textContent = done ? '✅ 홈 화면에 설치됨' : '📲 홈 화면 추가';
+      if (b.classList) b.classList.toggle('done', done);
+    });
+  }
+  function modalBrowserHelp() {
+    var body =
+      '<div class="note warn"><b>카톡 안에서는 「홈 화면 추가」가 안 됩니다.</b><br>' +
+      '아래 순서대로 브라우저에서 열면 앱처럼 설치할 수 있어요.</div>' +
+      steps(browserSteps());
+    var foot = (IS_ANDROID ? '<a class="gold" href="' + chromeIntent() + '">크롬으로 열기</a>' : '') +
+      '<button type="button" class="primary" data-close="1" style="margin-top:10px">확인</button>';
+    openModal('브라우저로 열기', body, foot);
+  }
+  function modalInstallHelp() {
+    var body =
+      '<div class="note"><b>YC Manager</b>를 홈 화면에 추가하면 주소창 없이 전체 화면으로 열리고, ' +
+      '홈 화면의 <b>YC Manager</b> 아이콘으로 바로 시작합니다.</div>' +
+      steps(installSteps());
+    var foot = (IS_ANDROID && IS_KA ? '<a class="gold" href="' + chromeIntent() + '">크롬으로 열기</a>' : '') +
+      '<button type="button" class="primary" data-close="1" style="margin-top:' + (IS_ANDROID && IS_KA ? 10 : 0) + 'px">확인</button>';
+    openModal('홈 화면에 추가', body, foot);
+  }
+  function openInstall() {
+    if (IS_KA) { modalBrowserHelp(); return; }
+    if (PWA.installed || isStandalone()) {
+      if (isStandalone()) { toast('이미 앱으로 열려 있어요'); return; }
+      toast('이미 홈 화면에 설치되어 있어요'); return;
+    }
+    if (PWA.deferred) {
+      var ev = PWA.deferred; PWA.deferred = null;
+      try {
+        ev.prompt();
+        Promise.resolve(ev.userChoice).then(function (res) {
+          if (res && res.outcome === 'accepted') {
+            PWA.installed = true; paintInstall(); toast('홈 화면에 설치했어요');
+          }
+        }).catch(function () {});
+        return;
+      } catch (e) { PWA.deferred = null; }
+    }
+    modalInstallHelp();
+  }
+  [q('installBtn'), q('installBtn2')].forEach(function (b) {
+    if (b) b.addEventListener('click', openInstall);
+  });
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    PWA.deferred = e;
+    paintInstall();
+  });
+  window.addEventListener('appinstalled', function () {
+    PWA.deferred = null; PWA.installed = true; paintInstall(); toast('홈 화면에 설치했어요');
+  });
+  window.matchMedia && window.matchMedia('(display-mode: standalone)').addEventListener &&
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', paintInstall);
+
+  /* ---------- 뒤로가기 ---------- */
+  function goBack() {
+    if (closeModal(false)) return;          // 안내 창이 열려 있으면 먼저 닫기
+    try {
+      if (history.length > 1 && document.referrer && document.referrer.indexOf(location.host) !== -1) {
+        history.back(); return;
+      }
+    } catch (e) {}
+    location.href = MAIN_URL;               // 영앤클래식 본체(쇼핑 화면)로
+  }
+  var backBtn = q('btnBack');
+  if (backBtn) backBtn.addEventListener('click', goBack);
+
+  try { if (!history.state || !history.state.app) history.pushState({ app: 1 }, ''); } catch (e) {}
+  window.addEventListener('popstate', function () {
+    if (skipPop) { skipPop = false; return; }
+    if (modalOpen) { closeModal(true); return; }
+    var st = history.state || {};
+    if (st.app || st.modal) return;
+    if (lockVisible()) return;              // 잠금 화면에서는 그냥 나간다
+    if (Date.now() - lastBack < 2200) return; // 두 번째 누름 → 앱 닫기
+    lastBack = Date.now();
+    try { history.pushState({ app: 1 }, ''); } catch (e) {}
+    toast('한 번 더 누르면 앱을 닫습니다', 1800);
+  });
+
+  /* ---------- 서비스 워커(설치 조건) ---------- */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/yc-admin/sw.js', { scope: '/yc-admin/' }).catch(function () {});
+    });
+  }
+
+  /* ---------- 시작 ---------- */
+  paintPromo();
+  paintInstall();
+})();
+</script>
+</body>
+</html>
