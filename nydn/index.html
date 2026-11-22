@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>뉴욕데이앤나이트 | 부평 호프·요리주점</title>
+<meta name="description" content="인천 부평대로, 뉴욕의 밤을 옮겨온 호프 &amp; 요리주점 뉴욕데이앤나이트. 매일 10:00–24:00, 단체·대관, 콜키지 무료. 부평시장역 4번 출구 370m.">
+<meta name="theme-color" content="#0a0908">
+<meta property="og:type" content="website">
+<meta property="og:title" content="뉴욕데이앤나이트 | 부평 호프·요리주점">
+<meta property="og:description" content="부평대로, 뉴욕의 밤을 옮겨온 호프 &amp; 요리주점. 매일 10:00–24:00 · 단체·대관 · 콜키지 무료.">
+<meta property="og:image" content="https://byoorim09-bot.github.io/newyork-daynight-demo/assets/hero.jpg">
+<meta property="og:url" content="https://byoorim09-bot.github.io/newyork-daynight-demo/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0908;
+    --ink-2:#12100d;
+    --ink-3:#1b1712;
+    --gold:#c8a04a;
+    --gold-lt:#e7cd8d;
+    --cream:#f4efe6;
+    --muted:#a99e8d;
+    --line:rgba(200,160,74,.28);
+    --shadow:0 18px 40px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  .js .dock{transform:translateY(110%);transition:transform .28s ease}
+  .js .dock.show{transform:none}
+  body{
+    margin:0;background:var(--ink);color:var(--cream);
+    font-family:"Noto Sans KR","NanumSquare",-apple-system,"Malgun Gothic",sans-serif;
+    font-size:17px;line-height:1.72;letter-spacing:-.01em;
+    word-break:keep-all;overflow-wrap:break-word;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  .serif{font-family:"Noto Serif KR","NanumMyeongjo",serif}
+
+  /* top notice */
+  .notice{
+    background:#151210;color:var(--muted);border-bottom:1px solid var(--line);
+    font-size:12.5px;letter-spacing:.02em;text-align:center;
+    padding:9px 14px;line-height:1.5;
+  }
+  .notice b{color:var(--gold-lt);font-weight:500}
+
+  /* hero */
+  .hero{position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:flex-end;isolation:isolate}
+  .hero-bg{position:absolute;inset:0;z-index:-2}
+  .hero-bg img{width:100%;height:100%;object-fit:cover;object-position:58% center}
+  .hero::after{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background:
+      linear-gradient(180deg,rgba(10,9,8,.72) 0%,rgba(10,9,8,.25) 26%,rgba(10,9,8,.55) 62%,rgba(10,9,8,.97) 100%);
+  }
+  .hero-top{padding:26px 22px 0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brandline{font-size:10.5px;letter-spacing:.2em;color:var(--gold-lt);text-transform:uppercase;white-space:nowrap}
+  .hero-top .tag{
+    font-size:11.5px;letter-spacing:.06em;color:var(--cream);
+    border:1px solid rgba(231,205,141,.45);border-radius:999px;padding:5px 11px;white-space:nowrap;
+    background:rgba(0,0,0,.25);backdrop-filter:blur(4px);
+  }
+  .hero-body{padding:0 22px 30px;margin-top:auto}
+  .hero h1{
+    font-family:"Noto Serif KR","NanumMyeongjo",serif;
+    font-weight:700;margin:0;line-height:.98;letter-spacing:.02em;
+    font-size:clamp(44px,12.4vw,58px);
+  }
+  .hero h1 span{display:block}
+  .hero h1 .amp{
+    color:var(--gold);font-weight:400;font-size:.62em;letter-spacing:.14em;margin:6px 0 4px;
+  }
+  .hero-sub{
+    margin:16px 0 0;font-size:16px;color:#ded4c4;letter-spacing:.01em;
+    max-width:19em;line-height:1.65;
+  }
+  .hero-sub b{color:var(--gold-lt);font-weight:500}
+  .hero-hours{
+    margin-top:18px;display:inline-flex;align-items:center;gap:9px;
+    font-size:14.5px;color:#efe6d7;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.13);border-radius:999px;padding:8px 14px;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:#65d08a;box-shadow:0 0 8px #65d08a}
+  .img-note{margin:12px 0 0;font-size:11.5px;line-height:1.5;color:rgba(214,203,187,.62);letter-spacing:.01em}
+
+  /* CTA row */
+  .cta-row{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;padding:0 22px 24px}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    min-height:58px;border-radius:14px;font-size:17.5px;font-weight:700;letter-spacing:-.01em;
+    border:1px solid transparent;transition:transform .15s ease,filter .15s ease;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn-gold{background:linear-gradient(180deg,#e3c07a,#c39a3f);color:#1a1206;box-shadow:0 10px 24px rgba(195,154,63,.28)}
+  .btn-line{background:rgba(255,255,255,.06);color:var(--cream);border-color:rgba(231,205,141,.38)}
+  .btn svg{width:20px;height:20px;flex:none}
+
+  /* sections */
+  section{padding:46px 22px}
+  .sec-label{
+    display:flex;align-items:center;gap:10px;font-size:11.5px;letter-spacing:.26em;
+    color:var(--gold);text-transform:uppercase;margin:0 0 12px;
+  }
+  .sec-label::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,var(--line),transparent)}
+  h2{
+    font-family:"Noto Serif KR","NanumMyeongjo",serif;font-weight:700;
+    font-size:27px;line-height:1.42;margin:0 0 16px;letter-spacing:-.005em;
+  }
+  h2 em{font-style:normal;color:var(--gold-lt)}
+  p{margin:0 0 14px}
+  .lead{color:#d7cdbd;font-size:16.5px}
+
+  .intro{background:var(--ink-2);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+  .quote{
+    margin:22px 0 0;padding:18px 18px 18px 20px;border-left:2px solid var(--gold);
+    background:rgba(200,160,74,.06);border-radius:0 12px 12px 0;
+    font-family:"Noto Serif KR",serif;font-size:17px;line-height:1.7;color:#efe4d0;
+  }
+
+  /* info card */
+  .card{
+    background:linear-gradient(160deg,#17130f,#100d0a);
+    border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);
+  }
+  .info-row{display:flex;gap:12px;padding:13px 0;border-bottom:1px dashed rgba(200,160,74,.18);align-items:flex-start}
+  .info-row:last-child{border-bottom:0;padding-bottom:2px}
+  .info-row:first-child{padding-top:0}
+  .info-ico{
+    width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;
+    background:rgba(200,160,74,.12);border:1px solid var(--line);color:var(--gold-lt);
+  }
+  .info-ico svg{width:18px;height:18px}
+  .info-k{font-size:12.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:1px 0 3px}
+  .info-v{font-size:16.5px;line-height:1.55}
+  .info-v strong{font-weight:700;color:#fff8ea}
+  .info-v a{border-bottom:1px solid rgba(231,205,141,.4)}
+  .pending{
+    display:inline-block;margin-top:6px;font-size:12.5px;color:#e7cd8d;
+    background:rgba(231,205,141,.1);border:1px dashed rgba(231,205,141,.45);
+    border-radius:8px;padding:3px 9px;line-height:1.5;
+  }
+
+  /* feature grid */
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .feat div{
+    border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:15px 14px;
+    background:rgba(255,255,255,.025);font-size:15px;line-height:1.5;
+  }
+  .feat b{display:block;font-size:16.5px;color:#fff8ea;margin-bottom:3px;font-weight:700}
+  .feat span{color:var(--muted);font-size:13.5px}
+
+  /* photo band */
+  .band{padding:0}
+  .band figure{margin:0;position:relative}
+  .band img{width:100%;height:260px;object-fit:cover}
+  .band figcaption{
+    position:absolute;left:0;right:0;bottom:0;padding:26px 22px 16px;font-size:12.5px;
+    letter-spacing:.04em;color:#cfc3b1;
+    background:linear-gradient(180deg,transparent,rgba(10,9,8,.92));
+  }
+
+  /* menu */
+  .menu-grid{display:grid;gap:10px;margin-top:6px}
+  .menu-item{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+    padding:17px 18px;border:1px solid rgba(255,255,255,.09);border-radius:14px;
+    background:rgba(255,255,255,.025);
+  }
+  .menu-item b{font-size:17px;font-weight:700;display:block;line-height:1.4}
+  .menu-item span{font-size:13.5px;color:var(--muted)}
+  .menu-price{font-family:"Noto Serif KR",serif;color:var(--gold-lt);font-size:14.5px;white-space:nowrap;text-align:right;line-height:1.4}
+
+  /* group */
+  .group{background:linear-gradient(180deg,#0f0d0b,#16120e);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05)}
+  .group .cta-row{padding:0;margin-top:22px}
+  .group .btn{min-height:60px}
+
+  /* location */
+  .map-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .map-links a{
+    display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;
+    border-radius:13px;border:1px solid var(--line);background:rgba(200,160,74,.08);
+    font-size:16px;font-weight:700;color:#f6eddc;
+  }
+  .map-links a:last-child{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}
+
+  /* footer */
+  footer{padding:34px 22px 118px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.8}
+  footer .mark{font-family:"Noto Serif KR",serif;color:var(--gold-lt);letter-spacing:.22em;font-size:13px;margin-bottom:12px}
+  footer .disc{
+    margin:14px auto 0;max-width:22em;border:1px dashed rgba(231,205,141,.35);
+    border-radius:10px;padding:10px 12px;color:#e7cd8d;background:rgba(231,205,141,.05);
+  }
+
+  /* sticky bar */
+  .dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    background:rgba(12,10,8,.94);backdrop-filter:blur(12px);
+    border-top:1px solid rgba(200,160,74,.3);
+    padding:9px 12px calc(9px + env(safe-area-inset-bottom));
+  }
+  .dock-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .dock a{
+    display:flex;align-items:center;justify-content:center;gap:7px;height:50px;
+    border-radius:12px;font-size:16.5px;font-weight:700;
+  }
+  .dock .p1{background:linear-gradient(180deg,#e3c07a,#c39a3f);color:#1a1206}
+  .dock .p2{background:rgba(255,255,255,.07);border:1px solid rgba(231,205,141,.35);color:var(--cream)}
+  .dock svg{width:18px;height:18px}
+
+  @media (max-width:359px){
+    .cta-row{grid-template-columns:1fr}
+    .feat{grid-template-columns:1fr}
+  }
+  @media (min-width:481px){
+    body{background:#060505}
+    .wrap{box-shadow:0 0 80px rgba(0,0,0,.8)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="notice">※ <b>매장 제안용 맞춤 시안</b>입니다 · 확인되지 않은 항목은 사장님 확인 후 반영됩니다</div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-bg"><img src="assets/hero.jpg" alt="뉴욕 데이앤나이트 매장 분위기 이미지(시안)" width="1600" height="1067"></div>
+
+    <div class="hero-top">
+      <div class="brandline">Bupyeong · New York</div>
+      <div class="tag">호프 · 요리주점</div>
+    </div>
+
+    <div class="hero-body">
+      <h1 class="serif">
+        <span>NEW YORK</span>
+        <span class="amp">DAY &amp; NIGHT</span>
+      </h1>
+      <p class="hero-sub">부평대로 한복판, <b>뉴욕의 밤</b>을 그대로 옮겨온<br>호프 &amp; 요리주점 <b>뉴욕데이앤나이트</b></p>
+      <div class="hero-hours"><span class="dot"></span>매일 10:00 – 24:00 영업</div>
+      <p class="img-note">※ 이미지는 분위기 연출용 시안 이미지입니다 (실제 매장 사진으로 교체)</p>
+    </div>
+  </header>
+
+  <div class="cta-row">
+    <a class="btn btn-gold" href="tel:050714536010" aria-label="전화 걸기 0507-1453-6010">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6.6 3.5h2.2l1.5 3.9-1.9 1.4a12 12 0 0 0 5.4 5.4l1.4-1.9 3.9 1.5v2.2a2.4 2.4 0 0 1-2.6 2.4A16.2 16.2 0 0 1 4.2 6.1 2.4 2.4 0 0 1 6.6 3.5z" stroke-linejoin="round"/></svg>
+      전화 예약
+    </a>
+    <a class="btn btn-line" href="https://map.naver.com/p/entry/place/2026153279" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6"/></svg>
+      네이버 지도
+    </a>
+  </div>
+
+  <!-- INTRO -->
+  <section class="intro">
+    <p class="sec-label">About</p>
+    <h2 class="serif">낮에는 편하게,<br>밤에는 <em>뉴욕처럼</em></h2>
+    <p class="lead">따뜻한 조명과 진한 나무 결, 잔을 채우는 맥주 소리.<br>부평시장역에서 걷어 올라오면 만나는 작은 뉴욕입니다.</p>
+    <div class="quote">단체모임 · 공간대여<br><span style="font-size:14.5px;color:#bfb3a1;font-family:'Noto Sans KR',sans-serif">— 매장에서 직접 등록한 소개</span></div>
+    <p style="margin-top:20px;color:#bfb3a1;font-size:15.5px">모임은 넓게, 술은 오래. 콜키지는 병수 제한 없이 무료입니다.</p>
+  </section>
+
+  <!-- 영업 정보 -->
+  <section>
+    <p class="sec-label">Information</p>
+    <h2 class="serif">영업 안내</h2>
+    <div class="card">
+      <div class="info-row">
+        <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/></svg></div>
+        <div>
+          <div class="info-k">영업시간</div>
+          <div class="info-v"><strong>매일 10:00 – 24:00</strong><br><span style="font-size:14px;color:var(--muted)">네이버 지도 등록 기준</span>
+            <div class="pending">라스트오더·휴무일 — 사장님 확인 후 즉시 반영 (시안)</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.6 3.5h2.2l1.5 3.9-1.9 1.4a12 12 0 0 0 5.4 5.4l1.4-1.9 3.9 1.5v2.2a2.4 2.4 0 0 1-2.6 2.4A16.2 16.2 0 0 1 4.2 6.1 2.4 2.4 0 0 1 6.6 3.5z" stroke-linejoin="round"/></svg></div>
+        <div>
+          <div class="info-k">전화</div>
+          <div class="info-v"><a href="tel:050714536010">0507-1453-6010</a></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6"/></svg></div>
+        <div>
+          <div class="info-k">주소</div>
+          <div class="info-v">인천 부평구 부평대로 115<br>M-TOWER7 1층 101호<br><span style="font-size:14.5px;color:var(--muted)">부평시장역 4번 출구 370m · 도보 약 5분</span></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h16M7 20V9l5-4 5 4v11" stroke-linejoin="round"/><path d="M10 20v-5h4v5"/></svg></div>
+        <div>
+          <div class="info-k">주차</div>
+          <div class="info-v">매장 주차 불가<br><span style="font-size:14.5px;color:var(--muted)">복개천 무료주차장 이용 가능</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 공간 -->
+  <section style="padding-top:8px">
+    <p class="sec-label">Space</p>
+    <h2 class="serif">이런 자리,<br>어떠세요</h2>
+    <div class="feat">
+      <div><b>단체 · 대관</b><span>모임·회식·공간대여 가능</span></div>
+      <div><b>콜키지 무료</b><span>병수 제한 없이 무료</span></div>
+      <div><b>좌식 · 바테이블</b><span>1인석 · 연인석까지</span></div>
+      <div><b>편안한 부속</b><span>무선인터넷 · 대기공간 · 남녀 화장실 구분</span></div>
+    </div>
+    <p style="margin-top:14px;font-size:14.5px;color:var(--muted)">휠체어 출입 가능 · 반려동물 동반은 어렵습니다</p>
+  </section>
+
+  <div class="band">
+    <figure>
+      <img src="assets/drink.jpg" alt="생맥주와 하이볼 이미지(시안)" width="1600" height="1200" loading="lazy">
+      <figcaption>차가운 잔, 진한 거품 — 하루의 끝을 여기서</figcaption>
+    </figure>
+  </div>
+
+  <!-- 메뉴 -->
+  <section>
+    <p class="sec-label">Menu</p>
+    <h2 class="serif">메뉴</h2>
+    <div class="menu-grid">
+      <div class="menu-item"><div><b>안주 · 요리</b><span>매장 대표 안주</span></div><div class="menu-price">가격 문의</div></div>
+      <div class="menu-item"><div><b>맥주 · 하이볼</b><span>생맥주 · 하이볼</span></div><div class="menu-price">가격 문의</div></div>
+      <div class="menu-item"><div><b>위스키 · 사케</b><span>병 · 잔 판매</span></div><div class="menu-price">가격 문의</div></div>
+    </div>
+    <div class="pending" style="margin-top:14px">메뉴 구성·가격 — 사장님 확인 후 즉시 반영 (시안)</div>
+  </section>
+
+  <div class="band">
+    <figure>
+      <img src="assets/room.jpg" alt="단체석 공간 이미지(시안)" width="1600" height="1200" loading="lazy">
+      <figcaption>단체석 · 공간대여 — 모임이 길어져도 편안하게</figcaption>
+    </figure>
+  </div>
+
+  <!-- 단체/예약 -->
+  <section class="group">
+    <p class="sec-label">Reservation</p>
+    <h2 class="serif">단체 · 회식 문의는<br><em>전화 한 통</em>이면 됩니다</h2>
+    <p class="lead">인원·날짜를 말씀해 주시면 자리를 잡아 드립니다.<br>대관·콜키지 상담도 함께 도와드립니다.</p>
+    <div class="cta-row">
+      <a class="btn btn-gold" href="tel:050714536010">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6.6 3.5h2.2l1.5 3.9-1.9 1.4a12 12 0 0 0 5.4 5.4l1.4-1.9 3.9 1.5v2.2a2.4 2.4 0 0 1-2.6 2.4A16.2 16.2 0 0 1 4.2 6.1 2.4 2.4 0 0 1 6.6 3.5z" stroke-linejoin="round"/></svg>
+        0507-1453-6010
+      </a>
+      <a class="btn btn-line" href="https://map.naver.com/p/entry/place/2026153279" target="_blank" rel="noopener">위치 보기</a>
+    </div>
+    <div class="pending" style="margin-top:14px">네이버 예약 — 개설 시 즉시 연결 (시안)</div>
+  </section>
+
+  <!-- 오시는 길 -->
+  <section>
+    <p class="sec-label">Location</p>
+    <h2 class="serif">오시는 길</h2>
+    <div class="card">
+      <div class="info-v" style="font-size:17px"><strong>인천 부평구 부평대로 115</strong><br>M-TOWER7 1층 101호</div>
+      <p style="margin:12px 0 0;font-size:15px;color:var(--muted)">부평시장역 4번 출구에서 370m<br>부천세무서 방향으로 곧장 오시면 됩니다</p>
+    </div>
+    <div class="map-links">
+      <a href="https://map.naver.com/p/entry/place/2026153279" target="_blank" rel="noopener">네이버 지도</a>
+      <a href="https://place.map.kakao.com/47538193" target="_blank" rel="noopener">카카오맵</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="mark serif">NEW YORK DAY &amp; NIGHT</div>
+    인천 부평구 부평대로 115 M-TOWER7 1층 101호<br>
+    T. 0507-1453-6010 · 매일 10:00 – 24:00
+    <div class="disc">※ 이 페이지는 <b>매장 제안용 맞춤 시안</b>이며, 매장의 공식 홈페이지가 아닙니다. 표시된 정보는 공개된 등록 정보를 기준으로 하였고, 미확인 항목은 사장님 확인 후 반영됩니다. 이미지는 분위기 연출용 시안 이미지입니다.</div>
+  </footer>
+
+</div>
+
+<div class="dock">
+  <div class="dock-in">
+    <a class="p1" href="tel:050714536010">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.6 3.5h2.2l1.5 3.9-1.9 1.4a12 12 0 0 0 5.4 5.4l1.4-1.9 3.9 1.5v2.2a2.4 2.4 0 0 1-2.6 2.4A16.2 16.2 0 0 1 4.2 6.1 2.4 2.4 0 0 1 6.6 3.5z" stroke-linejoin="round"/></svg>
+      전화하기
+    </a>
+    <a class="p2" href="https://map.naver.com/p/entry/place/2026153279" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.6"/></svg>
+      길찾기
+    </a>
+  </div>
+</div>
+<script>
+  (function(){
+    var d=document;
+    d.documentElement.className+=' js';
+    var dock=d.querySelector('.dock');
+    function sync(){ if(window.scrollY>360){dock.classList.add('show');} else {dock.classList.remove('show');} }
+    window.addEventListener('scroll',sync,{passive:true});
+    sync();
+  })();
+</script>
+</body>
+</html>
