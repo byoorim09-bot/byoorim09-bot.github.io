@@ -9,8 +9,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="뉴욕데이앤나이트 | 부평 호프·요리주점">
 <meta property="og:description" content="부평대로, 뉴욕의 밤을 옮겨온 호프 &amp; 요리주점. 매일 10:00–24:00 · 단체·대관 · 콜키지 무료.">
-<meta property="og:image" content="https://byoorim09-bot.github.io/newyork-daynight-demo/assets/hero.jpg">
-<meta property="og:url" content="https://byoorim09-bot.github.io/newyork-daynight-demo/">
+<meta property="og:image" content="https://byoorim09-bot.github.io/nydn/assets/hero.jpg">
+<meta property="og:url" content="https://byoorim09-bot.github.io/nydn/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -51,7 +51,7 @@
   .notice b{color:var(--gold-lt);font-weight:500}
 
   /* hero */
-  .hero{position:relative;min-height:600px;display:flex;flex-direction:column;justify-content:flex-end;isolation:isolate}
+  .hero{position:relative;min-height:560px;display:flex;flex-direction:column;justify-content:flex-end;isolation:isolate}
   .hero-bg{position:absolute;inset:0;z-index:-2}
   .hero-bg img{width:100%;height:100%;object-fit:cover;object-position:58% center}
   .hero::after{
@@ -71,6 +71,10 @@
     font-family:"Noto Serif KR","NanumMyeongjo",serif;
     font-weight:700;margin:0;line-height:.98;letter-spacing:.02em;
     font-size:clamp(44px,12.4vw,58px);
+  }
+  .hero-body::before{
+    content:"";display:block;width:38px;height:2px;background:linear-gradient(90deg,var(--gold),rgba(200,160,74,0));
+    margin:0 0 18px;
   }
   .hero h1 span{display:block}
   .hero h1 .amp{
@@ -245,7 +249,7 @@
       </h1>
       <p class="hero-sub">부평대로 한복판, <b>뉴욕의 밤</b>을 그대로 옮겨온<br>호프 &amp; 요리주점 <b>뉴욕데이앤나이트</b></p>
       <div class="hero-hours"><span class="dot"></span>매일 10:00 – 24:00 영업</div>
-      <p class="img-note">※ 이미지는 분위기 연출용 시안 이미지입니다 (실제 매장 사진으로 교체)</p>
+      <p class="img-note">※ 분위기 연출용 시안 이미지 (실제 매장 사진으로 교체)</p>
     </div>
   </header>
 
