@@ -80,7 +80,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .hero h2{font-size:19px;font-weight:800;letter-spacing:-.02em}
 .hero p{font-size:13.5px;color:#D6EDE6;margin-top:7px}
 .hero .hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
-.hero .hero-chips span{font-size:11.5px;font-weight:700;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);color:#EAF7F3;padding:4px 9px;border-radius:99px}
+.hero .hero-chips span{font-size:11px;font-weight:700;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.22);color:#EAF7F3;padding:3px 8px;border-radius:99px;letter-spacing:-.02em}
 
 .notice{
   display:flex;gap:9px;background:var(--warn-soft);border:1px solid #F3DFB0;
@@ -143,7 +143,7 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
   padding:13px 14px;margin-top:10px;
 }
 .big-out .lbl{font-size:12px;font-weight:800;color:#397564;letter-spacing:.02em}
-.big-out .val{font-size:24px;font-weight:900;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.2}
+.big-out .val{font-size:clamp(19px,5.6vw,25px);font-weight:900;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums;line-height:1.2;overflow-wrap:anywhere}
 .big-out .val small{font-size:14px;font-weight:800;margin-left:2px}
 .big-out .note{font-size:11.5px;color:#5B8B7C;margin-top:4px}
 .minus{color:var(--danger)}
@@ -163,16 +163,16 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .warn-list li{position:relative;padding-left:20px;font-size:13px;color:#4A3A22;margin-top:8px;line-height:1.55}
 .warn-list li::before{content:"!";position:absolute;left:0;top:1px;width:15px;height:15px;border-radius:50%;background:#F0B45A;color:#fff;font-size:10.5px;font-weight:900;display:grid;place-items:center}
 
-/* ---------- 비교표 ---------- */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--line)}
-table.cmp{width:100%;border-collapse:collapse;font-size:12.5px;min-width:100%}
-table.cmp th,table.cmp td{padding:9px 7px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
-table.cmp thead th{background:#F6F9FB;font-size:12px;font-weight:800;color:#33475B;white-space:nowrap}
-table.cmp thead th:first-child{width:21%}
-table.cmp tbody th{font-weight:800;color:#33475B;background:#FAFCFD;font-size:12px;white-space:nowrap}
-table.cmp tbody tr:last-child th,table.cmp tbody tr:last-child td{border-bottom:none}
-table.cmp td b{font-weight:800}
-.lvl{display:inline-block;font-size:11px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap}
+/* ---------- 자산 비교 카드 ---------- */
+.asset{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:11px;background:#FCFDFE}
+.asset h4{display:flex;align-items:center;gap:7px;font-size:14.5px;font-weight:800}
+.asset h4 .dot{width:8px;height:8px;border-radius:3px;flex:0 0 8px}
+.asset .sum{font-size:11.5px;color:var(--mute);margin:3px 0 6px 15px;line-height:1.5}
+.asset .kv{padding:6px 0;font-size:13px;align-items:flex-start;gap:8px}
+.asset .kv + .kv{border-top:1px solid #F2F5F8}
+.asset .kv .k{flex:0 0 62px;font-size:11.5px;color:var(--mute);padding-top:1px;line-height:1.5}
+.asset .kv .v{text-align:left;white-space:normal;font-weight:700;font-size:12.8px;line-height:1.5;flex:1}
+.lvl{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:5px;white-space:nowrap;margin-right:2px}
 .lvl.low{background:#E7F4EE;color:#0B6B4F}
 .lvl.mid{background:#FFF3DC;color:#8A5A00}
 .lvl.high{background:#FDE9E7;color:#A32418}

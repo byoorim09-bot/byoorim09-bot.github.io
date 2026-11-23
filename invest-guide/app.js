@@ -208,7 +208,7 @@
     var mixTxt = "주식 " + mix.stock + "% · 코인 " + mix.coin + "% · 부동산(리츠 포함) " + mix.realestate + "% · 예금·채권 " + mix.cash + "%";
     html += '<div class="step"><div class="bubble">2</div>' +
       '<div class="st-title">내 성향에 맞는 비중을 숫자로 정한다</div>' +
-      '<div class="st-body">"%를 정하는 것"이 투자의 거의 전부입니다. 어떤 종목을 고를지보다, <b>얼마를 어디에 둘지</b>가 결과를 더 크게 좌우합니다. '
+      '<div class="st-body">비중(%)을 정하는 것이 투자의 거의 전부입니다. 어떤 종목을 고를지보다, <b>얼마를 어디에 둘지</b>가 결과를 더 크게 좌우합니다. '
       + (d.style === "safe" ? "안정형은 원금이 크게 흔들리지 않는 쪽에 무게를 둡니다." : d.style === "active" ? "적극형은 변동을 감수하지만, 그만큼 '잃어도 되는 돈'으로만 채워야 합니다." : "균형형은 오르내림을 견디면서 장기 수익을 노리는 구성입니다.")
       + '</div>' +
       '<div class="st-do"><b>참고 예시 비중</b> · ' + mixTxt + '<br>월 ' + won(m) + " 기준이면 주식 쪽 약 " + won(m * mix.stock / 100) + ", 예금·채권 약 " + won(m * mix.cash / 100) + " (추천이 아닌 학습용 예시)</div></div>";
@@ -359,7 +359,7 @@
     html += row("원금 대비 증가율", '<span class="' + (gain >= 0 ? "plus" : "minus") + '">' + (gain >= 0 ? "+" : "") + pct(gainPct, 1) + "</span>");
     html += row("총 납입 횟수", (years * 12) + "회", "", "매달 " + won(monthly) + "씩");
     html += '<div class="chart">' + simChart(balances) + "</div>";
-    html += '<div class="legend"><span><i style="background:#12876D"></i>매년 말 예상 잔액</span><span><i style="background:#C9D6DF"></i>수익이 0%일 때(납입액)</span></div>';
+    html += '<div class="legend"><span><i style="background:#12876D"></i>매년 말 예상 잔액 (원금 + 수익)</span></div>';
 
     $("#simResult").innerHTML = html;
   }
@@ -611,7 +611,7 @@
     if (type !== "even") html += row("마지막 달 납부액", won(last));
     if (type === "bullet") html += row("만기 일시 상환액", won(P + P * r));
     html += row("총 이자", '<span class="minus">' + won(totalInterest) + "</span>", "", "원금의 " + pct(P > 0 ? totalInterest / P * 100 : 0, 1));
-    html += row("총 상환액", won(totalPay), "", P + "원 + 이자");
+    html += row("총 상환액", won(totalPay), "", won(P) + " + 이자");
     html += row("기간", years + "년 (" + nMonths + "회)", "", "연 " + pct(rate, 2) + " 고정 가정");
     html += '<p class="hint mt12">실제 대출은 <b>금리 변동(변동금리)·중도상환수수료·인지세</b> 등이 붙습니다. 은행 상환계산기와 차이가 있을 수 있으니 참고용으로만 쓰세요.</p>';
     out.innerHTML = html;
@@ -646,8 +646,7 @@
     else if (risk < 90) { verdict = "위험"; cls = "minus"; advice = "80%를 넘었습니다. '깡통전세' 위험이 있는 구간입니다. 계약을 멈추고 등기부등본·시세·집주인 채무를 직접 확인하세요."; }
     else { verdict = "매우 위험"; cls = "minus"; advice = "90% 이상입니다. 집값이 조금만 떨어지면 보증금을 거의 돌려받지 못할 수 있습니다. 전세보증금 반환보증 가입이 안 되는 집은 계약하지 않는 것이 안전합니다."; }
 
-    var html = bigOut("전세가율 " + pct(ratio, 1), verdict,
-      "보증금 " + kwon(deposit) + " ÷ 매매가 " + kwon(price), "");
+    var html = bigOut("전세가율", pct(ratio, 1), "<b>" + verdict + "</b> · 보증금 " + kwon(deposit) + " ÷ 매매가 " + kwon(price));
     html += row("보증금 + 집에 잡힌 빚", kwon(deposit + senior), "", "집주인 대출(근저당) 포함");
     html += row("집값 대비 비율", '<span class="' + cls + '">' + pct(risk, 1) + "</span>", "", "이 비율이 80%를 넘으면 위험 구간");
     html += row("남는 담보 여력", '<span class="' + (room > 0 ? "plus" : "minus") + '">' + kwon(room) + "</span>", "", "집값 - 빚 - 내 보증금");
