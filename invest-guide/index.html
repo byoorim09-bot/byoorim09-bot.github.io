@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>투자 첫걸음 — 초보자 투자 길잡이 (학습·계산 도우미)</title>
+<meta name="description" content="주식·코인·부동산을 처음 시작하는 분을 위한 학습·계산 도우미. 시작 순서 진단, 3대 자산 비교, 물타기·실수령액·전세가율 계산기, 체크리스트와 쉬운 용어사전. 투자 권유가 아닙니다.">
+<meta name="keywords" content="초보 투자, 주식 계산기, 코인 물타기, 평단가, 전세가율, 대출 이자 계산, 투자 체크리스트, 투자 용어">
+<meta name="author" content="투자 첫걸음">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0E7A63">
+<meta name="color-scheme" content="light">
+<link rel="canonical" href="https://byoorim09-bot.github.io/invest-guide/">
+
+<!-- PWA / 홈 화면 아이콘 -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="투자 첫걸음">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="투자 첫걸음">
+<meta name="format-detection" content="telephone=no">
+
+<!-- 공유 미리보기 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="투자 첫걸음">
+<meta property="og:title" content="투자 첫걸음 — 초보자 투자 길잡이">
+<meta property="og:description" content="주식·코인·부동산, 무엇부터 해야 할까요? 시작 순서 진단부터 물타기·실수령액·전세가율 계산기, 체크리스트, 쉬운 용어사전까지. 학습·계획·계산용 도우미이며 투자 권유가 아닙니다.">
+<meta property="og:url" content="https://byoorim09-bot.github.io/invest-guide/">
+<meta property="og:image" content="https://byoorim09-bot.github.io/invest-guide/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="투자 첫걸음 — 초보자를 위한 학습·계산 도우미">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="투자 첫걸음 — 초보자 투자 길잡이">
+<meta name="twitter:description" content="주식·코인·부동산 시작 순서 진단과 초보 계산기. 학습·계산용 도우미이며 투자 권유가 아닙니다.">
+<meta name="twitter:image" content="https://byoorim09-bot.github.io/invest-guide/og.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19V5"/><path d="M4 19h16"/>
+        <path d="M7 15l4-4 3 2 4-6"/>
+        <path d="M18 7h-3M18 7v3"/>
+      </svg>
+    </div>
+    <div class="brand-txt">
+      <h1>투자 첫걸음</h1>
+      <p>초보자를 위한 학습·계산 도우미</p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ 1. 시작 진단 ============ -->
+  <section class="panel on" id="panel-start" data-panel="start">
+    <div class="hero">
+      <h2>투자, 무엇부터 해야 할까요?</h2>
+      <p>세 가지만 알려주시면 <b>지금 당장 할 일 1·2·3단계</b>를 순서대로 짚어 드립니다. 정답을 알려주는 앱이 아니라, 순서를 정리해 주는 앱입니다.</p>
+      <div class="hero-chips"><span>시작 순서 진단</span><span>3대 자산 비교</span><span>초보 계산기</span><span>체크리스트</span></div>
+    </div>
+
+    <div class="notice">
+      <span class="ico" aria-hidden="true">⚠️</span>
+      <div>
+        <strong>먼저 꼭 읽어 주세요</strong>
+        이 앱은 <b>학습·계획·계산용 도우미</b>이며 <b>투자 권유가 아닙니다.</b> 특정 종목·코인·매물을 추천하지 않고, 수익을 보장하지 않으며, 실제 매매와 연결되지 않습니다. 모든 투자 판단과 결과의 책임은 투자자 본인에게 있습니다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div><h2>내 상황 알려주기</h2></div>
+      </div>
+      <p class="desc">입력한 값은 이 브라우저에만 저장되고, 어디로도 전송되지 않습니다.</p>
+
+      <div class="field">
+        <div class="field-label"><span class="q">Q1.</span>한 달에 투자에 쓸 수 있는 여유자금은 얼마인가요?
+          <span class="sub">생활비·저축을 빼고 '정말 남는 돈' 기준으로 적어 주세요.</span>
+        </div>
+        <div class="input-line">
+          <input type="number" id="diagMonthly" inputmode="numeric" min="0" step="10000" placeholder="예: 300000" aria-label="월 여유자금">
+          <span class="unit">원</span>
+        </div>
+        <div class="chips" id="diagMonthlyChips">
+          <button type="button" data-v="100000">10만원</button>
+          <button type="button" data-v="300000">30만원</button>
+          <button type="button" data-v="500000">50만원</button>
+          <button type="button" data-v="1000000">100만원</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span class="q">Q2.</span>비상금(생활비 3~6개월치)이 있나요?
+          <span class="sub">비상금 = 갑자기 월급이 끊겨도 3~6개월은 버틸 수 있는 돈</span>
+        </div>
+        <div class="seg" id="diagEmergency" role="group" aria-label="비상금 보유 여부">
+          <button type="button" data-v="none">없어요</button>
+          <button type="button" data-v="short">3개월<br>미만</button>
+          <button type="button" data-v="ready">3개월<br>이상</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label"><span class="q">Q3.</span>내 투자 성향은 어디에 가깝나요?
+          <span class="sub">돈이 -20%가 되어도 견딜 수 있는지 스스로에게 물어보세요.</span>
+        </div>
+        <div class="seg" id="diagStyle" role="group" aria-label="투자 성향">
+          <button type="button" data-v="safe">안정<span class="sm">원금 지키기</span></button>
+          <button type="button" data-v="balanced">균형<span class="sm">적당한 변동</span></button>
+          <button type="button" data-v="active">적극<span class="sm">큰 변동 감수</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="diagCard">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div><h2>지금 할 일 1·2·3단계</h2></div>
+      </div>
+      <div id="diagResult"></div>
+    </div>
+
+    <p class="foot">이 진단은 일반적인 원칙을 정리한 참고 자료입니다. 개인의 소득·부채·가족 상황에 따라 순서가 달라질 수 있고, 세법·금융상품 조건은 바뀔 수 있으므로 가입 전에 공식 안내를 확인하세요.</p>
+  </section>
+
+  <!-- ============ 2. 3대 자산 비교 & 배분 ============ -->
+  <section class="panel" id="panel-assets" data-panel="assets">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div><h2>주식 · 코인 · 부동산 한눈에 비교</h2></div>
+      </div>
+      <p class="desc">"무엇이 더 좋다"가 아니라 <b>무엇이 어떻게 다른지</b>를 보는 표입니다. 셋 다 원금 손실이 가능합니다.</p>
+
+      <div class="tbl-wrap mt12">
+        <table class="cmp">
+          <thead>
+            <tr><th>구분</th><th>주식</th><th>코인</th><th>부동산</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>최소 금액</th>
+              <td>1주부터<br>(몇 천 원~)</td>
+              <td>1,000원부터<br>(소수점 매수)</td>
+              <td>수천만 원~<br>(지방 소형도 억 단위)</td>
+            </tr>
+            <tr>
+              <th>위험도</th>
+              <td><span class="lvl mid">중간</span><br>기업 실적·경기 영향</td>
+              <td><span class="lvl high">매우 높음</span><br>하루 ±10~20% 흔함</td>
+              <td><span class="lvl low">상대적 낮음</span><br>빚(대출) 쓰면 위험 커짐</td>
+            </tr>
+            <tr>
+              <th>현금화(환금성)</th>
+              <td><span class="lvl low">빠름</span><br>2~3일</td>
+              <td><span class="lvl low">빠름</span><br>24시간, 단 급락 시 지연</td>
+              <td><span class="lvl high">느림</span><br>수개월, 급할 땐 손해</td>
+            </tr>
+            <tr>
+              <th>세금</th>
+              <td>매도 시 거래세<br>(2026년 코스피·코스닥 0.20%)<br>배당·이자 15.4%</td>
+              <td>2027년 1월부터<br>연 250만 원 초과 이익에 22%<br>(현행법 기준)</td>
+              <td>살 때 취득세, 보유 시 재산세,<br>팔 때 양도소득세</td>
+            </tr>
+            <tr>
+              <th>초보 난이도</th>
+              <td>중간<br>용어가 많음</td>
+              <td>높음<br>정보·사기 위험 큼</td>
+              <td>높음<br>서류·계약·대출 복잡</td>
+            </tr>
+            <tr>
+              <th>한마디로</th>
+              <td>회사의 지분을 사는 것</td>
+              <td>가격만 보고 사는 디지털 자산</td>
+              <td>살 집 + 빚을 함께 사는 것</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip">표의 숫자는 이해를 돕기 위한 <b>일반적인 기준</b>입니다. 개별 종목·지역·시점에 따라 크게 달라지고, 세율은 법 개정으로 바뀝니다.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div><h2>내 투자금 배분해 보기</h2></div>
+      </div>
+      <p class="desc">슬라이더를 움직이면 나머지 비중이 자동으로 조정됩니다. 정답은 없습니다 — <b>잃어도 견딜 수 있는 구조</b>가 좋은 구조입니다.</p>
+
+      <div class="field">
+        <div class="field-label">나눠 담을 투자금</div>
+        <div class="input-line">
+          <input type="number" id="allocAmount" inputmode="numeric" min="0" step="100000" placeholder="예: 1000000" aria-label="투자금">
+          <span class="unit">원</span>
+        </div>
+      </div>
+
+      <div id="allocSliders"></div>
+
+      <div class="total-row">
+        <span>합계</span>
+        <span class="ok" id="allocTotal">100% · 1,000,000원</span>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn sm" data-preset="safe">안정 예시</button>
+        <button type="button" class="btn sm" data-preset="balanced">균형 예시</button>
+        <button type="button" class="btn sm" data-preset="active">적극 예시</button>
+      </div>
+      <p class="hint mt8">위 세 가지는 <b>학습용 예시 비중</b>이며 추천이 아닙니다. 특히 코인 비중은 0%로 두어도 됩니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">3</div>
+        <div><h2>복리·적립 시뮬레이터</h2></div>
+      </div>
+      <p class="desc">매달 같은 금액을 넣고 같은 수익률이 난다고 <b>가정</b>했을 때의 계산입니다. 실제 수익률은 해마다 다르고, 마이너스인 해도 있습니다.</p>
+
+      <div class="field">
+        <div class="field-label">처음 넣는 돈</div>
+        <div class="input-line"><input type="number" id="simInitial" inputmode="numeric" min="0" step="100000" aria-label="초기 투자금"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">매달 넣는 돈</div>
+        <div class="input-line"><input type="number" id="simMonthly" inputmode="numeric" min="0" step="10000" aria-label="월 적립금"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">가정 연 수익률 <span class="sub">예금·채권·주식의 과거 평균을 참고해 직접 넣어 보세요</span></div>
+        <div class="input-line"><input type="number" id="simRate" inputmode="decimal" min="-50" max="100" step="0.5" aria-label="연 수익률"><span class="unit">%</span></div>
+        <div class="chips" id="simRateChips">
+          <button type="button" data-v="3">3%</button>
+          <button type="button" data-v="4.5">4.5%</button>
+          <button type="button" data-v="7">7%</button>
+          <button type="button" data-v="10">10%</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">기간</div>
+        <div class="input-line"><input type="number" id="simYears" inputmode="numeric" min="1" max="50" step="1" aria-label="기간"><span class="unit">년</span></div>
+        <div class="chips" id="simYearChips">
+          <button type="button" data-v="5">5년</button>
+          <button type="button" data-v="10">10년</button>
+          <button type="button" data-v="20">20년</button>
+          <button type="button" data-v="30">30년</button>
+        </div>
+      </div>
+
+      <div id="simResult"></div>
+      <p class="hint mt12">세금·수수료·물가 상승은 반영하지 않은 단순 계산입니다. 수익률을 높게 넣으면 결과가 좋아 보일 뿐, 실제로 그 수익률이 보장되는 것은 아닙니다.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. 초보 계산기 ============ -->
+  <section class="panel" id="panel-calc" data-panel="calc">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div><h2>물타기 계산기 (평단가)</h2></div>
+      </div>
+      <p class="desc">주가·코인 가격이 내렸을 때 <b>더 사면 평균 매입가가 얼마가 되는지</b> 계산합니다.</p>
+
+      <div class="field">
+        <div class="field-label">지금 보유 수량</div>
+        <div class="input-line"><input type="number" id="avgQty" inputmode="decimal" min="0" step="any" placeholder="예: 10" aria-label="보유 수량"><span class="unit">주·개</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">지금 평균 매입가</div>
+        <div class="input-line"><input type="number" id="avgPrice" inputmode="numeric" min="0" step="any" placeholder="예: 50000" aria-label="평균 매입가"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">추가로 살 금액</div>
+        <div class="input-line"><input type="number" id="avgAddAmount" inputmode="numeric" min="0" step="10000" placeholder="예: 100000" aria-label="추가 매수 금액"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">추가로 살 때의 가격</div>
+        <div class="input-line"><input type="number" id="avgAddPrice" inputmode="numeric" min="0" step="any" placeholder="예: 30000" aria-label="추가 매수 가격"><span class="unit">원</span></div>
+      </div>
+
+      <div id="avgResult"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div><h2>매도 실수령액 계산기</h2></div>
+      </div>
+      <p class="desc">팔면 <b>수수료와 세금을 빼고 실제로 얼마가 남는지</b> 계산합니다. 세율은 아래에서 직접 바꿀 수 있습니다.</p>
+
+      <div class="field">
+        <div class="field-label">무엇을 파나요? <span class="sub">세금 계산 방식이 자동으로 바뀝니다</span></div>
+        <div class="seg sub" id="sellPreset" role="group" aria-label="상품 종류">
+          <button type="button" data-v="kr">국내주식</button>
+          <button type="button" data-v="us">해외주식</button>
+          <button type="button" data-v="coin">코인</button>
+          <button type="button" data-v="custom">직접입력</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">매도 수량</div>
+        <div class="input-line"><input type="number" id="sellQty" inputmode="decimal" min="0" step="any" placeholder="예: 10" aria-label="매도 수량"><span class="unit">주·개</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">매도 가격</div>
+        <div class="input-line"><input type="number" id="sellPrice" inputmode="numeric" min="0" step="any" placeholder="예: 60000" aria-label="매도 가격"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">매수 평균가</div>
+        <div class="input-line"><input type="number" id="sellBuy" inputmode="numeric" min="0" step="any" placeholder="예: 50000" aria-label="매수 평균가"><span class="unit">원</span></div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">수수료율 <span class="sub">증권사·거래소마다 다릅니다(보통 0.015~0.25%)</span></div>
+        <div class="input-line"><input type="number" id="sellFee" inputmode="decimal" min="0" max="10" step="0.001" aria-label="수수료율"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">세율 <span class="sub" id="sellTaxHint">국내주식: 매도금액의 0.20%</span></div>
+        <div class="input-line"><input type="number" id="sellTax" inputmode="decimal" min="0" max="50" step="0.01" aria-label="세율"><span class="unit">%</span></div>
+      </div>
+      <div class="field" id="sellDeductWrap">
+        <div class="field-label">연간 기본공제 <span class="sub">이 금액까지의 이익은 세금을 매기지 않습니다</span></div>
+        <div class="input-line"><input type="number" id="sellDeduct" inputmode="numeric" min="0" step="1000000" aria-label="기본공제"><span class="unit">원</span></div>
+      </div>
+
+      <div id="sellResult"></div>
+      <p class="hint mt12">국내주식은 이익이 아니라 <b>매도금액 전체</b>에 거래세가 매겨집니다. 해외주식·코인은 <b>연간 이익</b>에서 기본공제를 뺀 금액에 세금이 붙고, 다음 해 5월에 신고합니다. 실제 세금은 다른 거래 손익과 합산해 정해지므로 이 계산은 <b>참고용</b>입니다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">3</div>
+        <div><h2>부동산 자금 · 대출 이자 계산기</h2></div>
+      </div>
+      <p class="desc">집을 살 때 <b>내 돈이 얼마나 필요한지</b>, 빌리면 <b>매달 얼마를 갚는지</b> 계산합니다.</p>
+
+      <p class="section-tag" style="margin-top:12px">매매 자금</p>
+      <div class="field" style="margin-top:6px">
+        <div class="field-label">매매가</div>
+        <div class="input-line"><input type="number" id="hpPrice" inputmode="numeric" min="0" step="10000000" placeholder="예: 400000000" aria-label="매매가"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">대출받을 금액</div>
+        <div class="input-line"><input type="number" id="hpLoan" inputmode="numeric" min="0" step="10000000" aria-label="대출금"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">취득세율 <span class="sub">가격에 따라 자동 제안됩니다(직접 수정 가능)</span></div>
+        <div class="input-line"><input type="number" id="hpAcqRate" inputmode="decimal" min="0" max="15" step="0.1" aria-label="취득세율"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">중개보수율</div>
+        <div class="input-line"><input type="number" id="hpBroker" inputmode="decimal" min="0" max="5" step="0.05" aria-label="중개보수율"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">이사·수리 등 기타 비용</div>
+        <div class="input-line"><input type="number" id="hpEtc" inputmode="numeric" min="0" step="1000000" placeholder="예: 5000000" aria-label="기타 비용"><span class="unit">원</span></div>
+      </div>
+      <div id="hpFundResult"></div>
+
+      <p class="section-tag" style="margin-top:20px">대출 월 상환액</p>
+      <div class="field" style="margin-top:6px">
+        <div class="field-label">대출 금액</div>
+        <div class="input-line"><input type="number" id="loanAmt" inputmode="numeric" min="0" step="10000000" aria-label="대출 금액"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">연 이자율</div>
+        <div class="input-line"><input type="number" id="loanRate" inputmode="decimal" min="0" max="30" step="0.1" aria-label="연 이자율"><span class="unit">%</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">기간</div>
+        <div class="input-line"><input type="number" id="loanYears" inputmode="numeric" min="1" max="50" step="1" aria-label="대출 기간"><span class="unit">년</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">상환 방식</div>
+        <div class="seg sub" id="loanType" role="group" aria-label="상환 방식">
+          <button type="button" data-v="even">원리금균등</button>
+          <button type="button" data-v="principal">원금균등</button>
+          <button type="button" data-v="bullet">만기일시</button>
+        </div>
+        <p class="hint mt8" id="loanTypeHint">매달 같은 금액을 갚는 방식. 가장 흔합니다.</p>
+      </div>
+      <div id="loanResult"></div>
+
+      <p class="section-tag" style="margin-top:20px">전세가율 · 보증금 위험</p>
+      <div class="field" style="margin-top:6px">
+        <div class="field-label">매매가 (시세)</div>
+        <div class="input-line"><input type="number" id="jsPrice" inputmode="numeric" min="0" step="10000000" aria-label="전세 매매가"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">내 전세보증금</div>
+        <div class="input-line"><input type="number" id="jsDeposit" inputmode="numeric" min="0" step="10000000" aria-label="전세보증금"><span class="unit">원</span></div>
+      </div>
+      <div class="field">
+        <div class="field-label">집에 이미 잡힌 빚 <span class="sub">등기부등본의 근저당·가압류 합계(집주인 대출)</span></div>
+        <div class="input-line"><input type="number" id="jsSenior" inputmode="numeric" min="0" step="10000000" placeholder="없으면 0" aria-label="선순위 채권"><span class="unit">원</span></div>
+      </div>
+      <div id="jsResult"></div>
+      <p class="hint mt12">전세가율이 높다는 것은 <b>집값이 조금만 떨어져도 보증금을 다 돌려받기 어려워진다</b>는 뜻입니다. 계약 전 등기부등본은 반드시 직접 발급해 확인하세요.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. 체크리스트 & 용어사전 ============ -->
+  <section class="panel" id="panel-learn" data-panel="learn">
+    <div class="card">
+      <div class="card-head">
+        <div class="num">1</div>
+        <div><h2>돈이 나가기 전 체크리스트</h2></div>
+      </div>
+      <p class="desc">하나라도 비어 있으면 <b>오늘은 사지 않는 것</b>이 맞습니다. 체크 상태는 이 브라우저에 저장됩니다.</p>
+      <div class="progress mt12">
+        <div class="bar"><i id="chkBar"></i></div>
+        <span class="pv" id="chkPv">0 / 0</span>
+      </div>
+      <div id="chkList"></div>
+      <div class="btn-row">
+        <button type="button" class="btn" id="chkReset">체크 모두 해제</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">2</div>
+        <div><h2>쉬운 투자 용어사전</h2></div>
+      </div>
+      <p class="desc">딱 한 줄로 풀어 썼습니다. 검색하거나 분류를 눌러 찾아보세요.</p>
+      <div class="search-wrap mt12">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="text" id="glossSearch" placeholder="용어 검색 (예: 전세가율, PER)" aria-label="용어 검색" autocomplete="off">
+      </div>
+      <div class="gloss-filter" id="glossFilter">
+        <button type="button" data-v="전체" class="on">전체</button>
+        <button type="button" data-v="주식">주식</button>
+        <button type="button" data-v="코인">코인</button>
+        <button type="button" data-v="부동산">부동산</button>
+        <button type="button" data-v="세금·제도">세금·제도</button>
+        <button type="button" data-v="사기주의">사기 주의</button>
+      </div>
+      <div id="glossList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="num">3</div>
+        <div><h2>직접 확인할 공식 사이트</h2></div>
+      </div>
+      <p class="desc">집값·등기·회사 공시·금융회사 등록 여부는 공식 사이트가 가장 정확합니다.</p>
+      <div class="links mt12">
+        <a href="https://rt.molit.go.kr" target="_blank" rel="noopener">
+          <span class="lic">🏠</span><span class="lt"><b>국토부 실거래가 공개시스템</b><span>아파트·빌라 실제 신고 거래가</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.iros.go.kr" target="_blank" rel="noopener">
+          <span class="lic">📜</span><span class="lt"><b>인터넷등기소</b><span>등기부등본 열람 (근저당·가압류 확인)</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://fine.fss.or.kr" target="_blank" rel="noopener">
+          <span class="lic">🔍</span><span class="lt"><b>금융감독원 파인(FINE)</b><span>금융회사·상품 등록 확인, 불법금융 신고</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.krx.co.kr" target="_blank" rel="noopener">
+          <span class="lic">📈</span><span class="lt"><b>한국거래소(KRX)</b><span>주식 시세·공시·관리종목 지정 현황</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://dart.fss.or.kr" target="_blank" rel="noopener">
+          <span class="lic">📄</span><span class="lt"><b>DART 전자공시</b><span>상장사의 매출·이익·부채 공식 공시</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.khug.or.kr" target="_blank" rel="noopener">
+          <span class="lic">🛡️</span><span class="lt"><b>주택도시보증공사(HUG)</b><span>전세보증금 반환보증 가입 조건</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.kofiu.go.kr" target="_blank" rel="noopener">
+          <span class="lic">🪙</span><span class="lt"><b>금융정보분석원(FIU)</b><span>가상자산사업자 신고 현황 확인</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.kdic.or.kr" target="_blank" rel="noopener">
+          <span class="lic">🏦</span><span class="lt"><b>예금보험공사</b><span>예금자보호 대상 상품·한도(1억 원)</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://www.hometax.go.kr" target="_blank" rel="noopener">
+          <span class="lic">🧾</span><span class="lt"><b>국세청 홈택스</b><span>양도소득세·종합소득세 신고</span></span><span class="go">↗</span>
+        </a>
+        <a href="https://ecrm.police.go.kr" target="_blank" rel="noopener">
+          <span class="lic">🚨</span><span class="lt"><b>경찰청 사이버범죄 신고(ECRM)</b><span>투자 사기·리딩방 피해 신고</span></span><span class="go">↗</span>
+        </a>
+      </div>
+      <div class="tip mt12">금융감독원 불법금융 신고 <b>1332</b> · 경찰 <b>112</b> · 한국거래소 불공정거래 신고 <b>1577-0088</b></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="disc-bar">
+  <span><b>학습·계획·계산용 도우미</b>이며 <b>투자 권유가 아닙니다.</b> 수익을 보장하지 않습니다.</span>
+</div>
+
+<nav class="tabbar" aria-label="주요 메뉴">
+  <div class="tabbar-in">
+    <button class="tab on" type="button" data-tab="start" aria-current="page">
+      <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M5.5 8.5 3.5 6.5"/><path d="M18.5 8.5l2-2"/><circle cx="12" cy="14" r="6"/><path d="M12 11v3l2 1.5"/></svg>
+      <span>시작 진단</span>
+    </button>
+    <button class="tab" type="button" data-tab="assets">
+      <svg viewBox="0 0 24 24"><rect x="3" y="12" width="5" height="9" rx="1.4"/><rect x="9.5" y="7" width="5" height="14" rx="1.4"/><rect x="16" y="4" width="5" height="17" rx="1.4"/></svg>
+      <span>자산 비교</span>
+    </button>
+    <button class="tab" type="button" data-tab="calc">
+      <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.4"/><path d="M8 7h8"/><path d="M8 12h2M14 12h2M8 16h2M14 16h2"/></svg>
+      <span>계산기</span>
+    </button>
+    <button class="tab" type="button" data-tab="learn">
+      <svg viewBox="0 0 24 24"><path d="M9 11l2.5 2.5L16 9"/><rect x="4" y="4" width="16" height="16" rx="3"/></svg>
+      <span>체크·용어</span>
+    </button>
+  </div>
+</nav>
+
+<footer class="foot">
+  투자 첫걸음 · 학습·계획·계산용 도우미<br>
+  이 앱은 특정 상품을 추천하거나 매매를 중개하지 않습니다. 화면의 숫자는 입력값에 따른 단순 계산 결과입니다.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
