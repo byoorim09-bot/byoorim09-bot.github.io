@@ -288,11 +288,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 }
 .tabbar-in{max-width:520px;margin:0 auto;width:100%;display:grid;grid-template-columns:repeat(4,1fr)}
 .tab{
-  border:none;background:none;padding:7px 2px 5px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;
+  border:none;background:none;padding:6px 2px 3px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;
   color:#8A98A6;cursor:pointer;position:relative;
 }
 .tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tab span{font-size:10.5px;font-weight:700;letter-spacing:-.02em}
+.tab span{font-size:10.5px;font-weight:700;letter-spacing:-.02em;line-height:1.35}
 .tab.on{color:var(--primary-dark)}
 .tab.on::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
 
