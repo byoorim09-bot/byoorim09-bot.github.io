@@ -641,10 +641,10 @@
     var room = price - senior - deposit;
 
     var verdict, cls, advice;
-    if (risk < 70) { verdict = "비교적 안전"; cls = "plus"; advice = "보증금과 집에 잡힌 빚을 합쳐도 집값의 70% 아래입니다. 그래도 계약 전 등기부등본 확인과 전입신고·확정일자는 반드시 하세요."; }
-    else if (risk < 80) { verdict = "주의"; cls = ""; advice = "집값의 70~80%가 이미 채워져 있습니다. 집값이 조금만 내려도 보증금을 돌려받기 어려워질 수 있으니, 보증금 반환보증 가입 가능 여부를 확인하세요."; }
-    else if (risk < 90) { verdict = "위험"; cls = "minus"; advice = "80%를 넘었습니다. '깡통전세' 위험이 있는 구간입니다. 계약을 멈추고 등기부등본·시세·집주인 채무를 직접 확인하세요."; }
-    else { verdict = "매우 위험"; cls = "minus"; advice = "90% 이상입니다. 집값이 조금만 떨어지면 보증금을 거의 돌려받지 못할 수 있습니다. 전세보증금 반환보증 가입이 안 되는 집은 계약하지 않는 것이 안전합니다."; }
+    if (risk < 70) { verdict = "비교적 안전"; cls = "plus"; advice = "보증금과 집에 잡힌 빚을 합쳐도 집값의 70% 아래입니다. 다만 아래 네 가지 확인은 그대로 하세요."; }
+    else if (risk < 80) { verdict = "주의"; cls = ""; advice = "집값의 70~80%가 이미 채워져 있습니다. 집값이 조금만 내려도 보증금을 돌려받기 어려워질 수 있는 구간입니다."; }
+    else if (risk < 90) { verdict = "위험"; cls = "minus"; advice = "80%를 넘었습니다. '깡통전세' 위험이 있는 구간이니 이 조건이면 계약을 다시 생각해 보세요."; }
+    else { verdict = "매우 위험"; cls = "minus"; advice = "90% 이상입니다. 집값이 조금만 떨어져도 보증금을 거의 돌려받지 못할 수 있습니다. 보증금 반환보증 가입이 안 되는 집은 계약하지 마세요."; }
 
     var html = bigOut("전세가율", pct(ratio, 1), "<b>" + verdict + "</b> · 보증금 " + kwon(deposit) + " ÷ 매매가 " + kwon(price));
     html += row("보증금 + 집에 잡힌 빚", kwon(deposit + senior), "", "집주인 대출(근저당) 포함");
