@@ -705,11 +705,14 @@ function detailView() {
     '<div class="svc">' +
       '<div class="svc-h"><div class="svc-num">03</div>' +
         '<div class="t"><b>네이버 플레이스 최적화</b><small>메뉴 · 예약 · 소개글</small></div>' +
-        svcState(svcDone(s.chk, 'place'), placeUrl ? 2 : 0, placeUrl ? '등록됨' : '등록 전') +
+        svcState(svcDone(s.chk, 'place'), placeUrl ? 1 : 0, placeUrl ? '진행 전' : '등록 전') +
       '</div>' +
       '<div class="svc-body">' +
         mapLine('플레이스', placeUrl, '열기', Id(s.id), 'place') +
         mapLine('네이버 예약', bookingUrl, '열기', Id(s.id), 'booking') +
+        (placeUrl && !svcDone(s.chk, 'place')
+          ? '<p class="hint" style="margin-top:10px">지금은 플레이스 링크만 연결된 상태입니다. 최적화를 마치면 「수정 → 서비스 선택 · 링크」의 <b>진행 완료 표시</b>에서 ‘네이버 플레이스·예약’을 켜 주세요.</p>'
+          : '') +
         '<div class="mini-checks">' +
           [['menu', '메뉴 정리'], ['review', '리뷰 답변'], ['news', '소식·공지']].map(function (o) {
             return '<span class="mchk ' + (s.opt && s.opt[o[0]] ? 'on' : '') + '">' + (s.opt && s.opt[o[0]] ? '✓ ' : '· ') + o[1] + '</span>';
@@ -779,14 +782,35 @@ function addSvc(id, k) {
   }).catch(function (e) { toast('저장 실패: ' + e.message); });
 }
 function mapLine(name, url, okLabel, idArg, field) {
-  if (url) {
-    return '<div class="link-line"><span class="nm">' + name + '</span>' +
-      '<span class="url">' + esc(url.replace(/^https?:\/\//, '').slice(0, 42)) + '</span>' +
-      '<a class="btn primary" href="' + esc(url) + '" target="_blank" rel="noopener">' + okLabel + ' ↗</a></div>';
+  // 링크가 있으면 「열기」와 「등록/수정」을 함께, 없으면 「등록」만
+  var acts = url
+    ? '<a class="btn primary" href="' + esc(url) + '" target="_blank" rel="noopener">' + okLabel + ' ↗</a>' +
+      '<button class="btn ghost" onclick="openLinkField(' + idArg + ',\'' + field + '\')">등록/수정</button>'
+    : '<button class="btn ghost" onclick="openLinkField(' + idArg + ',\'' + field + '\')">등록</button>';
+  return '<div class="link-line multi">' +
+    '<span class="nm">' + name + '</span>' +
+    '<span class="url"' + (url ? ' title="' + esc(url) + '"' : ' style="color:#B4483A"') + '>' +
+      (url ? esc(url.replace(/^https?:\/\//, '').slice(0, 42)) : '미등록') + '</span>' +
+    '<span class="acts">' + acts + '</span>' +
+  '</div>';
+}
+/* 링크 수정 화면(서비스 선택 · 링크)의 해당 입력칸으로 바로 이동 */
+function openLinkField(id, field) {
+  openSection(id, 'links');
+  focusField('f_' + field, 0);
+}
+function focusField(fid, tries) {
+  var el = document.getElementById(fid);
+  if (!el) {
+    if (tries < 15) setTimeout(function () { focusField(fid, tries + 1); }, 80);
+    return;
   }
-  return '<div class="link-line"><span class="nm">' + name + '</span>' +
-    '<span class="url" style="color:#B4483A">미등록</span>' +
-    '<button class="btn ghost" onclick="openSection(' + idArg + ',\'links\')">등록</button></div>';
+  try { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+  setTimeout(function () {
+    try { el.focus({ preventScroll: true }); } catch (e) { try { el.focus(); } catch (e2) {} }
+    el.classList.add('flash');
+    setTimeout(function () { el.classList.remove('flash'); }, 2400);
+  }, 280);
 }
 function afterDetail() {
   var s = S.shop;
@@ -1654,6 +1678,7 @@ window.setView = setView;
 window.openShop = openShop;
 window.openEdit = openEdit;
 window.openSection = openSection;
+window.openLinkField = openLinkField;
 window.openNew = openNew;
 window.openProposal = openProposal;
 window.copyShopLink = copyShopLink;
