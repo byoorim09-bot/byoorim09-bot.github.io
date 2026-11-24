@@ -733,6 +733,11 @@ function addSvc(id, k) {
   patch['svc.' + k] = true;
   patch['chk.' + k] = true;
   fsPatch('/aiMktShops/' + id, patch).then(function () {
+    if (S.shop && S.shop.id === id) {
+      S.shop.svc = Object.assign({}, S.shop.svc); S.shop.svc[k] = true;
+      S.shop.chk = Object.assign({}, S.shop.chk); S.shop.chk[k] = true;
+      render();
+    }
     toast('「' + SVC.filter(function (v) { return v.k === k; })[0].title + '」을(를) 추가했습니다');
   }).catch(function (e) { toast('저장 실패: ' + e.message); });
 }
@@ -904,6 +909,8 @@ function openSection(id, sec) {
 async function loadEditPhotos(id) {
   try {
     var rows = await fsList('/aiMktShops/' + id + '/photos');
+    // 올리는 중이거나 지운 사진이 있으면 덮어쓰지 않는다
+    if (S.editPhotos.some(function (p) { return p.isNew || p.del; })) return;
     S.editPhotos = rows.sort(function (a, b) { return num(a.o) - num(b.o); }).map(function (d) {
       return { id: d.id, d: d.d, o: num(d.o), isNew: false, del: false };
     });
