@@ -1564,8 +1564,8 @@ async function pubTick(first) {
     if (!first && sig === pubSig) return;
     pubSig = sig;
     S.shop = normalize(S.pubId, data);
+    document.title = S.shop.name + ' · ' + (S.shop.cat || '홍보 페이지');
     if (S.shop.webClosed) { renderPubClosed(); return; }
-    if (first) document.title = S.shop.name + ' · ' + (S.shop.cat || '홍보 페이지');
     await loadPubAssets(S.pubId);
     renderPublic();
   } catch (e) {
