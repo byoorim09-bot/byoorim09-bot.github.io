@@ -208,7 +208,8 @@ h1,h2,h3,h4,p{margin:0}
   padding:12px 13px;font-size:16.5px;outline:none;transition:border-color .15s}
 .field textarea{min-height:96px;resize:vertical;line-height:1.6}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--orange);background:#fff}
-.field .hint{font-size:12.5px;color:var(--muted-2);margin-top:5px;line-height:1.55}
+.hint{font-size:12.8px;color:var(--muted-2);line-height:1.6;margin-top:5px}
+.field .hint{margin-top:5px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:359px){.grid2{grid-template-columns:1fr}}
 

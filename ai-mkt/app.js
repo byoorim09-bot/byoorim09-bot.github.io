@@ -593,6 +593,11 @@ async function loadPhotos(id) {
 function svcStatus(ok, labelOk, labelNo) {
   return ok ? '<span class="badge ok">' + labelOk + '</span>' : '<span class="badge no">' + labelNo + '</span>';
 }
+function svcState(done, level, label) {
+  if (done) return '<span class="badge ok">완료</span>';
+  var cls = level === 2 ? 'ok' : (level === 1 ? 'wait' : 'no');
+  return '<span class="badge ' + cls + '">' + label + '</span>';
+}
 function detailView() {
   var s = S.shop;
   if (!s) return shellTopBack('샵 정보', 'AI 마케팅 관리', 'setView(\'hub\')') + '<div class="wrap"><div class="empty"><b>샵을 찾을 수 없습니다</b></div></div>';
@@ -655,7 +660,8 @@ function detailView() {
     '<div class="svc">' +
       '<div class="svc-h"><div class="svc-num">02</div>' +
         '<div class="t"><b>네이버 · 카카오 · 구글 지도</b><small>3사 통합 세팅</small></div>' +
-        (svcDone(s.chk, 'map') ? '<span class="badge ok">완료</span>' : svcStatus(!!(naverUrl && kakaoUrl && googleUrl), '3사 등록', '일부 등록')) +
+        svcState(svcDone(s.chk, 'map'), (naverUrl && kakaoUrl && googleUrl) ? 2 : ((naverUrl || kakaoUrl || googleUrl) ? 1 : 0),
+          (naverUrl && kakaoUrl && googleUrl) ? '3사 등록' : ((naverUrl || kakaoUrl || googleUrl) ? '일부 등록' : '등록 전')) +
       '</div>' +
       '<div class="svc-body">' +
         mapLine('네이버 지도', naverUrl, '등록', Id(s.id), 'naver') +
@@ -668,7 +674,7 @@ function detailView() {
     '<div class="svc">' +
       '<div class="svc-h"><div class="svc-num">03</div>' +
         '<div class="t"><b>네이버 플레이스 최적화</b><small>메뉴 · 예약 · 소개글</small></div>' +
-        (svcDone(s.chk, 'place') ? '<span class="badge ok">완료</span>' : svcStatus(!!placeUrl, '등록됨', '미등록')) +
+        svcState(svcDone(s.chk, 'place'), placeUrl ? 2 : 0, placeUrl ? '등록됨' : '등록 전') +
       '</div>' +
       '<div class="svc-body">' +
         mapLine('플레이스', placeUrl, '열기', Id(s.id), 'place') +
@@ -685,7 +691,7 @@ function detailView() {
     '<div class="svc">' +
       '<div class="svc-h"><div class="svc-num">04</div>' +
         '<div class="t"><b>AI 홍보 쇼츠 · 진단 카드뉴스</b><small>영상 · 카드 제작</small></div>' +
-        (svcDone(s.chk, 'shorts') ? '<span class="badge ok">완료</span>' : svcStatus(!!(shortsUrl || cardUrl || diagImg), '준비됨', '미준비')) +
+        svcState(svcDone(s.chk, 'shorts'), (shortsUrl || cardUrl || diagImg) ? 2 : 0, (shortsUrl || cardUrl || diagImg) ? '준비됨' : '준비 전') +
       '</div>' +
       '<div class="svc-body">' +
         mapLine('쇼츠·릴스', shortsUrl, '영상 열기', Id(s.id), 'shorts') +
