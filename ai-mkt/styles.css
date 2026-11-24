@@ -137,6 +137,7 @@ h1,h2,h3,h4,p{margin:0}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sc-name span{display:block;font-size:13.5px;color:var(--muted);margin-top:3px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-phone{color:#5A6070 !important;font-size:13px !important}
 .sc-dots{display:flex;gap:4px;margin-top:11px;flex-wrap:wrap}
 .dot{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;
   padding:3px 7px;border-radius:6px;background:#F4F1EB;color:#9A958B}

@@ -552,7 +552,8 @@ function shopCard(s) {
   return '<div class="shop-card" onclick="openShop(\'' + s.id + '\')" role="button" tabindex="0">' +
     '<div class="sc-top">' +
       '<div class="sc-name"><b>' + esc(s.name) + '</b>' +
-        '<span>' + esc([s.cat, s.addr].filter(Boolean).join(' · ') || '정보 없음') + '</span></div>' +
+        '<span>' + esc([s.cat, s.addr].filter(Boolean).join(' · ') || '정보 없음') + '</span>' +
+        (s.phone ? '<span class="sc-phone">☎ ' + esc(s.phone) + (s.owner ? ' · ' + esc(s.owner) : '') + '</span>' : '') + '</div>' +
       statusBadge(s.status) +
     '</div>' +
     '<div class="sc-dots">' + dots + '</div>' +
