@@ -559,7 +559,7 @@ function shopCard(s) {
     '<div class="sc-actions" onclick="event.stopPropagation()">' +
       '<button class="btn soft" onclick="openProposal(\'' + s.id + '\')">시안 열기 ↗</button>' +
       '<button class="btn ghost" onclick="copyShopLink(\'' + s.id + '\')">링크 복사</button>' +
-      '<button class="btn ghost" onclick="openEdit(\'' + s.id + '\')">수정</button>' +
+      '<button class="btn ghost" onclick="openEdit(\'' + s.id + '\')">사진·메뉴</button>' +
     '</div>' +
   '</div>';
 }
