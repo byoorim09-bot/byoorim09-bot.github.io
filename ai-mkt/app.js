@@ -585,15 +585,28 @@ function openShop(id) {
   loadPrivate(id);
 }
 // 요청사항·메모는 공개 시안에 실리지 않도록 별도 문서(로그인 필요)에 둔다
+var privCache = {};
+function applyPriv(shop, p) {
+  shop.memo = (p && p.memo) || '';
+  shop.notes = (p && Array.isArray(p.notes)) ? p.notes : [];
+  shop.privateLoaded = true;
+}
 async function loadPrivate(id) {
-  if (!S.shop || S.shop.id !== id || S.shop.privateLoaded) return;
+  if (!S.shop || S.shop.id !== id) return;
+  if (privCache[id]) {
+    if (!S.shop.privateLoaded) {
+      applyPriv(S.shop, privCache[id]);
+      if (S.view === 'detail' || (S.view === 'edit' && !S.section)) render();
+    }
+    return;
+  }
+  if (S.shop.privateLoaded) return;
   try {
     await FS.signIn().catch(function () {});
     var p = await fsGetDoc('/aiMktShops/' + id + '/private/info');
+    privCache[id] = { memo: (p && p.memo) || '', notes: (p && Array.isArray(p.notes)) ? p.notes : [] };
     if (!S.shop || S.shop.id !== id) return;
-    S.shop.memo = (p && p.memo) || '';
-    S.shop.notes = (p && Array.isArray(p.notes)) ? p.notes : [];
-    S.shop.privateLoaded = true;
+    applyPriv(S.shop, privCache[id]);
     if (S.view === 'detail') render();
     else if (S.view === 'edit' && (!S.section || S.section === 'notes')) render();
   } catch (e) {
@@ -897,6 +910,8 @@ async function createShop() {
   btnBusy(true, '등록 중…');
   try {
     await fsCreate('/aiMktShops', id, doc);
+    await fsPatch('/aiMktShops/' + id + '/private/info', { memo: '', notes: [] }).catch(function () {});
+    privCache[id] = { memo: '', notes: [] };
     toast('등록했습니다 · 시안 링크가 만들어졌습니다');
     S.curShopId = id;
     S.shop = normalize(id, doc);
@@ -1371,6 +1386,7 @@ async function saveNotes() {
     await fsPatch('/aiMktShops/' + S.shop.id, { updatedAt: Date.now() });
     btnBusy(false);
     S.shop.notes = notes;
+    privCache[S.shop.id] = { memo: S.shop.memo || '', notes: notes };
     toast('메모를 저장했습니다');
     backToEdit();
   } catch (e) { btnBusy(false); toast('저장 실패: ' + e.message); }
@@ -1394,7 +1410,7 @@ function confirmDelete(id) {
 async function doDelete(id) {
   closeModal();
   try {
-    var subs = ['photos', 'assets'];
+    var subs = ['photos', 'assets', 'private'];
     for (var i = 0; i < subs.length; i++) {
       var rows = await fsList('/aiMktShops/' + id + '/' + subs[i]).catch(function () { return []; });
       for (var j = 0; j < rows.length; j++) {
