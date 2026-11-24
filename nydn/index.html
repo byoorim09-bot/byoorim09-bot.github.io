@@ -292,6 +292,7 @@
   function showClosed(){
     if(done) return; done=true; if(T){clearTimeout(T);T=null;}
     if(box) box.className='amk-closed';
+    document.title='종료된 시안 · 알프스 AI 마케팅';
     try{ document.documentElement.style.overflow='hidden'; }catch(e){}
     window.scrollTo(0,0);
   }

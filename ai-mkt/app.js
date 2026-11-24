@@ -491,7 +491,15 @@ async function loadShops(silent) {
   S.shops = sortShops(docs.map(function (d) { return normalize(d.id, d); }));
   if (S.curShopId) {
     var f = S.shops.filter(function (s) { return s.id === S.curShopId; })[0];
-    if (f && S.view === 'detail') S.shop = f;
+    if (f && S.view === 'detail') {
+      // 주기 갱신에도 요청사항·메모(비공개 문서)와 진단 카드는 유지
+      if (S.shop && S.shop.id === f.id) {
+        f.memo = S.shop.memo; f.notes = S.shop.notes || [];
+        f._diag = S.shop._diag || ''; f._diagTried = S.shop._diagTried;
+        if (S.shop.privateLoaded) f.privateLoaded = true;
+      }
+      S.shop = f;
+    }
   }
   S.err = '';
   if (!silent || (changed && (S.view === 'hub' || S.view === 'detail'))) render();
