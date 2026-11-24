@@ -695,9 +695,9 @@ function detailView() {
           (naverUrl && kakaoUrl && googleUrl) ? '3사 등록' : ((naverUrl || kakaoUrl || googleUrl) ? '일부 등록' : '등록 전')) +
       '</div>' +
       '<div class="svc-body">' +
-        mapLine('네이버 지도', naverUrl, '등록', Id(s.id), 'naver') +
-        mapLine('카카오맵', kakaoUrl, '등록', Id(s.id), 'kakao') +
-        mapLine('구글 지도', googleUrl, '등록', Id(s.id), 'google') +
+        mapLine('네이버 지도', naverUrl, '열기', Id(s.id), 'naver') +
+        mapLine('카카오맵', kakaoUrl, '열기', Id(s.id), 'kakao') +
+        mapLine('구글 지도', googleUrl, '열기', Id(s.id), 'google') +
       '</div>' +
     '</div>') +
 
