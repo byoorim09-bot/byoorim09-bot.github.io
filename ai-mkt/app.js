@@ -582,6 +582,23 @@ function openShop(id) {
   S.view = 'detail'; S.section = null;
   render();
   loadPhotos(id);
+  loadPrivate(id);
+}
+// 요청사항·메모는 공개 시안에 실리지 않도록 별도 문서(로그인 필요)에 둔다
+async function loadPrivate(id) {
+  if (!S.shop || S.shop.id !== id || S.shop.privateLoaded) return;
+  try {
+    await FS.signIn().catch(function () {});
+    var p = await fsGetDoc('/aiMktShops/' + id + '/private/info');
+    if (!S.shop || S.shop.id !== id) return;
+    S.shop.memo = (p && p.memo) || '';
+    S.shop.notes = (p && Array.isArray(p.notes)) ? p.notes : [];
+    S.shop.privateLoaded = true;
+    if (S.view === 'detail') render();
+    else if (S.view === 'edit' && (!S.section || S.section === 'notes')) render();
+  } catch (e) {
+    if (S.shop) S.shop.privateLoaded = true;
+  }
 }
 async function loadPhotos(id) {
   try {
@@ -710,7 +727,7 @@ function detailView() {
       '<button class="btn ghost sm" style="margin-top:10px" onclick="openSection(\'' + s.id + '\',\'info\')">소개·기본정보 수정</button></div>' : '') +
 
     '<div class="req-box">' +
-      '<div class="req-h"><b>요청사항 · 메모</b><span>' + (notes.length ? notes.length + '건' : '없음') + '</span></div>' +
+      '<div class="req-h"><b>요청사항 · 메모</b><span>' + ((notes.length + (s.memo ? 1 : 0)) ? (notes.length + (s.memo ? 1 : 0)) + '건' : '없음') + '</span></div>' +
       (s.memo ? '<div class="req-item"><div class="req-t">초기 메모</div><div class="req-x">' + nl2br(s.memo) + '</div></div>' : '') +
       notes.slice().reverse().slice(0, 3).map(function (n) {
         return '<div class="req-item"><div class="req-t">' + fmtDate(n.t) + '</div><div class="req-x">' + nl2br(n.text) + '</div></div>';
@@ -871,8 +888,8 @@ async function createShop() {
     draft: true,
     theme: 'navy',
     svc: { web: !!newSvc.web, map: !!newSvc.map, place: !!newSvc.place, shorts: !!newSvc.shorts },
-    chk: {}, opt: {}, links: {}, menu: [], notes: [],
-    intro: '', hours: '', memo: '',
+    chk: {}, opt: {}, links: {}, menu: [],
+    intro: '', hours: '',
     order: nextOrder(),
     createdAt: now,
     updatedAt: now
@@ -902,6 +919,7 @@ function openEdit(id) {
   S.editPhotos = [];
   render(); window.scrollTo(0, 0);
   loadEditPhotos(id);
+  loadPrivate(id);
 }
 function openSection(id, sec) {
   var s = S.shops.filter(function (x) { return x.id === id; })[0] || S.shop;
@@ -911,6 +929,7 @@ function openSection(id, sec) {
   S.editPhotos = [];
   render(); window.scrollTo(0, 0);
   loadEditPhotos(id);
+  loadPrivate(id);
 }
 async function loadEditPhotos(id) {
   try {
@@ -1348,7 +1367,8 @@ async function saveNotes() {
   notes.sort(function (a, b) { return a.t - b.t; });
   btnBusy(true, '저장 중…');
   try {
-    await fsPatch('/aiMktShops/' + S.shop.id, { notes: notes, updatedAt: Date.now() });
+    await fsPatch('/aiMktShops/' + S.shop.id + '/private/info', { notes: notes, updatedAt: Date.now() });
+    await fsPatch('/aiMktShops/' + S.shop.id, { updatedAt: Date.now() });
     btnBusy(false);
     S.shop.notes = notes;
     toast('메모를 저장했습니다');
