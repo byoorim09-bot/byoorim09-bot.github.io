@@ -1540,7 +1540,8 @@ async function saveLinks() {
       await fsPatch('/aiMktShops/' + S.shop.id + '/assets/diag', { d: img, t: Date.now() });
     }
     btnBusy(false);
-    S.shop = Object.assign({}, S.shop, patch);
+    Object.assign(S.shop, patch);
+    S.shops.forEach(function (x) { if (S.shop && x.id === S.shop.id) Object.assign(x, patch); });
     S.shop._diag = '';
     toast('저장했습니다 · 시안에 바로 반영됩니다');
     backToEdit();
