@@ -341,6 +341,7 @@ function normalize(id, d) {
     memo: d.memo || '',
     notes: Array.isArray(d.notes) ? d.notes : [],
     draft: d.draft !== false,
+    webClosed: d.webClosed === true,
     hasDiag: !!d.hasDiag,
     theme: d.theme || 'navy',
     svc: svc, chk: chk, opt: d.opt || {},
@@ -556,7 +557,7 @@ function shopCard(s) {
         (s.phone ? '<span class="sc-phone">☎ ' + esc(s.phone) + (s.owner ? ' · ' + esc(s.owner) : '') + '</span>' : '') + '</div>' +
       statusBadge(s.status) +
     '</div>' +
-    '<div class="sc-dots">' + dots + '</div>' +
+    '<div class="sc-dots">' + (s.webClosed ? '<span class="dot closed">🔒 시안 비공개</span>' : '') + dots + '</div>' +
     '<div class="sc-actions" onclick="event.stopPropagation()">' +
       '<button class="btn soft" onclick="openProposal(\'' + s.id + '\')">시안 열기 ↗</button>' +
       '<button class="btn ghost" onclick="copyShopLink(\'' + s.id + '\')">링크 복사</button>' +
@@ -674,7 +675,7 @@ function detailView() {
     '<div class="svc">' +
       '<div class="svc-h"><div class="svc-num">01</div>' +
         '<div class="t"><b>맞춤형 모바일 홍보 웹페이지</b><small>제작 · 호스팅</small></div>' +
-        (svcDone(s.chk, 'web') ? '<span class="badge ok">완료</span>' : '<span class="badge navy">진행 중</span>') +
+        (s.webClosed ? '<span class="badge no">비공개 중</span>' : (svcDone(s.chk, 'web') ? '<span class="badge ok">완료</span>' : '<span class="badge navy">진행 중</span>')) +
       '</div>' +
       '<div class="svc-body">' +
         '<div class="link-line"><span class="nm">' + (webIsLegacy ? '전용 시안' : '자동 시안') + '</span>' +
@@ -683,6 +684,17 @@ function detailView() {
         '<div class="btn-row" style="margin-top:10px">' +
           '<button class="btn ghost" onclick="openSection(\'' + s.id + '\',\'photos\')">📷 사진 수정</button>' +
           '<button class="btn ghost" onclick="openSection(\'' + s.id + '\',\'menu\')">🍽 메뉴·가격 수정</button>' +
+        '</div>' +
+        '<div class="web-gate' + (s.webClosed ? ' closed' : '') + '">' +
+          '<div class="wg-tx">' +
+            '<b>' + (s.webClosed ? '🔒 비공개 중' : '🌐 공개 중') + '</b>' +
+            '<span>' + (s.webClosed
+              ? '지금 이 시안 주소로 들어오면 ‘비공개(종료) 안내’가 보입니다. 다시 열면 원래 시안이 그대로 보입니다.'
+              : '잠깐 내려 두면 주소를 아는 분에게 ‘비공개(종료) 안내’가 보입니다. 언제든 다시 열 수 있습니다.') + '</span>' +
+          '</div>' +
+          (s.webClosed
+            ? '<button class="btn primary sm" onclick="setWebClosed(\'' + s.id + '\',false)">시안 다시 열기</button>'
+            : '<button class="btn ghost sm wg-off" onclick="confirmWebClose(\'' + s.id + '\')">시안 내리기</button>') +
         '</div>' +
       '</div>' +
     '</div>') +
@@ -824,6 +836,31 @@ function afterDetail() {
         if (S.view === 'detail') render();
       }
     }).catch(function () {});
+  }
+}
+/* ---------- 전용 시안 내리기 / 다시 열기 (webClosed) ---------- */
+function shopById(id) {
+  if (S.shop && S.shop.id === id) return S.shop;
+  return S.shops.filter(function (x) { return x.id === id; })[0] || null;
+}
+function confirmWebClose(id) {
+  var s = shopById(id);
+  openModal('<h3>전용 시안을 내릴까요?</h3><p>' + esc((s && s.name) || '') +
+    ' 시안 주소를 아는 분에게 <b>‘비공개(종료) 안내’</b> 화면이 보입니다. 사진·메뉴·링크는 그대로 남고, 언제든 <b>다시 열 수</b> 있습니다.</p>' +
+    '<div class="acts cols"><button class="btn ghost" onclick="closeModal()">취소</button>' +
+    '<button class="btn primary" style="background:#BC4B37" onclick="setWebClosed(\'' + id + '\',true)">시안 내리기</button></div>');
+}
+async function setWebClosed(id, closed) {
+  closeModal();
+  var s = shopById(id);
+  try {
+    await fsPatch('/aiMktShops/' + id, { webClosed: !!closed, updatedAt: Date.now() });
+    if (s) { s.webClosed = !!closed; s.updatedAt = Date.now(); }
+    S.shops.forEach(function (x) { if (x.id === id) { x.webClosed = !!closed; x.updatedAt = Date.now(); } });
+    toast(closed ? '시안을 내렸습니다 · 비공개 안내가 표시됩니다' : '시안을 다시 열었습니다 · 원래대로 보입니다');
+    render();
+  } catch (e) {
+    toast('저장 실패: ' + e.message);
   }
 }
 function quickStatus(id, st) {
@@ -1519,6 +1556,7 @@ async function pubTick(first) {
     if (!first && sig === pubSig) return;
     pubSig = sig;
     S.shop = normalize(S.pubId, data);
+    if (S.shop.webClosed) { renderPubClosed(); return; }
     if (first) document.title = S.shop.name + ' · ' + (S.shop.cat || '홍보 페이지');
     await loadPubAssets(S.pubId);
     renderPublic();
@@ -1539,6 +1577,13 @@ async function loadPubAssets(id) {
     var d = await fsGetDoc('/aiMktShops/' + id + '/assets/diag');
     shop._diag = d && d.d ? d.d : '';
   } catch (e) { shop._diag = ''; }
+}
+function renderPubClosed() {
+  document.title = '종료된 시안 · 알프스 AI 마케팅';
+  app.innerHTML = '<div class="pub-empty"><div><div class="big">🔒</div>' +
+    '<b>종료된 시안입니다</b>' +
+    '<p>현재 이 시안은 <b>비공개(종료)</b> 상태입니다.<br>다시 공개되면 같은 주소로 볼 수 있습니다.</p>' +
+    '<p style="margin-top:14px;font-size:12.5px">문의 · 알프스 워크 AI 마케팅</p></div></div>';
 }
 function renderPubEmpty() {
   app.innerHTML = '<div class="pub-empty"><div><div class="big">🔍</div><b>페이지를 찾을 수 없습니다</b>' +
@@ -1683,6 +1728,8 @@ window.openNew = openNew;
 window.openProposal = openProposal;
 window.copyShopLink = copyShopLink;
 window.quickStatus = quickStatus;
+window.confirmWebClose = confirmWebClose;
+window.setWebClosed = setWebClosed;
 window.confirmDelete = confirmDelete;
 window.doDelete = doDelete;
 window.openSettings = openSettings;

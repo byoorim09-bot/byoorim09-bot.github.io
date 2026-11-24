@@ -142,6 +142,7 @@ h1,h2,h3,h4,p{margin:0}
 .dot{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;
   padding:3px 7px;border-radius:6px;background:#F4F1EB;color:#9A958B}
 .dot.on{background:var(--green-soft);color:var(--green)}
+.dot.closed{background:var(--red-soft);color:var(--red)}
 .sc-actions{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:7px;margin-top:12px}
 .sc-actions .btn{min-height:46px;font-size:15px;padding:0 8px;border-radius:11px}
 .empty{text-align:center;padding:46px 18px;color:var(--muted)}
@@ -172,6 +173,17 @@ h1,h2,h3,h4,p{margin:0}
 .svc-h .t b{display:block;font-size:16.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
 .svc-h .t small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
 .svc-body{margin-top:12px}
+/* 전용 시안 공개/비공개 전환 */
+.web-gate{display:flex;align-items:center;gap:10px;margin-top:10px;padding:11px 12px;
+  border-radius:12px;background:#F7F4EE;border:1px solid #ECE5D9}
+.web-gate.closed{background:var(--red-soft);border-color:#F0D2C9}
+.web-gate .wg-tx{flex:1;min-width:0}
+.web-gate .wg-tx b{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em;color:#4A5162}
+.web-gate.closed .wg-tx b{color:var(--red)}
+.web-gate .wg-tx span{display:block;margin-top:2px;font-size:12px;line-height:1.5;color:var(--muted)}
+.web-gate .btn{flex:none;min-height:42px;font-size:14px;padding:0 12px;border-radius:10px;gap:4px}
+.btn.ghost.wg-off{border-color:#E8C9C0;color:var(--red)}
+@media(max-width:359px){.web-gate .wg-tx span{font-size:11.5px}.web-gate .btn{font-size:13px;padding:0 10px}}
 .link-line{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px dashed #EDE7DC}
 .link-line:first-child{border-top:0}
 .link-line .nm{width:74px;flex:none;font-size:14px;font-weight:700;color:#4A5162}
