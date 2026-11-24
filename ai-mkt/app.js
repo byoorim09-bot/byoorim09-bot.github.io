@@ -1470,6 +1470,7 @@ function initPublic(id) {
   }, 15000);
 }
 async function pubTick(first) {
+  window.__pubTicks = (window.__pubTicks || 0) + 1;
   try {
     var data = await fsGetDoc('/aiMktShops/' + S.pubId);
     if (!data) { renderPubEmpty(); return; }
