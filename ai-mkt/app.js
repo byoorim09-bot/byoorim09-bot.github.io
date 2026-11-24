@@ -1403,6 +1403,7 @@ function settingsView() {
     '</div>' +
     '<div class="card"><h3>안내</h3><p style="font-size:14.5px;line-height:1.8;color:#5A6070">' +
       '이 관리 화면은 알프스 워크 AI 마케팅 대행 업무용입니다. 시안 링크를 받은 고객은 로그인 없이 홍보 페이지를 볼 수 있습니다.</p>' +
+      '<p style="font-size:14.5px;line-height:1.8;color:#5A6070;margin-top:8px">📲 휴대폰 Chrome에서 이 화면을 연 뒤 <b>메뉴(⋮) → 홈 화면에 추가</b>를 누르면 앱처럼 한 번에 열 수 있습니다.</p>' +
     '</div>' +
     '<button class="btn ghost block" onclick="lockNow()">🔒 잠그기</button>' +
   '</div></div>';
