@@ -342,6 +342,12 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
 .modal p{font-size:15px;color:var(--muted);line-height:1.7}
 .modal .acts{display:grid;gap:8px;margin-top:18px}
 .modal .acts.cols{grid-template-columns:1fr 1fr}
+.modal .pin-gate{margin-top:16px}
+.modal .pin-gate input[type=password]{width:100%;min-height:54px;border:1px solid var(--line-2);border-radius:12px;
+  background:#FEFDFB;padding:12px 13px;font-size:22px;letter-spacing:.32em;text-align:center;outline:none;transition:border-color .15s}
+.modal .pin-gate input[type=password]:focus{border-color:var(--orange);background:#fff}
+.modal .pin-gate input[type=password].bad{border-color:var(--red);background:#FDF4F2}
+.modal .pin-err{font-size:13px;font-weight:700;color:var(--red);margin-top:7px;min-height:19px;line-height:19px}
 .lb-modal img{width:100%;border-radius:12px}
 #toast{position:fixed;left:50%;bottom:calc(26px + var(--safe-b));transform:translate(-50%,20px);z-index:200;
   background:#1B2333;color:#fff;padding:12px 18px;border-radius:12px;font-size:14.5px;font-weight:600;

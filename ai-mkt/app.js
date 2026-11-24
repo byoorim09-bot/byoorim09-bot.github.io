@@ -1471,11 +1471,54 @@ function btnBusy(on, label) {
 }
 
 /* ---------- 삭제 ---------- */
+var delTargetId = null;
 function confirmDelete(id) {
+  delTargetId = id;
   openModal('<h3>샵을 삭제할까요?</h3><p>' + esc((S.shop && S.shop.name) || '') +
     ' 카드와 시안 링크가 사라집니다. 되돌릴 수 없습니다.</p>' +
+    '<div class="field pin-gate"><label for="delPin">비밀번호 확인 <small>잠금 해제에 쓰는 숫자 4자리</small></label>' +
+    '<input id="delPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" enterkeyhint="done" placeholder="••••"' +
+    ' oninput="delPinTyped()" onkeydown="if(event.key===&#39;Enter&#39;){event.preventDefault();submitDelete();}">' +
+    '<div class="pin-err" id="delPinMsg" role="alert"></div></div>' +
     '<div class="acts cols"><button class="btn ghost" onclick="closeModal()">취소</button>' +
-    '<button class="btn primary" style="background:#BC4B37" onclick="doDelete(\'' + id + '\')">삭제</button></div>');
+    '<button class="btn primary" id="delBtn" style="background:#BC4B37" onclick="submitDelete()">삭제</button></div>');
+  setTimeout(function () { var el = document.getElementById('delPin'); if (el) el.focus(); }, 80);
+}
+function delPinTyped() {
+  var input = document.getElementById('delPin');
+  var msg = document.getElementById('delPinMsg');
+  if (!input) return;
+  input.value = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+  if (msg) msg.textContent = '';
+  input.classList.remove('bad');
+}
+async function checkPin(pin) {
+  var cfg = await fsGetDoc('/aiMktConfig/main');
+  var stored = cfg && cfg.pinHash;
+  if (!stored) stored = await pinHash(DEFAULT_PIN);
+  var h = await pinHash(String(pin));
+  return h === stored;
+}
+async function submitDelete() {
+  var input = document.getElementById('delPin');
+  var msg = document.getElementById('delPinMsg');
+  var btn = document.getElementById('delBtn');
+  if (!delTargetId) return;
+  var pin = (input && input.value ? input.value : '').trim();
+  function fail() {
+    if (msg) msg.textContent = '비밀번호가 올바르지 않습니다';
+    if (input) { input.value = ''; input.classList.add('bad'); input.focus(); }
+    if (btn) { btn.disabled = false; btn.textContent = '삭제'; }
+  }
+  if (!/^[0-9]{4}$/.test(pin)) { fail(); return; }
+  if (msg) msg.textContent = '';
+  if (btn) { btn.disabled = true; btn.textContent = '확인 중…'; }
+  var ok = false;
+  try { ok = await checkPin(pin); } catch (e) { ok = false; }
+  if (!ok) { fail(); return; }
+  var id = delTargetId;
+  delTargetId = null;
+  await doDelete(id);
 }
 async function doDelete(id) {
   closeModal();
@@ -1539,7 +1582,7 @@ function lockNow() {
 function openModal(html) {
   modalRoot.innerHTML = '<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog">' + html + '</div></div>';
 }
-function closeModal() { modalRoot.innerHTML = ''; }
+function closeModal() { delTargetId = null; modalRoot.innerHTML = ''; }
 
 /* ===========================================================
    공개 시안 (?shop=<id>)
@@ -1739,6 +1782,8 @@ window.quickStatus = quickStatus;
 window.confirmWebClose = confirmWebClose;
 window.setWebClosed = setWebClosed;
 window.confirmDelete = confirmDelete;
+window.delPinTyped = delPinTyped;
+window.submitDelete = submitDelete;
 window.doDelete = doDelete;
 window.openSettings = openSettings;
 window.changePin = changePin;
