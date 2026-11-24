@@ -180,7 +180,7 @@ h1,h2,h3,h4,p{margin:0}
 .link-line .btn{min-height:40px;font-size:14px;padding:0 12px;border-radius:10px;flex:none}
 /* 링크가 있는 줄: 이름 + 버튼 두 개 / 주소는 아랫줄 */
 .link-line.multi{flex-wrap:wrap;row-gap:4px}
-.link-line.multi .nm{width:auto;flex:1 1 auto;min-width:0;white-space:nowrap}
+.link-line.multi .nm{width:auto;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .link-line.multi .url{flex:1 1 100%;order:3;margin-top:-1px}
 .link-line.multi .acts{display:flex;gap:6px;margin-left:auto;flex:none}
 .link-line.multi .btn{min-height:38px;font-size:13.5px;padding:0 11px;border-radius:9px;gap:4px}
