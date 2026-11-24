@@ -1501,8 +1501,9 @@ function renderPublic() {
   var gallery = '';
   var galPhotos = photos.slice(1);
   if (galPhotos.length) {
+    var fullFirst = galPhotos.length % 2 === 1;   // 홀수면 첫 장을 크게
     gallery = '<div class="gallery">' + galPhotos.map(function (p, i) {
-      return '<div class="g ' + (i === 0 ? 'g1' : '') + '"><img src="' + p + '" alt="' + esc(s.name) + ' 사진 ' + (i + 1) + '" loading="lazy"></div>';
+      return '<div class="g ' + (fullFirst && i === 0 ? 'g1' : '') + '"><img src="' + p + '" alt="' + esc(s.name) + ' 사진 ' + (i + 1) + '" loading="lazy"></div>';
     }).join('') + '</div>';
   }
 
