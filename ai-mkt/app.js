@@ -346,6 +346,8 @@ function normalize(id, d) {
     theme: d.theme || 'navy',
     svc: svc, chk: chk, opt: d.opt || {},
     links: d.links || {},
+    keywords: Array.isArray(d.keywords) ? d.keywords.filter(function (x) { return String(x || '').trim(); }).slice(0, 5) : [],
+    kwExamples: Array.isArray(d.kwExamples) ? d.kwExamples.filter(function (x) { return String(x || '').trim(); }).slice(0, 5) : [],
     menu: Array.isArray(d.menu) ? d.menu : [],
     order: num(d.order),
     createdAt: num(d.createdAt),
@@ -654,6 +656,7 @@ function detailView() {
   var cardUrl = safeUrl(L.card);
   var diagImg = s._diag || '';
   var notes = s.notes || [];
+  var kws = s.keywords || [];
 
   return shellTopBack(s.name, s.cat || '샵 상세', 'setView(\'hub\')') +
   '<div class="page"><div class="wrap">' +
@@ -704,6 +707,16 @@ function detailView() {
             ? '<button class="btn primary sm" onclick="setWebClosed(\'' + s.id + '\',false)">시안 다시 열기</button>'
             : '<button class="btn ghost sm wg-off" onclick="confirmWebClose(\'' + s.id + '\')">시안 내리기</button>') +
         '</div>' +
+        '<div class="seo-box">' +
+          '<div class="seo-h"><b>검색 등록</b><span>홈페이지 주소를 네이버·구글에 알리기</span></div>' +
+          '<div class="btn-row">' +
+            '<button class="btn ghost sm" onclick="seoRegister(\'' + s.id + '\',\'naver\')">네이버 검색 등록</button>' +
+            '<button class="btn ghost sm" onclick="seoRegister(\'' + s.id + '\',\'google\')">구글 검색 등록</button>' +
+          '</div>' +
+          (s.webClosed
+            ? '<p class="hint seo-warn">지금 시안이 비공개 상태예요. 등록 전에 위의 ‘시안 다시 열기’를 먼저 눌러 주세요.</p>'
+            : '') +
+        '</div>' +
       '</div>' +
     '</div>') +
 
@@ -737,6 +750,19 @@ function detailView() {
           [['menu', '메뉴 정리'], ['review', '리뷰 답변'], ['news', '소식·공지']].map(function (o) {
             return '<span class="mchk ' + (s.opt && s.opt[o[0]] ? 'on' : '') + '">' + (s.opt && s.opt[o[0]] ? '✓ ' : '· ') + o[1] + '</span>';
           }).join('') +
+        '</div>' +
+        '<div class="kw-box">' +
+          '<div class="kw-h"><b>핵심 검색어</b>' +
+            (kws.length ? '<span class="kw-n">' + kws.length + '/5</span>' : '') +
+          '</div>' +
+          (kws.length
+            ? '<div class="kw-chips">' + kws.map(function (k) { return '<span class="kw-chip">' + esc(k) + '</span>'; }).join('') + '</div>' +
+              '<div class="btn-row" style="margin-top:9px">' +
+                '<button class="btn ghost sm" onclick="copyKeywords(\'' + s.id + '\')">📋 검색어 복사</button>' +
+                '<button class="btn ghost sm" onclick="openLinkField(\'' + s.id + '\',\'kw1\')">✏️ 검색어 수정</button>' +
+              '</div>'
+            : '<p class="kw-empty">핵심 검색어 미등록 · 손님이 검색할 단어 5개를 넣어 두세요</p>' +
+              '<button class="btn soft sm block" style="margin-top:8px" onclick="openLinkField(\'' + s.id + '\',\'kw1\')">＋ 검색어 입력</button>') +
         '</div>' +
       '</div>' +
     '</div>') +
@@ -885,6 +911,127 @@ function showLinkModal(u) {
   openModal('<h3>시안 링크</h3><p>아래 주소를 길게 눌러 복사하세요.</p>' +
     '<div class="share-box" style="margin-top:14px"><div class="u" style="user-select:all">' + esc(u) + '</div></div>' +
     '<div class="acts"><button class="btn ghost" onclick="closeModal()">닫기</button></div>');
+}
+
+/* ---------- 핵심 검색어 ---------- */
+var KW_CITY = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원',
+  '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+function kwRegion(addr) {
+  var t = String(addr || '').replace(/[(),]/g, ' ').split(/\s+/).filter(Boolean);
+  var r = { prov: '', city: '', gu: '', dong: '', road: '', station: '' };
+  t.forEach(function (x) {
+    var bare = x.replace(/(특별시|광역시|특별자치시|특별자치도|시|도)$/, '');
+    if (/도$/.test(x)) { if (!r.prov) r.prov = bare; return; }
+    if (KW_CITY.indexOf(bare) >= 0) { if (!r.city) r.city = bare; return; }
+    if (/시$/.test(x) && x.length <= 6) { if (!r.city) r.city = bare; return; }
+    if (/(구|군)$/.test(x)) { if (!r.gu) r.gu = x.replace(/(구|군)$/, ''); return; }
+    if (/역$/.test(x)) { if (!r.station) r.station = x; return; }
+    if (/(동|읍|면)$/.test(x)) { if (!r.dong) r.dong = x; return; }
+    if (/(로|길)$/.test(x)) { if (!r.road) r.road = x; return; }
+  });
+  return r;
+}
+function kwShortName(name) {
+  var n = String(name || '').trim();
+  var short = n.replace(/\s*[가-힣A-Za-z0-9]{1,6}점$/, '').trim();
+  return short || n;
+}
+/* 이 샵에 맞는 예시 검색어 5개 (입력칸 흐린 글씨용) */
+function kwPlaceholders(s) {
+  s = s || {};
+  var cats = String(s.cat || '').split(/[·,、\/]/).map(function (x) { return x.trim(); }).filter(Boolean);
+  var r = kwRegion(s.addr);
+  var local = r.dong || r.station || (r.gu ? r.gu : r.city);
+  var cat1 = cats[0] || '가게';
+  var cat2 = cats[1] || cat1;
+  var pool = [];
+  function add(x) {
+    x = String(x || '').replace(/\s+/g, ' ').trim();
+    if (x && x.length <= 24 && pool.indexOf(x) < 0) pool.push(x);
+  }
+  (s.kwExamples || []).forEach(add);
+  if (local) { add(local + ' ' + cat1); add(local + ' ' + cat2); }
+  if (r.city && r.city !== local) { add(r.city + ' ' + cat1); add(r.city + ' ' + cat2); }
+  if (r.gu && r.gu !== local) add(r.gu + ' ' + cat1);
+  if (r.dong && r.dong !== local) add(r.dong + ' ' + cat2);
+  if (r.road) add(r.road + ' ' + cat1);
+  add(kwShortName(s.name));
+  if (local) { add(local + ' ' + cat1 + ' 추천'); add(local + ' ' + cat1 + ' 잘하는 곳'); }
+  if (r.city) add(r.city + ' ' + cat1 + ' 추천');
+  var out = pool.slice(0, 5);
+  while (out.length < 5) out.push('');
+  return out;
+}
+/* 입력칸 5개 → 쉼표 구분·공백 정리·중복 제거·최대 5개 */
+function kwListFrom(raw) {
+  var out = [];
+  (raw || []).forEach(function (v) {
+    String(v == null ? '' : v).split(/[,，、\n\t]/).forEach(function (x) {
+      x = x.replace(/\s+/g, ' ').trim();
+      if (!x) return;
+      if (x.length > 24) x = x.slice(0, 24).trim();
+      if (out.indexOf(x) < 0 && out.length < 5) out.push(x);
+    });
+  });
+  return out;
+}
+function shopById(id) {
+  if (S.shop && S.shop.id === id) return S.shop;
+  return S.shops.filter(function (x) { return x.id === id; })[0] || null;
+}
+function shopWebUrl(id) {
+  var s = shopById(id);
+  var u = (s && s.links && safeUrl(s.links.web)) ? safeUrl(s.links.web) : '';
+  return u || shareUrl(id);
+}
+function copyKeywords(id) {
+  var s = shopById(id);
+  var kws = (s && s.keywords) || [];
+  if (!kws.length) { toast('등록된 핵심 검색어가 없습니다'); return; }
+  copyText(kws.join(', ')).then(function () {
+    toast('핵심 검색어 ' + kws.length + '개를 복사했습니다');
+  }).catch(function () {
+    toast('복사하지 못했습니다 · 검색어를 길게 눌러 복사해 주세요');
+  });
+}
+
+/* ---------- 네이버 · 구글 검색 등록 ---------- */
+var seoCopyUrl = '';
+function seoRegister(id, which) {
+  var isN = which === 'naver';
+  var site = isN ? '네이버' : '구글';
+  var url = shopWebUrl(id);
+  var s = shopById(id);
+  seoCopyUrl = url;
+  // 사용자가 누른 순간에 복사해야 브라우저가 허용합니다
+  copyText(url).then(function () {
+    toast(site + ' 등록용 주소를 복사했습니다');
+  }).catch(function () {
+    toast('주소를 복사하지 못했습니다 · 모달에서 [주소 다시 복사]를 눌러 주세요');
+  });
+  var openUrl = isN
+    ? 'https://searchadvisor.naver.com/console/board'
+    : 'https://search.google.com/search-console/welcome';
+  openModal('<h3>' + site + ' 검색 등록</h3>' +
+    '<p>가게 홈페이지 주소가 복사됐어요! 아래 버튼을 눌러 ' + site +
+      ' 화면이 열리면 로그인 후 복사된 주소만 붙여 넣어 등록해 주세요.</p>' +
+    '<div class="seo-url"><b>복사된 주소</b><span>' + esc(url) + '</span>' +
+      '<button class="btn ghost sm" onclick="copySeoUrl()">📋 주소 다시 복사</button></div>' +
+    '<div class="acts">' +
+      '<a class="btn primary" href="' + openUrl + '" target="_blank" rel="noopener">' + site + ' 열기 ↗</a>' +
+      '<button class="btn ghost" onclick="closeModal()">닫기</button>' +
+    '</div>' +
+    '<p class="hint" style="margin-top:12px">' +
+      (isN
+        ? '네이버: 로그인 → <b>웹마스터 도구 → 사이트 등록</b>에서 주소를 붙여 넣고, 소유 확인(HTML 태그·파일)을 한 번 거칩니다.'
+        : '구글: 로그인 → <b>속성 추가 → URL 접두어</b>에 주소를 붙여 넣고, 소유 확인을 한 번 거칩니다.') +
+    '</p>' +
+    (s && s.webClosed ? '<p class="hint seo-warn">지금 이 시안은 비공개 상태입니다. 등록해도 검색에 보이지 않으니 ‘시안 다시 열기’를 먼저 눌러 주세요.</p>' : ''));
+}
+function copySeoUrl() {
+  if (!seoCopyUrl) return;
+  copyText(seoCopyUrl).then(function () { toast('주소를 복사했습니다'); })
+    .catch(function () { toast('복사하지 못했습니다 · 주소를 길게 눌러 주세요'); });
 }
 function openProposal(id) {
   var s = S.shop && S.shop.id === id ? S.shop : S.shops.filter(function (x) { return x.id === id; })[0];
@@ -1278,6 +1425,8 @@ async function saveInfo() {
 /* --- 서비스 링크 · 선택 --- */
 function linksSection(s) {
   var L = s.links || {};
+  var kws = s.keywords || [];
+  var kwPh = kwPlaceholders(s);
   var F = function (key, label, ph, hint) {
     return '<div class="field"><label>' + label + '</label>' +
       '<input id="f_' + key + '" type="url" inputmode="url" placeholder="' + esc(ph || 'https://') + '" value="' + esc(L[key] || '') + '" autocomplete="off">' +
@@ -1309,6 +1458,15 @@ function linksSection(s) {
     '<div class="card"><h3><em>03</em> 네이버 플레이스 · 예약</h3>' +
       F('place', '네이버 플레이스 주소', '비우면 02의 네이버 지도 주소를 씁니다') +
       F('booking', '네이버 예약 주소', 'https://booking.naver.com/…') +
+      '<div class="field kw-field"><label>핵심 검색어 <small>손님이 검색할 대표 단어 5개</small></label>' +
+        '<div class="kw-grid">' +
+          [0, 1, 2, 3, 4].map(function (i) {
+            return '<input id="f_kw' + (i + 1) + '" type="text" maxlength="24" autocomplete="off" enterkeyhint="next"' +
+              ' placeholder="' + esc(kwPh[i] || '') + '" value="' + esc(kws[i] || '') + '">';
+          }).join('') +
+        '</div>' +
+        '<p class="hint">흐린 글씨는 이 샵의 주소·업종·상호로 만든 예시입니다. 칸을 누르면 사라지니 원하는 검색어로 바꿔 주세요. (쉼표로 한 칸에 여러 개를 넣어도 됩니다)</p>' +
+      '</div>' +
       '<div class="toggles" style="margin-top:2px">' +
         [['menu', '메뉴 정리'], ['review', '리뷰 답변'], ['news', '소식·공지']].map(function (o) {
           var on = !!(s.opt && s.opt[o[0]]);
@@ -1365,7 +1523,10 @@ async function saveLinks() {
     google: val('f_google').trim(), place: val('f_place').trim(), booking: val('f_booking').trim(),
     shorts: val('f_shorts').trim(), card: val('f_card').trim()
   };
-  var patch = { svc: svc, chk: chk, opt: opt, links: links, updatedAt: Date.now() };
+  var kwRaw = [];
+  for (var ki = 1; ki <= 5; ki++) kwRaw.push(val('f_kw' + ki));
+  var keywords = kwListFrom(kwRaw);
+  var patch = { svc: svc, chk: chk, opt: opt, links: links, keywords: keywords, updatedAt: Date.now() };
   if (cardData === 'CLEAR') patch.hasDiag = false;
   else if (cardData) patch.hasDiag = true;
   btnBusy(true, '저장 중…');
@@ -1778,6 +1939,9 @@ window.openLinkField = openLinkField;
 window.openNew = openNew;
 window.openProposal = openProposal;
 window.copyShopLink = copyShopLink;
+window.copyKeywords = copyKeywords;
+window.seoRegister = seoRegister;
+window.copySeoUrl = copySeoUrl;
 window.quickStatus = quickStatus;
 window.confirmWebClose = confirmWebClose;
 window.setWebClosed = setWebClosed;
