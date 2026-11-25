@@ -1214,10 +1214,11 @@ var SS = { on: false, raf: 0, t0: null, el: 0, lastEl: 0, idx: -1, dur: 15000, n
 function defaultHook(s) {
   var kws = shopKeywords(s);
   if (kws.length) return kws.slice(0, 2).join(' · ');
+  var intro = ssIntroLines(s);
+  if (intro[0]) return ssCut(intro[0], 26);
   var region = ssRegion(s);
   if (region) return region + ' ' + ssCatShort(s);
-  var intro = ssIntroLines(s);
-  return intro[0] ? ssCut(intro[0], 24) : (s.name || '');
+  return s.name || '';
 }
 function shortsPhotos() {
   if (STS.photos.length) return STS.photos.slice(0, 6);
@@ -1311,9 +1312,10 @@ function buildShortsScript(s, opt) {
     return '사진 ' + ((i % nPhoto) + 1) + (nPhoto > 1 ? ' / ' + nPhoto : '');
   }
   var P = {};
+  var catLabel = ssCut(String(s.cat || '').trim() || cat, 16);
   P.open = {
-    cap: region ? region + ' ' + cat : cat,
-    nar: region ? region + '에서 ' + cat + ' 찾으신다면, ' + name + '입니다.' : name + '입니다.',
+    cap: region ? region + ' ' + catLabel : catLabel,
+    nar: region ? region + '에서 ' + catLabel + ' 찾으신다면, ' + name + '입니다.' : name + '입니다.',
     shot: shot(0)
   };
   if (kws.length) P.kw = {
@@ -1334,7 +1336,7 @@ function buildShortsScript(s, opt) {
     shot: shot(4)
   };
   P.cta = {
-    cap: phone ? '전화 · 예약 ' + phone : (region ? region + ' ' + cat : '지금 만나보세요'),
+    cap: phone ? '전화 · 예약 ' + phone : (region ? region + ' ' + catLabel : '지금 만나보세요'),
     nar: (phone ? '전화 한 통이면 됩니다. ' + phone + '. ' : '') + name + '에서 기다리겠습니다.',
     shot: nPhoto ? '사진 ' + nPhoto + ' · 마무리 로고' : '마무리 카드 · 상호 · 전화'
   };
@@ -1371,6 +1373,7 @@ function shortsTags(s, kws) {
   if (region) add(region);
   if (region) add(region + cat);
   add(String((s && s.cat) || '').replace(/[·,\/\s]+/g, ''));
+  if (out.length < 6 && region) add(region + cat + '추천');
   return out.map(function (t) { return '#' + t; });
 }
 function shortsScriptText(s, sc) {
@@ -1406,7 +1409,7 @@ function ssBackgrounds(s, scenes, photos) {
     };
   });
 }
-function ssResultHtml(s, sc, bg, text) {
+function ssResultHtml(s, sc, bg, text, nPhotos) {
   var kws = shopKeywords(s);
   var layers = bg.map(function (b, i) {
     if (b.type === 'img') return '<div class="ss-layer" id="ss_l' + i + '"></div>';
@@ -1421,7 +1424,6 @@ function ssResultHtml(s, sc, bg, text) {
       '<span class="nar">' + esc(x.nar) + '</span>' +
       '<span class="shot">' + esc(x.shot) + '</span></div></div>';
   }).join('');
-  var nImg = bg.filter(function (b) { return b.type === 'img'; }).length;
   return '<div class="ss-wrap">' +
       '<div class="ss-stage" id="ss_stage">' + layers +
         '<div class="ss-top"><span class="badge-name">' + esc(s.name || '') + '</span>' +
@@ -1432,7 +1434,7 @@ function ssResultHtml(s, sc, bg, text) {
           '<span class="ss-time" id="ss_time">0:00 / ' + ssClock(sc.len * 1000) + '</span></div>' +
       '</div>' +
       '<div class="ss-meta">9:16 세로 · ' + sc.len + '초 · 장면 ' + sc.scenes.length + '개 · ' +
-        (nImg ? '내 사진 ' + nImg + '장' : '샘플 카드') + '</div>' +
+        (nPhotos ? '사진 ' + nPhotos + '장' : '샘플 카드') + '</div>' +
     '</div>' +
     '<div class="sc-script"><div class="sc-h"><b>쇼츠 대본</b>' +
       '<button class="btn ghost sm" onclick="copyShortsScript()">📋 대본 복사</button></div>' +
@@ -1457,7 +1459,7 @@ function makeShorts() {
   var out = document.getElementById('ss_result');
   if (!out) return;
   SS.text = shortsScriptText(s, sc);
-  out.innerHTML = ssResultHtml(s, sc, bg, SS.text);
+  out.innerHTML = ssResultHtml(s, sc, bg, SS.text, photos.length);
   ssMount(bg);
   ssPlay(sc);
   setTimeout(function () { try { out.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) {} }, 100);
