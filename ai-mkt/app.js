@@ -185,7 +185,7 @@ var THEMES = [
 /* ---------- 상태 ---------- */
 var S = {
   view: 'hub', section: null,
-  shops: [], shop: null, photos: [], editPhotos: [],
+  shops: [], shop: null, photos: [], photosFor: null, editPhotos: [],
   query: '', filter: '전체',
   unlocked: false, loading: true, err: '', authWarn: false,
   curShopId: null, publicMode: false
@@ -591,7 +591,7 @@ function setFilter(f) { S.filter = f; render(); }
 function openShop(id) {
   S.curShopId = id;
   S.shop = S.shops.filter(function (s) { return s.id === id; })[0] || null;
-  S.photos = [];
+  S.photos = []; S.photosFor = null;
   S.view = 'detail'; S.section = null;
   render();
   loadPhotos(id);
@@ -629,7 +629,9 @@ async function loadPrivate(id) {
 async function loadPhotos(id) {
   try {
     var rows = await fsList('/aiMktShops/' + id + '/photos');
+    if (!S.shop || S.shop.id !== id) return;
     S.photos = rows.sort(function (a, b) { return num(a.o) - num(b.o); });
+    S.photosFor = id;
     if (S.view === 'detail') render();
   } catch (e) {}
 }
@@ -1222,8 +1224,15 @@ function defaultHook(s) {
 }
 function shortsPhotos() {
   if (STS.photos.length) return STS.photos.slice(0, 6);
+  var sid = S.shop && S.shop.id;
+  if (!sid || S.photosFor !== sid) return [];
   return (S.photos || []).map(function (p) { return p && (p.d || p); })
     .filter(function (x) { return typeof x === 'string' && x; }).slice(0, 6);
+}
+function shopPhotoCount() {
+  var sid = S.shop && S.shop.id;
+  if (!sid || S.photosFor !== sid) return 0;
+  return Math.min((S.photos || []).length, 6);
 }
 function openShortsStudio() {
   var s = S.shop;
@@ -1231,7 +1240,7 @@ function openShortsStudio() {
   ssStop();
   STS.shopId = s.id;
   STS.photos = [];
-  var shopN = Math.min((S.photos || []).length, 6);
+  var shopN = shopPhotoCount();
   openModal(
     '<h3>🎞 대본 · 슬라이드 만들기</h3>' +
     '<p>사진을 고르면 <b>9:16 세로 쇼츠</b>로 바로 재생됩니다. 사진이 없어도 샘플 카드로 먼저 보여 드릴 수 있습니다.</p>' +
@@ -1283,7 +1292,7 @@ function renderShortsThumbs() {
   }
   var info = document.getElementById('ss_pick_info');
   if (!info) return;
-  var shopN = Math.min((S.photos || []).length, 6);
+  var shopN = shopPhotoCount();
   info.textContent = STS.photos.length
     ? '고른 사진 ' + STS.photos.length + '장으로 만듭니다'
     : (shopN ? '매장에 등록된 사진 ' + shopN + '장을 먼저 씁니다' : '사진을 고르지 않으면 샘플 카드로 만듭니다');
@@ -1613,9 +1622,12 @@ async function createShop() {
     S.curShopId = id;
     S.shop = normalize(id, doc);
     S.shops.unshift(S.shop);
+    S.photos = []; S.photosFor = null;
     S.view = 'detail'; S.section = null;
     render();
     window.scrollTo(0, 0);
+    loadPhotos(id);
+    loadPrivate(id);
   } catch (e) {
     btnBusy(false);
     toast('저장 실패: ' + e.message);
