@@ -19,6 +19,7 @@
   p.forEach(function (v, k) {
     if (k !== 'w' && k !== 'h' && k !== 'vh' && k !== 'y' && k !== 'n') qs.push(k + '=' + encodeURIComponent(v));
   });
+  qs.push('cb=' + Date.now());
   if (qs.length) src += '?' + qs.join('&');
   var fr = document.getElementById('fr');
   fr.style.width = w + 'px';
