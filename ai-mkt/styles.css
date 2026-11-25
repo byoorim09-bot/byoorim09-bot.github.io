@@ -311,6 +311,7 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
 .pub{background:var(--pb);min-height:100vh;padding-bottom:calc(84px + var(--safe-b))}
 .pub-narrow{max-width:520px;margin:0 auto}
 .hero{position:relative;background:var(--phero-bg);color:#fff;overflow:hidden;min-height:430px;display:flex;flex-direction:column;justify-content:flex-end}
+.hero.no-img{min-height:368px}
 .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.92}
 .hero-scrim{position:absolute;inset:0;background:var(--pscrim)}
 .hero-in{position:relative;z-index:2;padding:26px 20px 25px;width:100%;max-width:520px;margin:0 auto}

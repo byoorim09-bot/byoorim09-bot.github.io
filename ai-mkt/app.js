@@ -2563,7 +2563,7 @@ function renderPublic() {
 
   app.innerHTML =
     '<div class="pub" data-theme="' + esc(themeKey(s.theme)) + '">' + notice + '<div class="pub-narrow">' +
-      '<header class="hero">' +
+      '<header class="hero' + (heroImg ? '' : ' no-img') + '">' +
         (heroImg ? '<img class="hero-img" src="' + heroImg + '" alt="" fetchpriority="high">' : '') +
         '<div class="hero-scrim"></div>' +
         '<div class="hero-top"><span class="hero-brand">' + esc(s.name.slice(0, 18)) + '</span>' +
