@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0C1A14">
+<title>파비스애니원 부천소사점 · 홍보 쇼츠 (23초)</title>
+<meta name="description" content="파비스애니원 부천소사점 AI 홍보 쇼츠 — 23초 세로 영상">
+<meta property="og:type" content="video.other">
+<meta property="og:title" content="파비스애니원 부천소사점 · 홍보 쇼츠">
+<meta property="og:description" content="부천 소사동 건강관리 전문 · 23초 세로 영상">
+<meta property="og:image" content="https://byoorim09-bot.github.io/ai-mkt/videos/pavis-sosa-shorts-poster.jpg">
+<meta name="twitter:card" content="player">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0C1A14;--gold:#C9A227;--ivory:#F3EEE2;--line:rgba(243,238,226,.16)}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(120% 80% at 50% 0%,#16301F 0%,#0C1A14 60%,#08110D 100%);
+    color:var(--ivory);font-family:"Noto Sans KR",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    padding:14px 14px calc(20px + env(safe-area-inset-bottom));
+  }
+  header{width:100%;max-width:440px;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .brand{font-size:12px;font-weight:800;letter-spacing:.22em;color:var(--gold);text-transform:uppercase}
+  .brand span{letter-spacing:.04em;color:rgba(243,238,226,.72);font-weight:700}
+  .len{margin-left:auto;font-size:12px;font-weight:700;color:rgba(243,238,226,.7);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  main{width:100%;max-width:440px}
+  .stage{position:relative;width:100%;aspect-ratio:9/16;background:#04100A;border-radius:18px;overflow:hidden;
+    box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px var(--line)}
+  .stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#04100A}
+  .play{
+    position:absolute;inset:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;border:0;padding:0;cursor:pointer;
+    background:linear-gradient(180deg,rgba(4,16,10,.12) 0%,rgba(4,16,10,.5) 78%,rgba(4,16,10,.72) 100%);
+    color:var(--ivory);font-family:inherit;transition:opacity .22s ease
+  }
+  .play .dot{width:84px;height:84px;border-radius:50%;background:rgba(243,238,226,.94);color:#0C1A14;
+    display:grid;place-items:center;font-size:30px;padding-left:5px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .play b{font-size:17px;font-weight:800;letter-spacing:-.01em;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .play small{font-size:13px;font-weight:500;color:rgba(243,238,226,.82)}
+  .stage.playing .play{opacity:0;pointer-events:none}
+  .info{margin-top:14px;border:1px solid var(--line);border-radius:16px;padding:14px 15px;
+    background:rgba(243,238,226,.045)}
+  .info h1{margin:0 0 3px;font-size:18.5px;font-weight:800;letter-spacing:-.02em;line-height:1.35}
+  .info p{margin:0;font-size:13.5px;line-height:1.7;color:rgba(243,238,226,.74)}
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+  .acts a{display:flex;align-items:center;justify-content:center;gap:6px;min-height:54px;border-radius:13px;
+    text-decoration:none;font-size:16px;font-weight:800;letter-spacing:-.01em}
+  .acts .call{background:var(--green,#2E5A46);background:#2E5A46;color:#fff}
+  .acts .page{background:rgba(243,238,226,.1);color:var(--ivory);border:1px solid var(--line)}
+  footer{margin-top:16px;font-size:11.5px;line-height:1.7;color:rgba(243,238,226,.5);text-align:center}
+  footer b{color:rgba(243,238,226,.72);font-weight:700}
+  @media (max-height:680px){
+    .stage{max-height:64vh;margin:0 auto}
+    .play .dot{width:68px;height:68px;font-size:24px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">PHARVIS <span>애니원</span></div>
+  <div class="len">23초 · 세로</div>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <video id="v" src="pavis-sosa-shorts.mp4" poster="pavis-sosa-shorts-poster.jpg"
+           preload="metadata" playsinline controls controlslist="nodownload" x5-playsinline></video>
+    <button class="play" id="play" type="button" aria-label="영상 재생">
+      <span class="dot">▶</span>
+      <b>홍보 쇼츠 재생</b>
+      <small>23초 · 소리를 켜고 보세요</small>
+    </button>
+  </div>
+
+  <div class="info">
+    <h1>파비스애니원 부천소사점</h1>
+    <p>부천 소사동 · 건강관리 전문<br>경기 부천시 소사구 은성로 78 2층 · 매일 10:00–19:00</p>
+  </div>
+
+  <div class="acts">
+    <a class="call" href="tel:050714824029">📞 전화하기</a>
+    <a class="page" href="../?shop=pavis-sosa">홍보 페이지 보기</a>
+  </div>
+
+  <footer>제작 · <b>알프스 워크 AI 마케팅</b> (010-6398-9872)<br>매장 사진으로 제작한 1차 시안 영상입니다</footer>
+</main>
+
+<script>
+(function(){
+  var v = document.getElementById('v');
+  var stage = document.getElementById('stage');
+  var btn = document.getElementById('play');
+  function show(){ stage.classList.remove('playing'); }
+  function hide(){ stage.classList.add('playing'); }
+  btn.addEventListener('click', function(){
+    hide();
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){ show(); v.setAttribute('controls',''); });
+  });
+  v.addEventListener('play', hide);
+  v.addEventListener('pause', function(){ if (v.currentTime === 0) show(); });
+  v.addEventListener('ended', function(){ show(); try{ v.currentTime = 0; }catch(e){} });
+})();
+</script>
+</body>
+</html>

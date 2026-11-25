@@ -2349,9 +2349,25 @@ function renderPublic() {
   }
 
   var media = '';
+  /* 쇼츠 링크가 영상 파일이거나 이 허브에 올린 전용 플레이어 페이지면 시안 안에서 바로 재생 */
+  var vidSrc = '', vidPoster = '', vidPage = '';
   if (shorts) {
-    media += '<div class="video-card"><span class="play">▶</span><div><b>매장 영상 보기</b><span>쇼츠 · 릴스로 미리 만나보세요</span></div>' +
-      '<a class="btn primary sm" style="margin-left:auto" href="' + esc(shorts) + '" target="_blank" rel="noopener">보기</a></div>';
+    var isVidFile = /\.(mp4|webm|m4v|mov)(\?|#|$)/i.test(shorts);
+    var isVidPage = /\/ai-mkt\/videos\/[^\/?#]+\.html(\?|#|$)/i.test(shorts);
+    if (isVidFile || isVidPage) {
+      var vidBase = shorts.replace(/(\?|#).*$/, '').replace(/\.(mp4|webm|m4v|mov|html)$/i, '');
+      vidPage = isVidPage ? shorts : '';
+      vidSrc = isVidFile ? shorts : vidBase + '.mp4';
+      vidPoster = isVidPage ? vidBase + '-poster.jpg' : '';
+      media += '<div class="vid-wrap"><video class="vid" src="' + esc(vidSrc) + '"' +
+        (vidPoster ? ' poster="' + esc(vidPoster) + '"' : '') +
+        ' controls playsinline preload="metadata" controlslist="nodownload"></video></div>' +
+        '<div class="vid-meta"><span class="vi-ic">▶</span><span class="vi-tx"><b>매장 홍보 쇼츠</b><small>세로 영상 · 소리를 켜고 보세요</small></span>' +
+        (vidPage ? '<a class="btn ghost sm" href="' + esc(vidPage) + '" target="_blank" rel="noopener">크게 보기 ↗</a>' : '') + '</div>';
+    } else {
+      media += '<div class="video-card"><span class="play">▶</span><div><b>매장 영상 보기</b><span>쇼츠 · 릴스로 미리 만나보세요</span></div>' +
+        '<a class="btn primary sm" style="margin-left:auto" href="' + esc(shorts) + '" target="_blank" rel="noopener">보기</a></div>';
+    }
   }
   if (card || diagImg) {
     media += '<div class="diag-card"><a href="' + esc(card || diagImg) + '" target="_blank" rel="noopener">' +
