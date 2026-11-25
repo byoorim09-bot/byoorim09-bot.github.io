@@ -1340,7 +1340,7 @@ function buildShortsScript(s, opt) {
     shot: shot(3)
   };
   if (hours || s.addr) P.info = {
-    cap: hours ? ssCut(hours, 24) : (region || '위치 안내'),
+    cap: hours ? ssCut(hours, 24) : ssCut(s.addr, 26),
     nar: (hours ? '영업시간은 ' + ssCut(hours, 34) + '. ' : '') + (s.addr ? '주소는 ' + s.addr + '.' : ''),
     shot: shot(4)
   };

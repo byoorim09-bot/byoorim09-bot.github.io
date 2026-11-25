@@ -505,7 +505,8 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
 .ss-card .k{font-size:10.5px;font-weight:800;letter-spacing:.18em;color:#F3B594;margin-bottom:12px}
 .ss-card .t{font-family:"Noto Serif KR",serif;font-size:19px;font-weight:700;line-height:1.42;
   letter-spacing:-.02em;word-break:keep-all;text-shadow:0 2px 14px rgba(0,0,0,.35)}
-.ss-card .s{margin-top:12px;font-size:11.5px;line-height:1.65;color:#DCD6CA;word-break:keep-all}
+.ss-card .s{margin-top:12px;font-size:11.5px;line-height:1.65;color:#EDE8DD;word-break:keep-all;
+  text-shadow:0 1px 8px rgba(0,0,0,.45)}
 .ss-c0{background:linear-gradient(160deg,#23395F 0%,#15243F 55%,#0E192C 100%)}
 .ss-c1{background:linear-gradient(160deg,#8A4A1C 0%,#5E3010 60%,#2C1708 100%)}
 .ss-c2{background:linear-gradient(160deg,#2E5A46 0%,#1D3B2E 60%,#0F2119 100%)}
