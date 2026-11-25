@@ -552,7 +552,7 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
 .th-bar .tx b{display:block;font-size:14.5px;font-weight:800;color:#3C4356;letter-spacing:-.01em}
 .th-bar .tx small{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
 .th-bar .btn{grid-column:1/-1;width:100%;min-height:42px;font-size:14.5px;border-radius:10px}
-.modal.theme-modal .th-grid{max-height:46vh;overflow-y:auto;padding:1px}
+.modal.theme-modal .th-grid{max-height:52vh;overflow-y:auto;padding:1px}
 
 /* ---------- 서비스 선택 · 수정 허브 ---------- */
 .svc.off{background:#FBFAF7;border-style:dashed;box-shadow:none}
