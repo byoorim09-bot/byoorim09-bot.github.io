@@ -175,12 +175,54 @@ var CHK = [
   { k: 'shorts', label: '쇼츠·릴스' },
   { k: 'etc',    label: '기타' }
 ];
+/* 시안 디자인 테마 5종 — 업종·분위기별 전용 스킨
+   sw = [배경, 포인트, 진한색] 스와치 / fit = 추천 업종 */
 var THEMES = [
-  { k: 'navy',   label: '네이비 (기본)' },
-  { k: 'forest', label: '포레스트 (건강·차·한방)' },
-  { k: 'wine',   label: '와인 (식당·주점)' },
-  { k: 'sand',   label: '샌드 (카페·베이커리)' }
+  { k: 'luxury-beauty', label: '럭셔리 뷰티', sub: '아이보리 · 샴페인 골드 · 세리프', fit: '에스테틱 · 화장품 · 미용실',
+    sw: ['#FAF6EF', '#C6A46A', '#2B2420'] },
+  { k: 'wellness-green', label: '웰니스 그린', sub: '포레스트 그린 · 웜 베이지', fit: '건강 · 관리 · 한방',
+    sw: ['#F4F1E7', '#39634E', '#1B3A2C'] },
+  { k: 'lounge-dark', label: '라운지 다크', sub: '차콜 · 웜 골드 · 무드 조명', fit: '카페 · 라운지 · 펍',
+    sw: ['#14161C', '#D6A45A', '#22262F'] },
+  { k: 'warm-dining', label: '웜 다이닝', sub: '테라코타 · 클린 화이트', fit: '맛집 · 일반 매장',
+    sw: ['#FFFFFF', '#C0562F', '#7A2E17'] },
+  { k: 'classic', label: '클래식 클린', sub: '네이비 · 오렌지 (기본형)', fit: '업종 무관 기본',
+    sw: ['#FFFFFF', '#15243F', '#E2782B'] }
 ];
+/* 예전 테마 키는 새 스킨으로 읽어 준다 (저장된 문서는 그대로 둔다) */
+var THEME_ALIAS = { navy: 'classic', forest: 'wellness-green', wine: 'warm-dining', sand: 'lounge-dark' };
+function themeKey(k) {
+  k = String(k == null ? '' : k).trim();
+  if (THEME_ALIAS[k]) k = THEME_ALIAS[k];
+  for (var i = 0; i < THEMES.length; i++) if (THEMES[i].k === k) return k;
+  return 'classic';
+}
+function themeDef(k) {
+  k = themeKey(k);
+  for (var i = 0; i < THEMES.length; i++) if (THEMES[i].k === k) return THEMES[i];
+  return THEMES[THEMES.length - 1];
+}
+/* URL ?theme= 값 검증 — 모르는 값이면 무시하고 저장된 테마로 보여 준다 */
+function themeParam(v) {
+  v = String(v == null ? '' : v).trim();
+  if (!v) return '';
+  var k = THEME_ALIAS[v] || v;
+  for (var i = 0; i < THEMES.length; i++) if (THEMES[i].k === k) return k;
+  return '';
+}
+/* 업종·상호 글자로 추천 테마 고르기 */
+var THEME_RULES = [
+  { k: 'luxury-beauty', re: /(뷰티|화장품|미용|에스테틱|피부|네일|헤어|왁싱|속눈썹|반영구|스파|마사지|살롱|코스메틱|향수|두피)/ },
+  { k: 'wellness-green', re: /(건강|웰니스|한방|한의|약국|요가|필라테스|헬스|다이어트|영양|클리닉|병원|의원|치과|재활|쑥뜸|뜸|사우나|수치료|피트니스)/ },
+  { k: 'lounge-dark', re: /(카페|커피|라운지|펍|호프|주점|이자카야|칵테일|와인|나이트|맥주|비어|pub|bar)/ },
+  { k: 'warm-dining', re: /(식당|음식|맛집|고기|국밥|한식|일식|중식|양식|분식|치킨|피자|베이커리|빵|디저트|정육|반찬|도시락|찌개|삼겹|횟집|돈까스|떡볶이|주먹밥|김밥)/ }
+];
+function themeForCat(cat, name) {
+  var t = String(cat || '') + ' ' + String(name || '');
+  if (!t.trim()) return 'classic';
+  for (var i = 0; i < THEME_RULES.length; i++) if (THEME_RULES[i].re.test(t)) return THEME_RULES[i].k;
+  return 'classic';
+}
 
 /* ---------- 상태 ---------- */
 var S = {
@@ -188,7 +230,7 @@ var S = {
   shops: [], shop: null, photos: [], photosFor: null, editPhotos: [],
   query: '', filter: '전체',
   unlocked: false, loading: true, err: '', authWarn: false,
-  curShopId: null, publicMode: false
+  curShopId: null, publicMode: false, forceTheme: null
 };
 var app = document.getElementById('app');
 var modalRoot = document.getElementById('modal-root');
@@ -343,7 +385,7 @@ function normalize(id, d) {
     draft: d.draft !== false,
     webClosed: d.webClosed === true,
     hasDiag: !!d.hasDiag,
-    theme: d.theme || 'navy',
+    theme: themeKey(d.theme),
     svc: svc, chk: chk, opt: d.opt || {},
     links: d.links || {},
     keywords: Array.isArray(d.keywords) ? d.keywords.filter(function (x) { return String(x || '').trim(); }).slice(0, 5) : [],
@@ -643,6 +685,68 @@ function svcState(done, level, label) {
   var cls = level === 2 ? 'ok' : (level === 1 ? 'wait' : 'no');
   return '<span class="badge ' + cls + '">' + label + '</span>';
 }
+
+/* ---------- 디자인 테마 선택 (등록 · 변경 · 수정 공용) ---------- */
+function themeSwatch(t, cls) {
+  return '<span class="' + (cls || 'th-prev') + '" style="background:linear-gradient(135deg,' + t.sw[0] + ' 0%,' + t.sw[1] + ' 100%)">' +
+    '<i style="background:' + t.sw[2] + '"></i></span>';
+}
+function themeChipsHtml(boxId, cur, onclick) {
+  cur = themeKey(cur);
+  return '<div class="th-grid" id="' + boxId + '">' + THEMES.map(function (t) {
+    return '<button type="button" class="th-chip' + (t.k === cur ? ' on' : '') + '" data-k="' + t.k + '" onclick="' + onclick + '">' +
+      themeSwatch(t) +
+      '<span class="th-tx"><b>' + esc(t.label) + '</b><small>' + esc(t.sub) + '</small><em>' + esc(t.fit) + '</em></span>' +
+      '<span class="th-ck">✓</span></button>';
+  }).join('') + '</div>';
+}
+function pickTheme(el) {
+  var chips = el.parentNode.querySelectorAll('.th-chip');
+  for (var i = 0; i < chips.length; i++) chips[i].classList.remove('on');
+  el.classList.add('on');
+}
+function selThemeIn(boxId) {
+  var el = document.querySelector('#' + boxId + ' .th-chip.on');
+  return el ? themeKey(el.getAttribute('data-k')) : '';
+}
+function themeBarHtml(s) {
+  var t = themeDef(s.theme);
+  return '<div class="th-bar">' + themeSwatch(t) +
+    '<span class="tx"><b>디자인 · ' + esc(t.label) + '</b><small>' + esc(t.sub) + '</small></span>' +
+    '<button class="btn ghost sm" onclick="openThemePicker(' + Id(s.id) + ')">🎨 디자인 변경</button></div>';
+}
+function openThemePicker(id) {
+  var s = shopById(id) || S.shop;
+  if (!s) return;
+  var t = themeDef(s.theme);
+  openModal(
+    '<h3>🎨 디자인 변경</h3>' +
+    '<p>업종·분위기에 맞는 시안 디자인을 고르세요. 저장하면 고객 시안에 바로 반영됩니다.</p>' +
+    '<p class="th-cur">지금 디자인 · <b>' + esc(t.label) + '</b></p>' +
+    themeChipsHtml('th_grid', s.theme, 'pickTheme(this)') +
+    '<div class="acts cols" id="th_acts"><button class="btn ghost" onclick="closeModal()">취소</button>' +
+      '<button class="btn primary" onclick="saveTheme(' + Id(id) + ')">저장</button></div>',
+    'theme-modal');
+}
+async function saveTheme(id) {
+  var k = selThemeIn('th_grid');
+  if (!k) return;
+  var btn = document.querySelector('#th_acts .btn.primary');
+  if (btn) { btn.disabled = true; btn.textContent = '저장 중…'; }
+  try {
+    await fsPatch('/aiMktShops/' + id, { theme: k, updatedAt: Date.now() });
+    S.shops.forEach(function (x) { if (x.id === id) { x.theme = k; x.updatedAt = Date.now(); } });
+    if (S.shop && S.shop.id === id) S.shop.theme = k;
+    toast('디자인을 「' + themeDef(k).label + '」(으)로 바꿨습니다');
+    var acts = document.getElementById('th_acts');
+    if (acts) acts.innerHTML = '<button class="btn ghost" onclick="closeModal()">닫기</button>' +
+      '<a class="btn primary" href="' + esc(shareUrl(id)) + '" target="_blank" rel="noopener">시안 열기 ↗</a>';
+    if (S.view === 'detail') setTimeout(function () { if (S.view === 'detail') render(); }, 40);
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = '저장'; }
+    toast('저장 실패: ' + e.message);
+  }
+}
 function detailView() {
   var s = S.shop;
   if (!s) return shellTopBack('샵 정보', 'AI 마케팅 관리', 'setView(\'hub\')') + '<div class="wrap"><div class="empty"><b>샵을 찾을 수 없습니다</b></div></div>';
@@ -692,6 +796,7 @@ function detailView() {
         (s.webClosed ? '<span class="badge no">비공개 중</span>' : (svcDone(s.chk, 'web') ? '<span class="badge ok">완료</span>' : '<span class="badge navy">진행 중</span>')) +
       '</div>' +
       '<div class="svc-body">' +
+        themeBarHtml(s) +
         '<div class="link-line"><span class="nm">' + (webIsLegacy ? '전용 시안' : '자동 시안') + '</span>' +
           '<span class="url">' + esc(webIsLegacy ? L.web : '사진·메뉴에서 자동 생성') + '</span>' +
           '<a class="btn primary" href="' + esc(webUrl) + '" target="_blank" rel="noopener">열기 ↗</a></div>' +
@@ -1546,8 +1651,10 @@ function copyShortsScript() {
 
 /* ---------- 새 샵 ---------- */
 var newSvc = { web: true, map: false, place: false, shorts: false };
+var newTheme = 'classic', newThemeTouched = false;
 function openNew() {
   newSvc = { web: true, map: false, place: false, shorts: false };
+  newTheme = 'classic'; newThemeTouched = false;
   S.view = 'new'; S.section = null; render(); window.scrollTo(0, 0);
 }
 function newView() {
@@ -1555,7 +1662,7 @@ function newView() {
   '<div class="page"><div class="wrap">' +
     '<div class="card">' +
       '<div class="field"><label>상호 <small>필수</small></label>' +
-        '<input id="n_name" type="text" placeholder="예) 파비스애니원 부천소사점" autocomplete="off"></div>' +
+        '<input id="n_name" type="text" placeholder="예) 파비스애니원 부천소사점" autocomplete="off" oninput="onNewName()"></div>' +
       '<div class="field"><label>주소</label>' +
         '<input id="n_addr" type="text" placeholder="예) 경기도 부천시 소사구 은성로 78 2층" autocomplete="off"></div>' +
       '<div class="grid2">' +
@@ -1563,7 +1670,20 @@ function newView() {
         '<div class="field"><label>담당자·연락처</label><input id="n_owner" type="text" placeholder="원장 010-0000-0000"></div>' +
       '</div>' +
       '<div class="field"><label>업종</label>' +
-        '<input id="n_cat" type="text" placeholder="예) 건강·웰니스 / 카페·펍 / 미용" autocomplete="off"></div>' +
+        '<input id="n_cat" type="text" placeholder="예) 건강·웰니스 / 카페·펍 / 미용" autocomplete="off" oninput="onNewCat()">' +
+        '<div class="cat-picks">' +
+          [['뷰티 · 화장품', '뷰티'], ['건강 · 웰니스', '웰니스'], ['카페 · 라운지', '카페'], ['맛집 · 음식점', '맛집']].map(function (o) {
+            return '<button type="button" class="chip" onclick="setNewCat(\'' + o[1] + '\')">' + o[0] + '</button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="field"><label>영문 주소 ID <small>선택</small></label>' +
+        '<input id="n_id" type="text" placeholder="예) rodecssongdo" autocomplete="off" autocapitalize="off" spellcheck="false">' +
+        '<p class="hint">비우면 자동으로 만들어집니다. 직접 넣으면 <b>?shop=넣은값</b> 주소로 시안이 열립니다. (영문 소문자·숫자·- _ .)</p></div>' +
+    '</div>' +
+    '<div class="card"><h3><em>🎨</em> 시안 디자인</h3>' +
+      '<p class="hint" style="margin:-4px 0 2px">업종에 맞는 디자인을 자동으로 골라 줍니다. 원하면 직접 바꾸세요.</p>' +
+      themeChipsHtml('n_themes', newTheme, 'pickNewTheme(this)') +
     '</div>' +
     '<div class="card"><h3><em>진행</em> 하기로 한 서비스</h3>' +
       SVC.map(function (v) {
@@ -1577,6 +1697,24 @@ function newView() {
     '</div>' +
     '<div class="savebar"><button class="btn primary" onclick="createShop()">이 샵 등록하고 시안 만들기</button></div>' +
   '</div></div>';
+}
+/* 업종을 바꾸면 (사용자가 디자인을 직접 고르기 전까지) 추천 디자인을 따라간다 */
+function setNewCat(v) {
+  var el = document.getElementById('n_cat');
+  if (el) el.value = v;
+  if (!newThemeTouched) setNewTheme(themeForCat(v, val('n_name')));
+}
+function onNewCat() { if (!newThemeTouched) setNewTheme(themeForCat(val('n_cat'), val('n_name'))); }
+function onNewName() { if (!newThemeTouched && !String(val('n_cat') || '').trim()) setNewTheme(themeForCat('', val('n_name'))); }
+function setNewTheme(k) {
+  newTheme = themeKey(k);
+  var chips = document.querySelectorAll('#n_themes .th-chip');
+  for (var i = 0; i < chips.length; i++) chips[i].classList.toggle('on', chips[i].getAttribute('data-k') === newTheme);
+}
+function pickNewTheme(el) {
+  newThemeTouched = true;
+  pickTheme(el);
+  newTheme = themeKey(el.getAttribute('data-k'));
 }
 function toggleNewSvc(el) {
   var k = el.getAttribute('data-k');
@@ -1596,7 +1734,21 @@ async function createShop() {
     toast('진행할 서비스를 하나 이상 골라 주세요'); return;
   }
   var now = Date.now();
-  var id = 'shop' + now.toString(36);
+  var rawId = String(val('n_id') || '').trim().toLowerCase();
+  var id;
+  if (rawId) {
+    if (!/^[a-z0-9][a-z0-9._-]{1,48}$/.test(rawId)) {
+      toast('영문 주소 ID는 영문 소문자·숫자·- _ . 2~49자만 됩니다');
+      var idEl = document.getElementById('n_id'); if (idEl) idEl.focus();
+      return;
+    }
+    if (S.shops.some(function (x) { return x.id === rawId; })) {
+      toast('이미 쓰고 있는 주소 ID입니다 · 다른 값을 넣어 주세요'); return;
+    }
+    id = rawId;
+  } else {
+    id = 'shop' + now.toString(36);
+  }
   var doc = {
     name: name,
     addr: val('n_addr').trim(),
@@ -1605,7 +1757,7 @@ async function createShop() {
     cat: val('n_cat').trim(),
     status: '신규',
     draft: true,
-    theme: 'navy',
+    theme: themeKey(newTheme),
     svc: { web: !!newSvc.web, map: !!newSvc.map, place: !!newSvc.place, shorts: !!newSvc.shorts },
     chk: {}, opt: {}, links: {}, menu: [],
     intro: '', hours: '',
@@ -1873,9 +2025,9 @@ function infoSection(s) {
       '<div class="field"><label>한 줄 소개 <small>시안 상단 큰 문구</small></label>' +
         '<textarea id="f_intro" placeholder="예) 발효로 삭히고 비움으로 정돈합니다">' + esc(s.intro) + '</textarea></div>' +
       '<div class="field"><label>영업시간</label><input id="f_hours" type="text" placeholder="예) 매일 10:00 – 19:00 (일요일 휴무)" value="' + esc(s.hours) + '"></div>' +
-      '<div class="field"><label>시안 색상</label><select id="f_theme">' +
-        THEMES.map(function (t) { return '<option value="' + t.k + '" ' + (t.k === th ? 'selected' : '') + '>' + t.label + '</option>'; }).join('') +
-      '</select></div>' +
+      '<div class="field"><label>시안 디자인 <small>업종·분위기에 맞는 스킨</small></label>' +
+        themeChipsHtml('f_themes', th, 'pickTheme(this)') +
+      '</div>' +
       '<div class="field" style="margin-top:4px"><button class="tg ' + (s.draft ? 'on' : '') + '" id="f_draft" data-on="' + (s.draft ? '1' : '0') + '" onclick="toggleDraft(this)" style="width:100%;justify-content:flex-start">' +
         '<span class="bx">' + (s.draft ? '✓' : '') + '</span>시안 안내 문구 표시 (제작 시안 단계)</button></div>' +
     '</div>' +
@@ -1900,7 +2052,7 @@ async function saveInfo() {
     status: val('f_status'),
     intro: val('f_intro').trim(),
     hours: val('f_hours').trim(),
-    theme: val('f_theme') || 'navy',
+    theme: selThemeIn('f_themes') || themeKey(s.theme),
     draft: document.getElementById('f_draft').getAttribute('data-on') === '1',
     updatedAt: Date.now()
   };
@@ -2256,6 +2408,10 @@ function stableSig(v) {
 function initPublic(id) {
   S.publicMode = true;
   S.pubId = id;
+  /* ?theme=xxx 미리보기 — 저장된 디자인은 건드리지 않고 화면에만 적용 */
+  var tp = '';
+  try { tp = themeParam(new URLSearchParams(location.search).get('theme')); } catch (e) { tp = ''; }
+  S.forceTheme = tp || null;
   app.innerHTML = '<div class="loading"><div><div class="spin"></div>시안을 불러오는 중…</div></div>';
   pubTick(true);
   clearInterval(pubTimer);
@@ -2272,7 +2428,9 @@ async function pubTick(first) {
     if (!first && sig === pubSig) return;
     pubSig = sig;
     S.shop = normalize(S.pubId, data);
-    document.title = S.shop.name + ' · ' + (S.shop.cat || '홍보 페이지');
+    if (S.forceTheme) S.shop.theme = S.forceTheme;
+    document.title = S.shop.name + ' · ' + (S.shop.cat || '홍보 페이지') +
+      (S.forceTheme ? ' · ' + themeDef(S.forceTheme).label + ' 미리보기' : '');
     if (S.shop.webClosed) { renderPubClosed(); return; }
     await loadPubAssets(S.pubId);
     renderPublic();
@@ -2404,7 +2562,7 @@ function renderPublic() {
   var showAbout = restIntro.length > 0;
 
   app.innerHTML =
-    '<div class="pub" data-theme="' + esc(s.theme || 'navy') + '">' + notice + '<div class="pub-narrow">' +
+    '<div class="pub" data-theme="' + esc(themeKey(s.theme)) + '">' + notice + '<div class="pub-narrow">' +
       '<header class="hero">' +
         (heroImg ? '<img class="hero-img" src="' + heroImg + '" alt="" fetchpriority="high">' : '') +
         '<div class="hero-scrim"></div>' +
@@ -2475,6 +2633,13 @@ window.lockNow = lockNow;
 window.createShop = createShop;
 window.addSvc = addSvc;
 window.toggleNewSvc = toggleNewSvc;
+window.pickTheme = pickTheme;
+window.openThemePicker = openThemePicker;
+window.saveTheme = saveTheme;
+window.pickNewTheme = pickNewTheme;
+window.setNewCat = setNewCat;
+window.onNewCat = onNewCat;
+window.onNewName = onNewName;
 window.toggleSvcPick = toggleSvcPick;
 window.toggleChk = toggleChk;
 window.toggleDraft = toggleDraft;
