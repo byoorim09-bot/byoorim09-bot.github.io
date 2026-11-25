@@ -349,6 +349,7 @@ function normalize(id, d) {
     keywords: Array.isArray(d.keywords) ? d.keywords.filter(function (x) { return String(x || '').trim(); }).slice(0, 5) : [],
     kwExamples: Array.isArray(d.kwExamples) ? d.kwExamples.filter(function (x) { return String(x || '').trim(); }).slice(0, 5) : [],
     menu: Array.isArray(d.menu) ? d.menu : [],
+    shortsRequest: (d.shortsRequest && typeof d.shortsRequest === 'object') ? d.shortsRequest : null,
     order: num(d.order),
     createdAt: num(d.createdAt),
     updatedAt: num(d.updatedAt)
@@ -781,6 +782,11 @@ function detailView() {
             ? '<button class="btn primary" onclick="showCard(\'' + s.id + '\')">카드 보기</button>'
             : '<button class="btn ghost" onclick="openSection(\'' + s.id + '\',\'links\')">올리기</button>') +
         '</div>' +
+        '<div class="shorts-acts">' +
+          '<button class="btn primary block" onclick="openShortsRequest()">🎬 쇼츠 제작 요청</button>' +
+          '<button class="btn navy block" onclick="openShortsStudio()">🎞 대본 · 슬라이드 만들기</button>' +
+        '</div>' +
+        shortsRecentHtml(s) +
       '</div>' +
     '</div>') +
 
@@ -1053,6 +1059,478 @@ function showCard(id) {
     else if (cardUrl) apply(cardUrl);
     else toast('등록된 진단 카드가 없습니다');
   }).catch(function () { if (cardUrl) apply(cardUrl); else toast('카드를 불러오지 못했습니다'); });
+}
+
+/* ===========================================================
+   04 쇼츠 · ① 제작 요청 ② 대본·슬라이드 만들기
+   =========================================================== */
+function shopKeywords(s) {
+  return ((s && s.keywords) || []).filter(function (x) { return String(x || '').trim(); });
+}
+function ssRegion(s) {
+  var r = kwRegion((s && s.addr) || '');
+  return r.dong || r.gu || r.city || '';
+}
+function ssCatShort(s) {
+  var c = String((s && s.cat) || '').split(/[·,\/]/)[0].trim();
+  return c || '가게';
+}
+function ssIntroLines(s) {
+  return String((s && s.intro) || '').split('\n').map(function (t) { return t.trim(); }).filter(Boolean);
+}
+function ssClock(ms) {
+  var t = Math.max(0, Math.round(ms / 1000));
+  return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2);
+}
+function ssCut(txt, n) {
+  var t = String(txt || '').replace(/\s+/g, ' ').trim();
+  return t.length > n ? t.slice(0, n - 1).trim() + '…' : t;
+}
+function ssFlat(txt) { return String(txt || '').replace(/\s+/g, ''); }
+function fmtDateTime(ts) {
+  var d = new Date(ts || Date.now());
+  return d.getFullYear() + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + '.' + ('0' + d.getDate()).slice(-2) +
+    ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+}
+function pickSeg(el) {
+  if (!el || !el.parentNode) return;
+  [].forEach.call(el.parentNode.children, function (b) { b.classList.remove('on'); });
+  el.classList.add('on');
+}
+function segVal(boxId, dflt) {
+  var el = document.querySelector('#' + boxId + ' .seg-b.on');
+  var v = el ? num(el.getAttribute('data-len')) : 0;
+  return v === 30 || v === 15 ? v : dflt;
+}
+
+/* --- ① 쇼츠 제작 요청 --- */
+var srLastText = '';
+function shortsRecentHtml(s) {
+  var r = s && s.shortsRequest;
+  if (!r || !r.t) return '';
+  return '<div class="shorts-note"><span>최근 요청 <b>' + fmtDate(r.t) + '</b> · ' + (num(r.len) === 30 ? '30초' : '15초') + '</span>' +
+    '<button onclick="openShortsRequest()">다시 보기 ›</button></div>';
+}
+function shopMiniInfoHtml(s) {
+  var kws = shopKeywords(s);
+  var tagline = ssIntroLines(s)[0] || '';
+  var rows = [['상호', s.name || '-']];
+  if (s.cat) rows.push(['업종', s.cat]);
+  if (s.addr) rows.push(['주소', s.addr]);
+  rows.push(['핵심 검색어', kws.length ? kws.join(', ') : '미등록 (업종·주소로 보정)']);
+  if (tagline) rows.push(['한 줄 소개', tagline]);
+  return '<div class="sm-info"><dl>' + rows.map(function (r) {
+    return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>';
+  }).join('') + '</dl></div>';
+}
+function openShortsRequest() {
+  var s = S.shop;
+  if (!s) return;
+  var r = s.shortsRequest || {};
+  var len = num(r.len) === 30 ? 30 : 15;
+  srLastText = r.text || '';
+  openModal(
+    '<h3>🎬 쇼츠 제작 요청</h3>' +
+    '<p>샵 정보는 자동으로 채웠습니다. 아래 세 가지만 적고 <b>[요청 문구 생성]</b>을 누르면 담당자에게 그대로 보낼 요청서가 만들어집니다.</p>' +
+    shopMiniInfoHtml(s) +
+    '<div class="field" style="margin-top:16px"><label>① 강조할 내용 · 이벤트</label>' +
+      '<textarea id="sr_memo" rows="3" placeholder="예) 11월 신규 고객 30% 할인 · 주차 가능 · 예약 전화 강조">' + esc(r.memo || '') + '</textarea></div>' +
+    '<div class="field"><label>② 사용할 사진 설명</label>' +
+      '<textarea id="sr_photo" rows="2" placeholder="예) 매장 외관 1장, 관리실 2장, 원장님 작업 장면 1장">' + esc(r.photo || '') + '</textarea>' +
+      '<p class="hint">휴대폰 사진은 아래 「대본·슬라이드 만들기」에서 직접 고를 수 있습니다.</p></div>' +
+    '<div class="field"><label>③ 길이</label><div class="seg" id="sr_len">' +
+      '<button type="button" class="seg-b' + (len === 15 ? ' on' : '') + '" data-len="15" onclick="pickSeg(this)">15초</button>' +
+      '<button type="button" class="seg-b' + (len === 30 ? ' on' : '') + '" data-len="30" onclick="pickSeg(this)">30초</button>' +
+    '</div></div>' +
+    '<div class="acts cols">' +
+      '<button class="btn ghost" onclick="closeModal()">닫기</button>' +
+      '<button class="btn primary" onclick="genShortsRequest()">요청 문구 생성</button>' +
+    '</div>' +
+    '<div id="sr_out">' + (r.text ? srOutHtml(r.text) : '') + '</div>'
+  );
+}
+function srOutHtml(text) {
+  return '<div class="sr-out"><div class="sr-box" id="sr_text">' + esc(text) + '</div>' +
+    '<button class="btn primary block" style="margin-top:9px" onclick="copyShortsRequest()">📋 요청 문구 복사</button>' +
+    '<p class="hint" style="margin-top:7px">이 문구를 담당자에게 그대로 보내면 됩니다. 저장되어 새로고침해도 최근 요청으로 남습니다.</p></div>';
+}
+function buildRequestText(s, f) {
+  var kws = shopKeywords(s);
+  var tagline = ssIntroLines(s)[0] || '';
+  var L = [];
+  L.push('[AI 홍보 쇼츠 제작 요청]');
+  L.push('');
+  L.push('■ 샵 정보');
+  L.push('· 상호: ' + (s.name || ''));
+  if (s.cat) L.push('· 업종: ' + s.cat);
+  if (s.addr) L.push('· 주소: ' + s.addr);
+  if (s.phone) L.push('· 전화: ' + s.phone);
+  L.push('· 핵심 검색어: ' + (kws.length ? kws.join(', ') : '미등록'));
+  if (tagline) L.push('· 한 줄 소개: ' + tagline);
+  L.push('');
+  L.push('■ 제작 요청');
+  L.push('· 길이: ' + f.len + '초 (9:16 세로)');
+  L.push('· 강조할 내용·이벤트: ' + (f.memo || '(없음)'));
+  L.push('· 사용할 사진: ' + (f.photo || '(미정 · 담당자 협의)'));
+  L.push('');
+  L.push('■ 참고');
+  L.push('· 시안: ' + shareUrl(s.id));
+  if (s.links && s.links.web) L.push('· 홍보 웹페이지: ' + s.links.web);
+  L.push('· 요청일: ' + fmtDateTime(Date.now()));
+  return L.join('\n');
+}
+async function genShortsRequest() {
+  var s = S.shop;
+  if (!s) return;
+  var memo = String(val('sr_memo') || '').trim();
+  var photo = String(val('sr_photo') || '').trim();
+  var len = segVal('sr_len', 15);
+  var text = buildRequestText(s, { memo: memo, photo: photo, len: len });
+  srLastText = text;
+  var out = document.getElementById('sr_out');
+  if (out) out.innerHTML = srOutHtml(text);
+  var rec = { memo: memo, photo: photo, len: len, text: text, t: Date.now() };
+  s.shortsRequest = rec;
+  S.shops.forEach(function (x) { if (x.id === s.id) x.shortsRequest = rec; });
+  try {
+    await fsPatch('/aiMktShops/' + s.id, { shortsRequest: rec, updatedAt: Date.now() });
+    toast('요청서를 만들었습니다 · 최근 요청으로 저장');
+    if (S.view === 'detail') render();
+  } catch (e) {
+    toast('요청서는 만들었습니다 · 저장 실패: ' + e.message);
+  }
+  if (out) setTimeout(function () { try { out.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {} }, 120);
+}
+function copyShortsRequest() {
+  if (!srLastText) { toast('먼저 [요청 문구 생성]을 눌러 주세요'); return; }
+  copyText(srLastText).then(function () { toast('요청 문구를 복사했습니다'); })
+    .catch(function () { toast('복사하지 못했습니다 · 문구를 길게 눌러 복사해 주세요'); });
+}
+
+/* --- ② 대본 · 슬라이드 만들기 --- */
+var STS = { photos: [], shopId: null };
+var SS = { on: false, raf: 0, t0: null, el: 0, lastEl: 0, idx: -1, dur: 15000, n: 0, per: 3000, caps: [], text: '' };
+
+function defaultHook(s) {
+  var kws = shopKeywords(s);
+  if (kws.length) return kws.slice(0, 2).join(' · ');
+  var region = ssRegion(s);
+  if (region) return region + ' ' + ssCatShort(s);
+  var intro = ssIntroLines(s);
+  return intro[0] ? ssCut(intro[0], 24) : (s.name || '');
+}
+function shortsPhotos() {
+  if (STS.photos.length) return STS.photos.slice(0, 6);
+  return (S.photos || []).map(function (p) { return p && (p.d || p); })
+    .filter(function (x) { return typeof x === 'string' && x; }).slice(0, 6);
+}
+function openShortsStudio() {
+  var s = S.shop;
+  if (!s) return;
+  ssStop();
+  STS.shopId = s.id;
+  STS.photos = [];
+  var shopN = Math.min((S.photos || []).length, 6);
+  openModal(
+    '<h3>🎞 대본 · 슬라이드 만들기</h3>' +
+    '<p>사진을 고르면 <b>9:16 세로 쇼츠</b>로 바로 재생됩니다. 사진이 없어도 샘플 카드로 먼저 보여 드릴 수 있습니다.</p>' +
+    '<div class="ss-pick">' +
+      '<button class="btn ghost" onclick="pickShortsPhotos()">📷 사진 고르기</button>' +
+      '<span id="ss_pick_info">' + (shopN ? '매장에 등록된 사진 ' + shopN + '장을 먼저 씁니다' : '사진을 고르지 않으면 샘플 카드로 만듭니다') + '</span>' +
+    '</div>' +
+    '<input id="ss_file" type="file" accept="image/*" multiple style="display:none" onchange="onShortsPhotos(this)">' +
+    '<div class="ss-thumbs" id="ss_thumbs"></div>' +
+    '<div class="field" style="margin-top:16px"><label>핵심 문구 <small>샵 정보로 채웠습니다 · 고쳐도 됩니다</small></label>' +
+      '<input id="ss_hook" type="text" maxlength="60" autocomplete="off" value="' + esc(defaultHook(s)) + '"></div>' +
+    '<div class="field"><label>길이</label><div class="seg" id="ss_len">' +
+      '<button type="button" class="seg-b on" data-len="15" onclick="pickSeg(this)">15초</button>' +
+      '<button type="button" class="seg-b" data-len="30" onclick="pickSeg(this)">30초</button></div></div>' +
+    '<div class="acts cols">' +
+      '<button class="btn ghost" onclick="closeModal()">닫기</button>' +
+      '<button class="btn primary" onclick="makeShorts()">만들기</button></div>' +
+    '<div id="ss_result"></div>', 'studio');
+}
+function pickShortsPhotos() { var el = document.getElementById('ss_file'); if (el) el.click(); }
+function onShortsPhotos(input) {
+  var files = Array.prototype.slice.call((input && input.files) || []);
+  if (input) input.value = '';
+  if (!files.length) return;
+  var room = 6 - STS.photos.length;
+  if (room <= 0) { toast('사진은 6장까지입니다'); return; }
+  files = files.slice(0, room);
+  toast('사진을 준비하는 중…');
+  var chain = Promise.resolve();
+  files.forEach(function (f) {
+    chain = chain.then(function () {
+      return compressPhoto(f).then(function (d) {
+        STS.photos.push(d);
+        renderShortsThumbs();
+      }).catch(function (e) { toast(e.message); });
+    });
+  });
+  chain.then(function () {
+    toast('사진 ' + STS.photos.length + '장 준비 · [만들기]를 누르면 미리보기가 재생됩니다');
+  });
+}
+function renderShortsThumbs() {
+  var box = document.getElementById('ss_thumbs');
+  if (box) {
+    box.innerHTML = STS.photos.map(function (d, i) {
+      return '<div class="ss-thumb"><img src="' + d + '" alt="사진 ' + (i + 1) + '">' +
+        '<button onclick="ssRemovePhoto(' + i + ')" aria-label="사진 빼기">✕</button></div>';
+    }).join('');
+  }
+  var info = document.getElementById('ss_pick_info');
+  if (!info) return;
+  var shopN = Math.min((S.photos || []).length, 6);
+  info.textContent = STS.photos.length
+    ? '고른 사진 ' + STS.photos.length + '장으로 만듭니다'
+    : (shopN ? '매장에 등록된 사진 ' + shopN + '장을 먼저 씁니다' : '사진을 고르지 않으면 샘플 카드로 만듭니다');
+}
+function ssRemovePhoto(i) {
+  STS.photos.splice(i, 1);
+  renderShortsThumbs();
+}
+function buildShortsScript(s, opt) {
+  opt = opt || {};
+  var len = opt.len === 30 ? 30 : 15;
+  var region = ssRegion(s);
+  var cat = ssCatShort(s);
+  var kws = shopKeywords(s);
+  var intro = ssIntroLines(s);
+  var tagline = intro[0] || '';
+  var body = intro.slice(1).join(' ').trim();
+  var name = s.name || '가게';
+  var hook = String(opt.hook || '').trim();
+  var menu = (s.menu || []).filter(function (m) { return m && m.n; }).slice(0, 2);
+  var phone = s.phone || '';
+  var hours = String(s.hours || '').split('\n')[0].trim();
+  var nPhoto = Math.max(0, num(opt.photoCount));
+  function shot(i) {
+    if (!nPhoto) return '샘플 카드 (사진을 고르면 내 사진으로 바뀝니다)';
+    return '사진 ' + ((i % nPhoto) + 1) + (nPhoto > 1 ? ' / ' + nPhoto : '');
+  }
+  var P = {};
+  P.open = {
+    cap: region ? region + ' ' + cat : cat,
+    nar: region ? region + '에서 ' + cat + ' 찾으신다면, ' + name + '입니다.' : name + '입니다.',
+    shot: shot(0)
+  };
+  if (kws.length) P.kw = {
+    cap: ssCut(kws.slice(0, 2).join(' · '), 24),
+    nar: kws.slice(0, 3).join(', ') + ' — 이 단어로 찾아오시는 곳입니다.',
+    shot: shot(1)
+  };
+  if (tagline) P.intro = { cap: ssCut(tagline, 22), nar: ssCut(tagline + (body ? ' ' + body : ''), 64), shot: shot(1) };
+  if (body) P.about = { cap: ssCut(body, 26), nar: ssCut(body, 64), shot: shot(2) };
+  if (menu.length) P.menu = {
+    cap: ssCut(menu.map(function (m) { return m.n + (m.p ? ' ' + m.p : ''); }).join(' · '), 26),
+    nar: menu.map(function (m) { return m.n; }).join(', ') + ' — 가장 많이 찾으시는 항목입니다.',
+    shot: shot(3)
+  };
+  if (hours || s.addr) P.info = {
+    cap: hours ? ssCut(hours, 24) : (region || '위치 안내'),
+    nar: (hours ? '영업시간은 ' + ssCut(hours, 34) + '. ' : '') + (s.addr ? '주소는 ' + s.addr + '.' : ''),
+    shot: shot(4)
+  };
+  P.cta = {
+    cap: phone ? '전화 · 예약 ' + phone : (region ? region + ' ' + cat : '지금 만나보세요'),
+    nar: (phone ? '전화 한 통이면 됩니다. ' + phone + '. ' : '') + name + '에서 기다리겠습니다.',
+    shot: nPhoto ? '사진 ' + nPhoto + ' · 마무리 로고' : '마무리 카드 · 상호 · 전화'
+  };
+  var scenes = [];
+  function push(x) {
+    if (!x || !x.cap) return;
+    var key = ssFlat(x.cap);
+    for (var i = 0; i < scenes.length; i++) if (ssFlat(scenes[i].cap) === key) return;
+    scenes.push(x);
+  }
+  push(P.open);
+  if (hook && ssFlat(hook) !== ssFlat(P.open.cap)) push({ cap: ssCut(hook, 24), nar: hook, shot: shot(1) });
+  if (len === 15) {
+    push(P.intro || P.kw || P.menu);
+    push(P.info || P.about);
+  } else {
+    push(P.kw); push(P.intro); push(P.about); push(P.menu); push(P.info);
+  }
+  push(P.cta);
+  if (!scenes.length) push(P.cta);
+  var per = (len * 1000) / Math.max(1, scenes.length);
+  return { len: len, scenes: scenes, per: per, tags: shortsTags(s, kws) };
+}
+function shortsTags(s, kws) {
+  var out = [];
+  function add(t) {
+    t = String(t || '').replace(/[#\s]+/g, '');
+    if (t && out.indexOf(t) < 0 && out.length < 10) out.push(t);
+  }
+  var region = ssRegion(s);
+  var cat = ssCatShort(s);
+  add(s && s.name);
+  (kws || []).forEach(add);
+  if (region) add(region);
+  if (region) add(region + cat);
+  add(String((s && s.cat) || '').replace(/[·,\/\s]+/g, ''));
+  return out.map(function (t) { return '#' + t; });
+}
+function shortsScriptText(s, sc) {
+  var L = [];
+  L.push('[AI 쇼츠 ' + sc.len + '초 대본] ' + (s.name || ''));
+  L.push('');
+  sc.scenes.forEach(function (x, i) {
+    L.push('[' + (i + 1) + '] ' + ssClock(i * sc.per) + '–' + ssClock((i + 1) * sc.per));
+    L.push('  자막: ' + x.cap);
+    L.push('  내레이션: ' + x.nar);
+    L.push('  화면: ' + x.shot);
+    L.push('');
+  });
+  L.push('해시태그: ' + sc.tags.join(' '));
+  L.push('');
+  L.push('※ 알프스 AI 마케팅 제작 · 사진만 보내 주시면 위 대본대로 만들 수 있습니다.');
+  return L.join('\n');
+}
+function ssBackgrounds(s, scenes, photos) {
+  if (photos && photos.length) {
+    return scenes.map(function (x, i) { return { type: 'img', src: photos[i % photos.length] }; });
+  }
+  var region = ssRegion(s);
+  var cat = ssCatShort(s);
+  var n = scenes.length;
+  return scenes.map(function (x, i) {
+    return {
+      type: 'card',
+      k: i === 0 ? 'ALPS AI SHORTS' : (i === n - 1 ? 'CONTACT' : (region || cat)),
+      t: x.cap,
+      s: ssCut(x.nar, 44),
+      c: i % 4
+    };
+  });
+}
+function ssResultHtml(s, sc, bg, text) {
+  var kws = shopKeywords(s);
+  var layers = bg.map(function (b, i) {
+    if (b.type === 'img') return '<div class="ss-layer" id="ss_l' + i + '"></div>';
+    return '<div class="ss-card ss-c' + b.c + '" id="ss_l' + i + '">' +
+      '<div class="k">' + esc(b.k) + '</div>' +
+      '<div class="t">' + nl2br(b.t) + '</div>' +
+      (b.s ? '<div class="s">' + esc(b.s) + '</div>' : '') + '</div>';
+  }).join('');
+  var rows = sc.scenes.map(function (x, i) {
+    return '<div class="sc-row"><div class="sc-time">' + ssClock(i * sc.per) + '<br>' + ssClock((i + 1) * sc.per) + '</div>' +
+      '<div class="sc-tx"><b>' + esc(x.cap) + '</b>' +
+      '<span class="nar">' + esc(x.nar) + '</span>' +
+      '<span class="shot">' + esc(x.shot) + '</span></div></div>';
+  }).join('');
+  var nImg = bg.filter(function (b) { return b.type === 'img'; }).length;
+  return '<div class="ss-wrap">' +
+      '<div class="ss-stage" id="ss_stage">' + layers +
+        '<div class="ss-top"><span class="badge-name">' + esc(s.name || '') + '</span>' +
+          (kws[0] ? '<span class="badge-kw">' + esc(kws[0]) + '</span>' : '') + '</div>' +
+        '<div class="ss-capbox"><div class="ss-cap" id="ss_cap"></div></div>' +
+        '<div class="ss-ctrl"><button id="ss_btn" onclick="ssToggle()" aria-label="재생·일시정지">⏸</button>' +
+          '<div class="ss-track"><i id="ss_prog"></i></div>' +
+          '<span class="ss-time" id="ss_time">0:00 / ' + ssClock(sc.len * 1000) + '</span></div>' +
+      '</div>' +
+      '<div class="ss-meta">9:16 세로 · ' + sc.len + '초 · 장면 ' + sc.scenes.length + '개 · ' +
+        (nImg ? '내 사진 ' + nImg + '장' : '샘플 카드') + '</div>' +
+    '</div>' +
+    '<div class="sc-script"><div class="sc-h"><b>쇼츠 대본</b>' +
+      '<button class="btn ghost sm" onclick="copyShortsScript()">📋 대본 복사</button></div>' +
+      '<div class="sc-body">' + rows + '</div>' +
+      '<div class="sc-tags">' + esc(sc.tags.join(' ')) + '</div></div>';
+}
+function ssMount(bg) {
+  bg.forEach(function (b, i) {
+    if (b.type !== 'img') return;
+    var el = document.getElementById('ss_l' + i);
+    if (el) el.style.backgroundImage = 'url("' + b.src + '")';
+  });
+}
+function makeShorts() {
+  var s = S.shop;
+  if (!s) return;
+  var hook = String(val('ss_hook') || '').trim();
+  var len = segVal('ss_len', 15);
+  var photos = shortsPhotos();
+  var sc = buildShortsScript(s, { hook: hook, len: len, photoCount: photos.length });
+  var bg = ssBackgrounds(s, sc.scenes, photos);
+  var out = document.getElementById('ss_result');
+  if (!out) return;
+  SS.text = shortsScriptText(s, sc);
+  out.innerHTML = ssResultHtml(s, sc, bg, SS.text);
+  ssMount(bg);
+  ssPlay(sc);
+  setTimeout(function () { try { out.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) {} }, 100);
+}
+function ssPlay(sc) {
+  cancelAnimationFrame(SS.raf);
+  SS.on = true;
+  SS.dur = sc.len * 1000;
+  SS.n = sc.scenes.length;
+  SS.per = SS.dur / SS.n;
+  SS.idx = -1; SS.el = 0; SS.lastEl = 0; SS.t0 = null;
+  SS.caps = sc.scenes.map(function (x) { return x.cap; });
+  ssSetScene(0);
+  ssPaint(0);
+  var b = document.getElementById('ss_btn');
+  if (b) b.textContent = '⏸';
+  SS.raf = requestAnimationFrame(ssTick);
+}
+function ssTick(ts) {
+  if (!SS.on) return;
+  if (SS.t0 == null) SS.t0 = ts;
+  var el = SS.el + (ts - SS.t0);
+  if (el >= SS.dur) { SS.el = 0; SS.t0 = ts; el = 0; }
+  SS.lastEl = el;
+  var i = Math.min(SS.n - 1, Math.floor(el / SS.per));
+  if (i !== SS.idx) ssSetScene(i);
+  ssPaint(el);
+  SS.raf = requestAnimationFrame(ssTick);
+}
+function ssPaint(el) {
+  var p = document.getElementById('ss_prog');
+  if (p) p.style.width = Math.min(100, (el / SS.dur) * 100) + '%';
+  var tm = document.getElementById('ss_time');
+  if (tm) tm.textContent = ssClock(el) + ' / ' + ssClock(SS.dur);
+}
+function ssSetScene(i) {
+  SS.idx = i;
+  for (var k = 0; k < SS.n; k++) {
+    var l = document.getElementById('ss_l' + k);
+    if (l) l.classList.toggle('on', k === i);
+  }
+  var cap = document.getElementById('ss_cap');
+  if (cap) {
+    cap.textContent = SS.caps[i] || '';
+    cap.classList.remove('in');
+    void cap.offsetWidth;
+    cap.classList.add('in');
+  }
+}
+function ssToggle() {
+  var b = document.getElementById('ss_btn');
+  if (SS.on) {
+    SS.on = false;
+    SS.el = SS.lastEl || 0;
+    cancelAnimationFrame(SS.raf);
+    SS.raf = 0;
+    if (b) b.textContent = '▶';
+  } else {
+    if (!SS.n) return;
+    SS.on = true; SS.t0 = null;
+    if (b) b.textContent = '⏸';
+    SS.raf = requestAnimationFrame(ssTick);
+  }
+}
+function ssStop() {
+  SS.on = false;
+  if (SS.raf) cancelAnimationFrame(SS.raf);
+  SS.raf = 0; SS.idx = -1; SS.lastEl = 0; SS.el = 0; SS.t0 = null;
+}
+function copyShortsScript() {
+  if (!SS.text) { toast('먼저 [만들기]를 눌러 주세요'); return; }
+  copyText(SS.text).then(function () { toast('대본을 복사했습니다'); })
+    .catch(function () { toast('복사하지 못했습니다 · 대본을 길게 눌러 복사해 주세요'); });
 }
 
 /* ---------- 새 샵 ---------- */
@@ -1741,10 +2219,12 @@ function lockNow() {
 }
 
 /* ---------- 모달 ---------- */
-function openModal(html) {
-  modalRoot.innerHTML = '<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog">' + html + '</div></div>';
+function openModal(html, cls) {
+  ssStop();
+  modalRoot.innerHTML = '<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal' +
+    (cls ? ' ' + cls : '') + '" role="dialog">' + html + '</div></div>';
 }
-function closeModal() { delTargetId = null; modalRoot.innerHTML = ''; }
+function closeModal() { ssStop(); delTargetId = null; modalRoot.innerHTML = ''; }
 
 /* ===========================================================
    공개 시안 (?shop=<id>)
@@ -1982,5 +2462,16 @@ window.saveLinks = saveLinks;
 window.saveNotes = saveNotes;
 window.addNote = addNote;
 window.rmNote = rmNote;
+window.openShortsRequest = openShortsRequest;
+window.openShortsStudio = openShortsStudio;
+window.pickSeg = pickSeg;
+window.genShortsRequest = genShortsRequest;
+window.copyShortsRequest = copyShortsRequest;
+window.pickShortsPhotos = pickShortsPhotos;
+window.onShortsPhotos = onShortsPhotos;
+window.ssRemovePhoto = ssRemovePhoto;
+window.makeShorts = makeShorts;
+window.ssToggle = ssToggle;
+window.copyShortsScript = copyShortsScript;
 
 })();
