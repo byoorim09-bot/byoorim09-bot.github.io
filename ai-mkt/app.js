@@ -2244,6 +2244,15 @@ function closeModal() { ssStop(); delTargetId = null; modalRoot.innerHTML = ''; 
    공개 시안 (?shop=<id>)
    =========================================================== */
 var pubSig = '', pubTimer = null;
+/* Firestore REST는 필드 순서를 매번 다르게 주므로, 순서에 흔들리지 않는 서명으로 비교
+   (서명이 어긋나면 15초마다 화면이 다시 그려져 스크롤이 맨 위로 튀고 영상 재생이 끊겼음) */
+function stableSig(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Object.prototype.toString.call(v) === '[object Array]') return '[' + v.map(stableSig).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(function (k) {
+    return JSON.stringify(k) + ':' + stableSig(v[k]);
+  }).join(',') + '}';
+}
 function initPublic(id) {
   S.publicMode = true;
   S.pubId = id;
@@ -2259,7 +2268,7 @@ async function pubTick(first) {
   try {
     var data = await fsGetDoc('/aiMktShops/' + S.pubId);
     if (!data) { renderPubEmpty(); return; }
-    var sig = JSON.stringify(data);
+    var sig = stableSig(data);
     if (!first && sig === pubSig) return;
     pubSig = sig;
     S.shop = normalize(S.pubId, data);
