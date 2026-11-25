@@ -511,7 +511,7 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
   --phead:"Noto Serif KR",serif;
   --phero-bg:linear-gradient(158deg,#B5472A 0%,#8A3A1E 55%,#6E2A16 100%);
   --phero-btn:#FFF4EA;--phero-btn-ink:#8A3A1E;
-  --pscrim:linear-gradient(180deg,rgba(60,22,10,.42) 0%,rgba(60,22,10,.18) 40%,rgba(60,22,10,.88) 100%);
+  --pscrim:linear-gradient(180deg,rgba(26,10,5,.5) 0%,rgba(26,10,5,.3) 42%,rgba(22,9,4,.92) 100%);
   --pbrand:#FBEFE2;--pcat:#F7C69E;--paddr:#F0D7C3;
   --ptag-bg:rgba(255,255,255,.16);--ptag-line:rgba(255,214,182,.4);--ptag-ink:#fff;
   --hghost-bg:rgba(255,255,255,.12);--hghost-line:rgba(255,214,182,.45);--hghost-ink:#fff;
