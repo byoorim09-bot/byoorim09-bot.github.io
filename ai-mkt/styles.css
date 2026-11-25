@@ -417,6 +417,8 @@ input.flash,textarea.flash,select.flash{border-color:var(--orange) !important;
    =========================================================== */
 .pub .btn.primary{background:var(--pbtn);color:var(--pbtn-ink);box-shadow:var(--pbtn-shadow)}
 .pub .btn.navy{background:var(--pbtn2);color:var(--pbtn2-ink)}
+/* 히어로 위 기본 버튼은 테마별 대비색 */
+.pub .hero-cta .btn.primary{background:var(--phero-btn,var(--pbtn));color:var(--phero-btn-ink,var(--pbtn-ink));box-shadow:none}
 .pub .menu-list .mp{color:var(--pa-ink)}
 
 /* 카드형 섹션 (classic 외 4종) */
