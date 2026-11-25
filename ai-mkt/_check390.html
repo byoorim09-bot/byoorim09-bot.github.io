@@ -27,6 +27,14 @@
   var ifr = document.createElement('iframe');
   ifr.width = w; ifr.height = h; ifr.src = src;
   ifr.style.top = (-y) + 'px';
+  ifr.onload = function () {
+    try {
+      var d = ifr.contentDocument;
+      var st = d.createElement('style');
+      st.textContent = 'html{scrollbar-width:none!important}html::-webkit-scrollbar{display:none!important;width:0!important}';
+      (d.head || d.documentElement).appendChild(st);
+    } catch (e) {}
+  };
   fr.appendChild(ifr);
   document.documentElement.style.height = Math.min(vh, 885) + 'px';
   document.body.style.height = Math.min(vh, 885) + 'px';
