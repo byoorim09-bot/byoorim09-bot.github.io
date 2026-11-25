@@ -2052,7 +2052,7 @@ async function saveInfo() {
     status: val('f_status'),
     intro: val('f_intro').trim(),
     hours: val('f_hours').trim(),
-    theme: selThemeIn('f_themes') || themeKey(s.theme),
+    theme: selThemeIn('f_themes') || themeKey(S.shop && S.shop.theme),
     draft: document.getElementById('f_draft').getAttribute('data-on') === '1',
     updatedAt: Date.now()
   };
